@@ -1,0 +1,249 @@
+{
+    "scenario_id": "06_sales_crm",
+    "name": "Sales CRM Assistant",
+    "description": "Sales rep's AI assistant tracking a complex enterprise deal over a 4-month sales cycle. Stakeholders change, budget shifts, competitor dynamics, and negotiation positions evolve.",
+    "sessions": [
+        {
+            "session_id": 1,
+            "label": "Opportunity opened",
+            "turns": [
+                {"role": "user", "content": "New opportunity: Hartwell Manufacturing, mid-market account. Potential deal size $120K ARR. They're evaluating our platform for supply chain analytics."},
+                {"role": "assistant", "content": "Opportunity created: Hartwell Manufacturing, $120K ARR, supply chain analytics use case."},
+                {"role": "user", "content": "Champion is Nadine Foster, Director of Operations. She pushed for the evaluation. Economic buyer is CFO Bill Yamamoto."},
+                {"role": "assistant", "content": "Champion: Nadine Foster (Dir. Operations). Economic buyer: Bill Yamamoto (CFO)."},
+                {"role": "user", "content": "Main competitor is Synapse Analytics. They've been the incumbent for 2 years. Hartwell likes them but is frustrated with slow support response times."},
+                {"role": "assistant", "content": "Competitor: Synapse Analytics (2-year incumbent). Pain point: slow support. Our differentiation opportunity."}
+            ]
+        },
+        {
+            "session_id": 2,
+            "label": "Discovery and qualification",
+            "turns": [
+                {"role": "user", "content": "Discovery call done. Their core pain is inventory forecasting — they're losing $800K/year to overstock and they know it."},
+                {"role": "assistant", "content": "Core pain: inventory forecasting. Quantified loss: $800K/year to overstock."},
+                {"role": "user", "content": "They also have a new stakeholder — VP IT, Raj Patel. He's a blocker, not a champion. Worried about integration complexity."},
+                {"role": "assistant", "content": "New stakeholder: Raj Patel (VP IT). Blocker — concerned about integration complexity."},
+                {"role": "user", "content": "Decision timeline is Q3 end. Budget is $150K approved but they won't share it — I found out through Nadine off the record."},
+                {"role": "assistant", "content": "Budget: $150K (approved, found via Nadine, treat as confidential). Decision: Q3 end. Deal size headroom exists above $120K."}
+            ]
+        },
+        {
+            "session_id": 3,
+            "label": "Technical eval and POC",
+            "turns": [
+                {"role": "user", "content": "POC kicked off. Raj's team is testing the integration. Early feedback is good but they flagged an issue with our SAP connector — it doesn't support SAP S/4HANA out of the box."},
+                {"role": "assistant", "content": "POC blocker: SAP S/4HANA connector not supported out of the box. Raj Patel's team flagged."},
+                {"role": "user", "content": "Our solutions engineer told Raj we can build the S/4HANA connector as part of a premium implementation package for $15K."},
+                {"role": "assistant", "content": "Proposed resolution: S/4HANA connector via premium implementation package at $15K add-on."},
+                {"role": "user", "content": "Bill Yamamoto left the company. New CFO is Sandra Ng, starting next Monday."},
+                {"role": "assistant", "content": "Economic buyer updated: Bill Yamamoto departed. New CFO: Sandra Ng, starting Monday. Re-qualification needed."}
+            ]
+        },
+        {
+            "session_id": 4,
+            "label": "Re-qualification and proposal",
+            "turns": [
+                {"role": "user", "content": "Met Sandra Ng. She's budget-conscious — wants to start with a pilot at $80K to prove ROI before committing to the full $150K."},
+                {"role": "assistant", "content": "Sandra Ng position: pilot-first at $80K. Full $150K deal requires ROI proof. Deal structure may change."},
+                {"role": "user", "content": "Synapse came back with a $90K counter-offer to retain the account. Hartwell told Nadine."},
+                {"role": "assistant", "content": "Competitive update: Synapse offered $90K retention deal. They're fighting to keep the account."},
+                {"role": "user", "content": "We submitted our proposal: $105K base + $15K S/4HANA connector = $120K total. Same as original but with the implementation bundled."},
+                {"role": "assistant", "content": "Proposal submitted: $105K base + $15K S/4HANA connector = $120K total."}
+            ]
+        },
+        {
+            "session_id": 5,
+            "label": "Negotiation and close",
+            "turns": [
+                {"role": "user", "content": "Sandra came back and said $120K is too much for a first-year deal. She wants $100K all-in and will commit to expansion in year 2."},
+                {"role": "assistant", "content": "Counter-offer: $100K all-in (year 1), verbal commitment to expansion year 2."},
+                {"role": "user", "content": "We agreed to $100K year 1. S/4HANA connector included. Year 2 target is $150K."},
+                {"role": "assistant", "content": "Deal closed: $100K year 1 (S/4HANA connector included), $150K year 2 target."},
+                {"role": "user", "content": "Raj Patel ended up being a strong supporter once the SAP issue was resolved. Nadine and Raj both signed off."},
+                {"role": "assistant", "content": "Blocker converted: Raj Patel now a supporter. Signed off with Nadine Foster."}
+            ]
+        }
+    ],
+    "queries": [
+        {
+            "query_id": 1,
+            "query": "What is the final deal size for Hartwell Manufacturing?",
+            "expected_answer": "$100K for year 1 (S/4HANA connector included). Year 2 target: $150K.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "hard",
+            "trap": "Deal size changed: $120K initial → $120K proposal → $100K closed. Must return the actual closed amount.",
+            "relevant_sessions": [1, 4, 5]
+        },
+        {
+            "query_id": 2,
+            "query": "Who is the CFO at Hartwell Manufacturing?",
+            "expected_answer": "Sandra Ng. Bill Yamamoto was the previous CFO but left the company.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "Bill Yamamoto established early as CFO. Session 3 replaces him. Must return current CFO.",
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 3,
+            "query": "What role does Raj Patel play now?",
+            "expected_answer": "Supporter. Initially a blocker (concerned about integration), became a strong supporter once the SAP S/4HANA connector issue was resolved.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "Raj introduced as a blocker in session 2. Session 5 marks him as a supporter. Must return current alignment.",
+            "relevant_sessions": [2, 5]
+        },
+        {
+            "query_id": 4,
+            "query": "What was Hartwell's quantified business pain?",
+            "expected_answer": "$800K/year in inventory overstock losses due to poor forecasting.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 5,
+            "query": "What technical gap was identified during the POC?",
+            "expected_answer": "The SAP S/4HANA connector was not supported out of the box. Resolved with a $15K premium implementation package.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [3, 5]
+        },
+        {
+            "query_id": 6,
+            "query": "Is Raj Patel still a blocker?",
+            "expected_answer": "No. He converted to a supporter after the SAP integration concern was resolved.",
+            "reasoning_type": "negative_with_history",
+            "difficulty": "easy",
+            "trap": "Session 2 tags Raj as a blocker. Session 5 resolves this. Must return resolved state.",
+            "relevant_sessions": [2, 5]
+        },
+        {
+            "query_id": 7,
+            "query": "What was the approved budget at Hartwell and how did you find out?",
+            "expected_answer": "$150K approved budget. Found out through Nadine Foster off the record — should be treated as confidential.",
+            "reasoning_type": "fact_plus_context",
+            "difficulty": "medium",
+            "trap": "Must return both the budget figure AND the sensitivity context.",
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 8,
+            "query": "What was Synapse Analytics' counter-offer to retain the account?",
+            "expected_answer": "$90K retention offer.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 9,
+            "query": "Who are all the stakeholders at Hartwell and what is each person's current role/alignment?",
+            "expected_answer": "Nadine Foster (Dir. Operations, champion), Sandra Ng (CFO, economic buyer, pilot-first but agreed to close), Raj Patel (VP IT, former blocker, now supporter).",
+            "reasoning_type": "aggregation",
+            "difficulty": "hard",
+            "trap": "Must include current state of each stakeholder, noting Bill Yamamoto departed and Raj's flip from blocker to supporter.",
+            "relevant_sessions": [1, 2, 3, 4, 5]
+        },
+        {
+            "query_id": 10,
+            "query": "What is the year 2 revenue target from Hartwell?",
+            "expected_answer": "$150K.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5]
+        },
+        {
+            "query_id": 11,
+            "query": "Why was the incumbent vendor (Synapse Analytics) vulnerable?",
+            "expected_answer": "Slow support response times — Hartwell was frustrated despite being a 2-year customer.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 12,
+            "query": "What was the original deal size estimate when the opportunity was opened?",
+            "expected_answer": "$120K ARR.",
+            "reasoning_type": "historical_recall",
+            "difficulty": "easy",
+            "trap": "Deal closed at $100K. Must not confuse historical estimate with final deal.",
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 13,
+            "query": "What position did Sandra Ng take on the deal when she joined?",
+            "expected_answer": "Pilot-first: start at $80K to prove ROI before committing to the full amount. Eventually agreed to $100K all-in for year 1.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [4, 5]
+        },
+        {
+            "query_id": 14,
+            "query": "Was the S/4HANA connector issue fully resolved at close?",
+            "expected_answer": "Yes. Included in the closed deal at no additional line-item cost (bundled into the $100K total).",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "medium",
+            "trap": "Session 3 proposes $15K add-on. Session 5 closes at $100K total with connector included. Must reconcile.",
+            "relevant_sessions": [3, 5]
+        },
+        {
+            "query_id": 15,
+            "query": "What was the decision timeline for this deal?",
+            "expected_answer": "End of Q3.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 16,
+            "query": "Is Bill Yamamoto still at Hartwell?",
+            "expected_answer": "No. He left the company. Sandra Ng is the new CFO.",
+            "reasoning_type": "negative_current_state",
+            "difficulty": "easy",
+            "trap": "Directly tests stale-fact rejection for a key stakeholder.",
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 17,
+            "query": "Why was the economic buyer change (Bill leaving) significant?",
+            "expected_answer": "The incoming CFO Sandra Ng had a different position (pilot-first at $80K) versus the $150K budget Bill had approved, requiring full re-qualification of the deal.",
+            "reasoning_type": "causal_chain",
+            "difficulty": "hard",
+            "trap": "Must connect three facts: Bill's departure → Sandra's different budget posture → deal structure changed.",
+            "relevant_sessions": [3, 4]
+        },
+        {
+            "query_id": 18,
+            "query": "What is the original deal structure that was proposed before the final negotiation?",
+            "expected_answer": "$105K base + $15K S/4HANA connector = $120K total.",
+            "reasoning_type": "historical_recall",
+            "difficulty": "medium",
+            "trap": "Deal closed at different terms. Must recall the pre-negotiation proposal specifically.",
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 19,
+            "query": "What was the competitive response from Synapse, and did it affect the outcome?",
+            "expected_answer": "Synapse offered $90K to retain the account. It did not win — Hartwell still closed with us at $100K, largely due to better integration capabilities and Nadine Foster's advocacy.",
+            "reasoning_type": "multi_hop",
+            "difficulty": "hard",
+            "trap": "Must infer the competitive outcome from the final close — Synapse's offer is mentioned but the win was against them.",
+            "relevant_sessions": [4, 5]
+        },
+        {
+            "query_id": 20,
+            "query": "Who signed off on the final deal at Hartwell?",
+            "expected_answer": "Nadine Foster (champion, Dir. Operations) and Raj Patel (VP IT).",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5]
+        }
+    ]
+}

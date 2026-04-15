@@ -1,0 +1,251 @@
+{
+    "scenario_id": "08_tutor",
+    "name": "AI Tutor — High School Student Over a Semester",
+    "description": "AI tutor working with a 10th grade student over a semester. Tracks subject strengths/gaps, learning style, misconceptions corrected, and grade trajectory.",
+    "sessions": [
+        {
+            "session_id": 1,
+            "label": "First session — assessment",
+            "turns": [
+                {"role": "user", "content": "I'm Marcus, 10th grade. I need help with Algebra 2 and Chemistry. I'm good at reading and English but math kills me."},
+                {"role": "assistant", "content": "Got it, Marcus — 10th grade, strong in English/reading, struggling with math. Algebra 2 and Chemistry are the focus."},
+                {"role": "user", "content": "My teacher is Mr. Harrison for Algebra 2. We're starting polynomial functions next week."},
+                {"role": "assistant", "content": "Algebra 2 with Mr. Harrison, polynomial functions coming up."},
+                {"role": "user", "content": "In Chemistry I got a 54% on the first exam. We're covering stoichiometry and I keep getting the mole conversions wrong."},
+                {"role": "assistant", "content": "Chemistry alert: 54% on first exam, mole conversion errors in stoichiometry. That's the first gap to close."},
+                {"role": "user", "content": "I learn better with real-world examples and pictures. Not abstract formulas dumped on me."},
+                {"role": "assistant", "content": "Learning style: visual and concrete examples. Abstract formula dumps do not work for Marcus."}
+            ]
+        },
+        {
+            "session_id": 2,
+            "label": "Algebra 2 deep dive and misconception fix",
+            "turns": [
+                {"role": "user", "content": "I had a quiz on polynomial functions. Got 62%. I keep thinking FOIL works for trinomials — like (x+1)(x+2+3). My teacher marked it wrong."},
+                {"role": "assistant", "content": "Common misconception caught: FOIL only works for two binomials. For a binomial times a trinomial, distribute every term. Fixed on record."},
+                {"role": "user", "content": "OH. That makes sense actually. So FOIL is a shortcut, not a rule?"},
+                {"role": "assistant", "content": "Exactly — FOIL is a mnemonic for a specific case (binomial × binomial). Underlying rule is the distributive property. Always apply that and FOIL appears naturally."},
+                {"role": "user", "content": "Chemistry: I got 78% on the stoichiometry retest. Mole conversions are clicking now."},
+                {"role": "assistant", "content": "Chemistry improvement: 54% → 78% on stoichiometry retest. Mole conversions resolved."}
+            ]
+        },
+        {
+            "session_id": 3,
+            "label": "Mid-semester check-in",
+            "turns": [
+                {"role": "user", "content": "Mr. Harrison is out on paternity leave. We have a sub, Ms. Rivera. She teaches differently — more formula-heavy."},
+                {"role": "assistant", "content": "Context updated: Mr. Harrison on paternity leave, substitute Ms. Rivera. She uses a more formula-heavy approach — that's a known challenge for Marcus."},
+                {"role": "user", "content": "We started rational functions. I'm confused about vertical asymptotes — I keep thinking the function equals zero at the asymptote."},
+                {"role": "assistant", "content": "Misconception flagged: vertical asymptotes occur where the denominator equals zero, NOT where the function equals zero. The function is undefined there, not zero. Important distinction."},
+                {"role": "user", "content": "Chemistry midterm was 82%. Things are clicking."},
+                {"role": "assistant", "content": "Chemistry midterm: 82%. Solid upward trajectory from 54%."}
+            ]
+        },
+        {
+            "session_id": 4,
+            "label": "Grade anxiety and new topic",
+            "turns": [
+                {"role": "user", "content": "Mr. Harrison is back. Ms. Rivera moved fast and now I'm behind on graphing rational functions."},
+                {"role": "assistant", "content": "Mr. Harrison returned. Marcus is behind on graphing rational functions from the sub period — catchup needed."},
+                {"role": "user", "content": "I have a test on this in 2 weeks. I'm really stressed. My parents are on my case about the Algebra grade — it's a C+ right now."},
+                {"role": "assistant", "content": "Algebra 2 current grade: C+. Test in 2 weeks on rational functions. High-stakes session needed."},
+                {"role": "user", "content": "We also started logarithms in parallel. I actually think I understand logarithms — they make more sense than polynomials to me."},
+                {"role": "assistant", "content": "Unexpected strength: Marcus is picking up logarithms well. More intuitive than polynomials for him."}
+            ]
+        },
+        {
+            "session_id": 5,
+            "label": "Test results and semester close",
+            "turns": [
+                {"role": "user", "content": "Got an 87% on the rational functions test! Way better than expected."},
+                {"role": "assistant", "content": "Rational functions test: 87%. Big jump from C+ territory. Grade likely improving."},
+                {"role": "user", "content": "Final Algebra 2 grade was a B. Chemistry was a B+. Huge improvement from the start."},
+                {"role": "assistant", "content": "Semester final: Algebra 2 B, Chemistry B+. Started the semester with a 54% Chemistry exam and Algebra struggles."},
+                {"role": "user", "content": "Next semester I have Pre-Calc and I'm adding AP Environmental Science. I'm nervous about AP."},
+                {"role": "assistant", "content": "Next semester: Pre-Calc and AP Environmental Science. AP course is new territory — tracking."}
+            ]
+        }
+    ],
+    "queries": [
+        {
+            "query_id": 1,
+            "query": "What are Marcus's final semester grades?",
+            "expected_answer": "Algebra 2: B. Chemistry: B+.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5]
+        },
+        {
+            "query_id": 2,
+            "query": "Who is Marcus's current Algebra 2 teacher?",
+            "expected_answer": "Mr. Harrison. He was on paternity leave mid-semester and covered by Ms. Rivera, but returned before the semester ended.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "medium",
+            "trap": "Mr. Harrison → Ms. Rivera → Mr. Harrison. Must return current teacher.",
+            "relevant_sessions": [1, 3, 4]
+        },
+        {
+            "query_id": 3,
+            "query": "What misconception did Marcus have about FOIL?",
+            "expected_answer": "Marcus thought FOIL worked for any polynomial multiplication, including binomial × trinomial. FOIL only applies to binomial × binomial. The underlying rule is the distributive property.",
+            "reasoning_type": "lesson_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 4,
+            "query": "What misconception did Marcus have about vertical asymptotes?",
+            "expected_answer": "Thought the function equals zero at a vertical asymptote. Correction: vertical asymptotes occur where the denominator is zero — the function is undefined there, not zero.",
+            "reasoning_type": "lesson_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 5,
+            "query": "What is Marcus's learning style?",
+            "expected_answer": "Visual learner who needs real-world concrete examples. Abstract formula presentations don't work for him.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 6,
+            "query": "How did Marcus's Chemistry grade change over the semester?",
+            "expected_answer": "Started at 54% on the first exam (stoichiometry). Improved to 78% on the retest. Midterm: 82%. Final grade: B+.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "medium",
+            "trap": "Must trace the full arc across four data points, not just the final grade.",
+            "relevant_sessions": [1, 2, 3, 5]
+        },
+        {
+            "query_id": 7,
+            "query": "Is mole conversion still a problem for Marcus?",
+            "expected_answer": "No. It was resolved in session 2 — went from 54% to 78% on the stoichiometry retest.",
+            "reasoning_type": "negative_resolved",
+            "difficulty": "medium",
+            "trap": "Session 1 flags mole conversion as a gap. Session 2 closes it. Must return resolved state.",
+            "relevant_sessions": [1, 2]
+        },
+        {
+            "query_id": 8,
+            "query": "What subjects will Marcus take next semester?",
+            "expected_answer": "Pre-Calculus and AP Environmental Science.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5]
+        },
+        {
+            "query_id": 9,
+            "query": "What was Marcus's Algebra grade before the rational functions test?",
+            "expected_answer": "C+ heading into the rational functions test (session 4).",
+            "reasoning_type": "temporal_historical",
+            "difficulty": "medium",
+            "trap": "Grade improved to B after the test. Must recall the pre-test grade specifically.",
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 10,
+            "query": "What unexpected math strength did Marcus discover?",
+            "expected_answer": "Logarithms — they clicked more naturally than polynomials for Marcus.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 11,
+            "query": "What happened when the substitute teacher was teaching?",
+            "expected_answer": "Ms. Rivera moved faster and used a more formula-heavy approach — a known challenge for Marcus. He fell behind on graphing rational functions and needed catchup.",
+            "reasoning_type": "causal_chain",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [3, 4]
+        },
+        {
+            "query_id": 12,
+            "query": "What is Marcus good at in school?",
+            "expected_answer": "Reading and English. Math is his weaker subject.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 13,
+            "query": "What was the Chemistry starting score and how did the student improve?",
+            "expected_answer": "Started at 54% on the first stoichiometry exam. Fixed mole conversion errors. Improved to 78% on retest, 82% on midterm, and finished with a B+ for the semester.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "hard",
+            "trap": "Requires connecting all Chemistry data points across 4 sessions into a coherent progression.",
+            "relevant_sessions": [1, 2, 3, 5]
+        },
+        {
+            "query_id": 14,
+            "query": "What was the score on the rational functions test?",
+            "expected_answer": "87%.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5]
+        },
+        {
+            "query_id": 15,
+            "query": "How should content be presented to Marcus given his learning style?",
+            "expected_answer": "Use real-world examples and visual aids. Avoid leading with abstract formulas. Build concrete intuition first, then formalize.",
+            "reasoning_type": "rule_application",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 16,
+            "query": "What topics caused the most difficulty this semester?",
+            "expected_answer": "Polynomial functions (FOIL misconception), rational functions/graphing (fell behind during sub period), and initially stoichiometry in Chemistry. All were resolved by end of semester.",
+            "reasoning_type": "aggregation",
+            "difficulty": "hard",
+            "trap": "Must identify all problem areas and note their resolution status accurately.",
+            "relevant_sessions": [1, 2, 3, 4]
+        },
+        {
+            "query_id": 17,
+            "query": "Did Mr. Harrison come back before the semester ended?",
+            "expected_answer": "Yes. He returned from paternity leave (session 4) and finished the semester with Marcus.",
+            "reasoning_type": "negative_resolved",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [3, 4]
+        },
+        {
+            "query_id": 18,
+            "query": "What subject started with a failing score and ended with a B+?",
+            "expected_answer": "Chemistry — 54% on the first exam, B+ final grade.",
+            "reasoning_type": "multi_hop",
+            "difficulty": "medium",
+            "trap": "Must connect starting score (54%) and final grade (B+) to identify the subject.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 19,
+            "query": "What is the underlying mathematical rule that FOIL is a special case of?",
+            "expected_answer": "The distributive property. FOIL is a mnemonic shortcut for applying distribution to two binomials.",
+            "reasoning_type": "lesson_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 20,
+            "query": "What are Marcus's concerns going into next semester?",
+            "expected_answer": "Nervous about taking AP Environmental Science — AP coursework is new territory for him.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5]
+        }
+    ]
+}

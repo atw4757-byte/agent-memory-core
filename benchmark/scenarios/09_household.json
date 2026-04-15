@@ -1,0 +1,251 @@
+{
+    "scenario_id": "09_household",
+    "name": "Smart Home & Household Management Assistant",
+    "description": "AI assistant managing a household over a year. Tracks appliance issues, service contacts, utility info, recurring tasks, and home maintenance state changes.",
+    "sessions": [
+        {
+            "session_id": 1,
+            "label": "Initial household setup",
+            "turns": [
+                {"role": "user", "content": "I moved into 338 Birchwood Court. Three bed, two bath. Built in 1994."},
+                {"role": "assistant", "content": "Home profile: 338 Birchwood Court, 3BR/2BA, built 1994."},
+                {"role": "user", "content": "HVAC company is Comfort Air Solutions, my tech is Dave Pelletier. Last service was about 18 months ago."},
+                {"role": "assistant", "content": "HVAC: Comfort Air Solutions, tech Dave Pelletier. Last service 18 months ago — overdue."},
+                {"role": "user", "content": "Water heater is a Rheem 40-gallon, installed 2011. Model RH40T."},
+                {"role": "assistant", "content": "Water heater: Rheem 40-gal, model RH40T, installed 2011 (13 years old — approaching end of life)."},
+                {"role": "user", "content": "Trash pickup is Tuesday mornings. Recycling is every other Tuesday."},
+                {"role": "assistant", "content": "Trash: every Tuesday AM. Recycling: biweekly Tuesday AM."}
+            ]
+        },
+        {
+            "session_id": 2,
+            "label": "Service visits and appliance issues",
+            "turns": [
+                {"role": "user", "content": "Had Dave come out for the HVAC service. Filters were filthy — he replaced them. Recommends annual servicing every September."},
+                {"role": "assistant", "content": "HVAC serviced. Filters replaced. Recurring: annual service every September with Dave Pelletier."},
+                {"role": "user", "content": "The dishwasher isn't draining properly. Pool of water after cycles. It's a Bosch 500 series, bought in 2019."},
+                {"role": "assistant", "content": "Dishwasher issue: Bosch 500 series (2019), not draining. Likely drain hose or filter clog."},
+                {"role": "user", "content": "I called an appliance repair service — Tom's Appliance Repair, 630-555-0124. Tech found the drain filter clogged. Cleared it. No parts needed."},
+                {"role": "assistant", "content": "Dishwasher resolved: drain filter clog cleared by Tom's Appliance Repair (630-555-0124). No parts needed."}
+            ]
+        },
+        {
+            "session_id": 3,
+            "label": "Water heater decision",
+            "turns": [
+                {"role": "user", "content": "The water heater started making rumbling sounds. Plumber says sediment buildup — at this age (13 yrs) should just replace it."},
+                {"role": "assistant", "content": "Water heater: sediment rumbling, 13 years old. Plumber recommends replacement."},
+                {"role": "user", "content": "We're replacing it with a Bradford White 50-gallon heat pump water heater. Better efficiency. Installing Friday."},
+                {"role": "assistant", "content": "Water heater replacement scheduled Friday: Bradford White 50-gal heat pump model. Old Rheem RH40T retiring."},
+                {"role": "user", "content": "Done — new one is in. Plumber was Tim Calloway from Calloway Plumbing, 630-555-0299."},
+                {"role": "assistant", "content": "Water heater installed: Bradford White 50-gal heat pump. Plumber: Tim Calloway, Calloway Plumbing, 630-555-0299. Old Rheem RH40T retired."}
+            ]
+        },
+        {
+            "session_id": 4,
+            "label": "Roof and gutters",
+            "turns": [
+                {"role": "user", "content": "We had a big storm. There's a shingle missing on the back slope. Got a quote from Premier Roofing — $450 for the repair."},
+                {"role": "assistant", "content": "Roof damage: missing shingle (back slope), storm damage. Premier Roofing quote: $450."},
+                {"role": "user", "content": "Also the gutters are overflowing on the north side — probably need to clean them. Haven't done it in two years."},
+                {"role": "assistant", "content": "Gutters: north side overflow, last cleaned 2+ years ago. Overdue."},
+                {"role": "user", "content": "Premier Roofing did the repair. Also found and fixed a small flashing issue near the chimney at no extra charge."},
+                {"role": "assistant", "content": "Roof repaired: shingle replaced + chimney flashing fixed at no extra cost. Premier Roofing."}
+            ]
+        },
+        {
+            "session_id": 5,
+            "label": "Gutter resolution and new appliance",
+            "turns": [
+                {"role": "user", "content": "Had the gutters cleaned. Both north and south side. Also installed gutter guards — should be good for 5 years now."},
+                {"role": "assistant", "content": "Gutters: cleaned (both sides) + guards installed. Next cleaning estimated in 5 years."},
+                {"role": "user", "content": "The dishwasher drain issue came back. Tom's came out again — this time a different problem, the drain pump failed. Replaced it for $180."},
+                {"role": "assistant", "content": "Dishwasher: drain pump failed and replaced ($180). Second service call. Monitor for further issues — may indicate end-of-life for this unit."},
+                {"role": "user", "content": "Refrigerator started running louder too. Brand is LG, model LRMVS3006S, bought 2020. Haven't called anyone yet."},
+                {"role": "assistant", "content": "Refrigerator: LG LRMVS3006S (2020), running loud. No service call yet — monitor."}
+            ]
+        }
+    ],
+    "queries": [
+        {
+            "query_id": 1,
+            "query": "What water heater do we currently have?",
+            "expected_answer": "Bradford White 50-gallon heat pump water heater, installed recently. The original Rheem 40-gallon (RH40T, 2011) was replaced.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "Session 1 establishes Rheem as current. Session 3 replaces it. Must return the new unit.",
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 2,
+            "query": "Who is the plumber contact?",
+            "expected_answer": "Tim Calloway, Calloway Plumbing, 630-555-0299.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 3,
+            "query": "Is the dishwasher draining correctly now?",
+            "expected_answer": "Unclear — it has had two service calls. The drain filter was cleared first (session 2), then the drain pump failed and was replaced for $180 (session 5). May be approaching end of life.",
+            "reasoning_type": "pattern_recognition",
+            "difficulty": "hard",
+            "trap": "Session 2 shows issue resolved. Session 5 introduces a new failure. System must not say 'resolved' — there's been a second incident.",
+            "relevant_sessions": [2, 5]
+        },
+        {
+            "query_id": 4,
+            "query": "When is the HVAC service due?",
+            "expected_answer": "Every September — annual service with Dave Pelletier from Comfort Air Solutions.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 5,
+            "query": "What appliances or systems are currently showing issues?",
+            "expected_answer": "LG refrigerator (LRMVS3006S, 2020) is running loud — no service call yet. All other recent issues (water heater, dishwasher pump, roof, gutters) have been addressed.",
+            "reasoning_type": "aggregation_with_status",
+            "difficulty": "hard",
+            "trap": "Must identify only the currently unresolved issue (refrigerator) and not list resolved issues as active.",
+            "relevant_sessions": [2, 3, 4, 5]
+        },
+        {
+            "query_id": 6,
+            "query": "What is the trash and recycling schedule?",
+            "expected_answer": "Trash: every Tuesday morning. Recycling: every other Tuesday morning.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 7,
+            "query": "Who fixed the dishwasher the first time and what was wrong?",
+            "expected_answer": "Tom's Appliance Repair (630-555-0124). Drain filter was clogged — cleared at no parts cost.",
+            "reasoning_type": "historical_recall",
+            "difficulty": "medium",
+            "trap": "There were two dishwasher service calls. Must correctly identify the first one specifically.",
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 8,
+            "query": "What additional repair did Premier Roofing do beyond the shingle?",
+            "expected_answer": "Fixed a small chimney flashing issue at no extra charge.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 9,
+            "query": "Do the gutters need cleaning soon?",
+            "expected_answer": "No. Recently cleaned (both sides) and gutter guards installed. Estimated maintenance-free for about 5 years.",
+            "reasoning_type": "negative_resolved",
+            "difficulty": "medium",
+            "trap": "Session 4 flags gutters as overdue. Session 5 resolves it with cleaning AND guards. Must reflect resolved + future-proofed state.",
+            "relevant_sessions": [4, 5]
+        },
+        {
+            "query_id": 10,
+            "query": "What was the Rheem water heater model and year?",
+            "expected_answer": "Rheem RH40T, 40-gallon, installed 2011. Retired after 13 years.",
+            "reasoning_type": "historical_recall",
+            "difficulty": "easy",
+            "trap": "Water heater was replaced. System should accurately recall the old unit's details.",
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 11,
+            "query": "What year was the house built?",
+            "expected_answer": "1994.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 12,
+            "query": "How much did the dishwasher pump repair cost?",
+            "expected_answer": "$180.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": "Must retrieve the second dishwasher call's cost, not the first (which had no parts cost).",
+            "relevant_sessions": [5]
+        },
+        {
+            "query_id": 13,
+            "query": "What is the HVAC company and contact tech?",
+            "expected_answer": "Comfort Air Solutions. Tech: Dave Pelletier.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1, 2]
+        },
+        {
+            "query_id": 14,
+            "query": "Was there a roof repair? What was done?",
+            "expected_answer": "Yes — missing shingle on back slope replaced, plus chimney flashing fixed. Done by Premier Roofing after a storm. Cost: $450 (no extra charge for flashing).",
+            "reasoning_type": "aggregation",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 15,
+            "query": "What appliance repair service number should I call?",
+            "expected_answer": "Tom's Appliance Repair: 630-555-0124.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 16,
+            "query": "Why was the water heater replaced instead of repaired?",
+            "expected_answer": "Sediment buildup caused rumbling, and the unit was 13 years old. Plumber recommended replacement at that age rather than repair.",
+            "reasoning_type": "causal_chain",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 17,
+            "query": "What is the dishwasher model?",
+            "expected_answer": "Bosch 500 series, purchased 2019.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 18,
+            "query": "Has the dishwasher had multiple issues?",
+            "expected_answer": "Yes — two service calls: (1) drain filter clog (cleared, no parts), (2) drain pump failure ($180 repair). The repeat failures suggest the unit may be approaching end of life.",
+            "reasoning_type": "pattern_recognition",
+            "difficulty": "medium",
+            "trap": "Must recognize this as a recurring pattern across sessions, not a single event.",
+            "relevant_sessions": [2, 5]
+        },
+        {
+            "query_id": 19,
+            "query": "What is the refrigerator model and what is the current issue?",
+            "expected_answer": "LG LRMVS3006S, purchased 2020. Running louder than normal. No service call placed yet.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5]
+        },
+        {
+            "query_id": 20,
+            "query": "Give me a full maintenance summary — what's been done, what's pending.",
+            "expected_answer": "Done: HVAC service (annual Sept), dishwasher drain filter (cleared), water heater replaced (Bradford White heat pump), dishwasher drain pump replaced, roof repaired (shingle + flashing), gutters cleaned + guards installed. Pending: LG refrigerator loud noise (no service call yet). Recurring: HVAC every September.",
+            "reasoning_type": "aggregation",
+            "difficulty": "hard",
+            "trap": "Requires accurate status for every item — distinguishing resolved, pending, and recurring. Must not list the old Rheem as current or the first dishwasher fix as the last one.",
+            "relevant_sessions": [1, 2, 3, 4, 5]
+        }
+    ]
+}

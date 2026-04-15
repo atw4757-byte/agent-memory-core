@@ -1,0 +1,261 @@
+{
+    "scenario_id": "03_customer_support",
+    "name": "Customer Support Agent — SaaS Platform",
+    "description": "Support agent for a B2B SaaS platform, helping the same enterprise customer over multiple tickets. Tracks account config, bugs encountered, workarounds applied, and escalation history.",
+    "sessions": [
+        {
+            "session_id": 1,
+            "label": "Account setup and first issue",
+            "turns": [
+                {"role": "user", "content": "Hi, we're Falcon Ridge Logistics. Account ID FR-00421. We just went live on your platform last week."},
+                {"role": "assistant", "content": "Welcome, Falcon Ridge Logistics. Account FR-00421 is noted. How can I help?"},
+                {"role": "user", "content": "We have 80 seats on the Enterprise plan. Our admin is Kim Park at k.park@falconridge.com."},
+                {"role": "assistant", "content": "Saved: 80 Enterprise seats, admin Kim Park (k.park@falconridge.com)."},
+                {"role": "user", "content": "We're getting a 403 error when trying to access the Reporting module. Our SSO is set up through Okta."},
+                {"role": "assistant", "content": "Known issue: Okta SSO + Reporting module 403 error. Workaround: re-authorize the Okta app connection in Settings > Integrations, then log out and back in. Does that resolve it?"},
+                {"role": "user", "content": "Yes, that fixed it. Thanks."},
+                {"role": "assistant", "content": "Great. Ticket closed. Workaround documented on your account."}
+            ]
+        },
+        {
+            "session_id": 2,
+            "label": "Second ticket — data export issue",
+            "turns": [
+                {"role": "user", "content": "Kim here from Falcon Ridge again. We're trying to export our shipment data to CSV and the export always fails silently after about 30 seconds."},
+                {"role": "assistant", "content": "Hi Kim. Falcon Ridge account FR-00421. The silent CSV export failure — are you exporting more than 10,000 rows at a time?"},
+                {"role": "user", "content": "Probably, yes. We have about 45,000 shipment records."},
+                {"role": "assistant", "content": "That's the issue. CSV exports are capped at 10,000 rows. Workaround: use date-range filters to export in chunks. We've also flagged this limit to engineering — target is to raise it to 100K in the next release."},
+                {"role": "user", "content": "That's painful but okay. We'll work around it."},
+                {"role": "assistant", "content": "Workaround applied and noted on FR-00421. Engineering ticket created: export limit increase."}
+            ]
+        },
+        {
+            "session_id": 3,
+            "label": "Escalation and plan change",
+            "turns": [
+                {"role": "user", "content": "This is Kim again. The CEO of Falcon Ridge, Tyler Bowen, is very frustrated. We've hit three bugs in two weeks and want to talk to someone senior."},
+                {"role": "assistant", "content": "Understood. I'm escalating to your dedicated Customer Success Manager, Jordan Ellis. Jordan will reach out within 2 business hours."},
+                {"role": "user", "content": "Also, we want to upgrade from 80 to 120 seats. Tyler approved the budget."},
+                {"role": "assistant", "content": "Seat expansion from 80 to 120 noted. I'll include this in Jordan's handoff. Your CS team will handle the contract amendment."},
+                {"role": "user", "content": "One more thing — we got a 500 error today when trying to bulk-assign users to a new workspace. Error code was ERR-5512."},
+                {"role": "assistant", "content": "ERR-5512 is a known race condition in bulk workspace assignment when inviting more than 50 users simultaneously. Workaround: batch in groups of 25. Engineering has a fix shipping in v3.8."}
+            ]
+        },
+        {
+            "session_id": 4,
+            "label": "Post-escalation follow-up",
+            "turns": [
+                {"role": "user", "content": "Hi, Tyler Bowen here from Falcon Ridge. Jordan Ellis introduced herself and we're working with her now."},
+                {"role": "assistant", "content": "Good to hear, Tyler. You're on account FR-00421 with Jordan Ellis as your CSM."},
+                {"role": "user", "content": "The seat upgrade went through — we're now at 120 seats."},
+                {"role": "assistant", "content": "Confirmed. Falcon Ridge Logistics updated to 120 Enterprise seats."},
+                {"role": "user", "content": "Jordan mentioned v3.8 is out. Did that fix the bulk workspace bug?"},
+                {"role": "assistant", "content": "Checking release notes — v3.8 does include the ERR-5512 fix. The bulk workspace assignment race condition is resolved."}
+            ]
+        },
+        {
+            "session_id": 5,
+            "label": "New admin and SSO revisit",
+            "turns": [
+                {"role": "user", "content": "Kim Park left the company. Our new admin is Priya Mehta, p.mehta@falconridge.com."},
+                {"role": "assistant", "content": "Admin contact updated: Priya Mehta (p.mehta@falconridge.com). Kim Park removed."},
+                {"role": "user", "content": "Priya is seeing the 403 Reporting module error again. Is this the same Okta issue?"},
+                {"role": "assistant", "content": "Likely yes — same Okta SSO + Reporting 403 pattern seen in your first ticket. Have Priya re-authorize the Okta app in Settings > Integrations, then log out and back in."},
+                {"role": "user", "content": "That worked. Why does this keep happening?"},
+                {"role": "assistant", "content": "Okta tokens expire silently after 30 days of inactivity. Engineering has a long-term fix planned but no ETA yet. For now, the re-auth workaround is the resolution path."}
+            ]
+        },
+        {
+            "session_id": 6,
+            "label": "Feature request and satisfaction",
+            "turns": [
+                {"role": "user", "content": "Tyler here again. We'd love a bulk CSV export that handles our full 45,000 record dataset in one go."},
+                {"role": "assistant", "content": "Noted. Your account (FR-00421) has an existing engineering ticket for raising the CSV export limit to 100K. I'm adding your upvote and urgency flag to that ticket."},
+                {"role": "user", "content": "Great. Overall experience has improved a lot since Jordan got involved. Happy to be a reference customer if needed."},
+                {"role": "assistant", "content": "Excellent. I'm flagging Falcon Ridge as a potential reference customer on your account. Jordan will follow up with the reference program details."}
+            ]
+        }
+    ],
+    "queries": [
+        {
+            "query_id": 1,
+            "query": "Who is the current admin contact for Falcon Ridge Logistics?",
+            "expected_answer": "Priya Mehta, p.mehta@falconridge.com. Kim Park was the previous admin but left the company.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "Kim Park is established early as admin. Session 5 updates this to Priya Mehta. Naive systems return Kim Park.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 2,
+            "query": "How many seats does Falcon Ridge have?",
+            "expected_answer": "120 Enterprise seats. Originally 80, upgraded in session 4.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "easy",
+            "trap": "Seat count changed from 80 to 120. Must return current value.",
+            "relevant_sessions": [1, 3, 4]
+        },
+        {
+            "query_id": 3,
+            "query": "Is the ERR-5512 bulk workspace bug still an issue?",
+            "expected_answer": "No. Fixed in v3.8 which is now released.",
+            "reasoning_type": "negative_with_history",
+            "difficulty": "medium",
+            "trap": "Session 3 reports the bug. Session 4 confirms v3.8 resolved it. System must reflect the resolved state.",
+            "relevant_sessions": [3, 4]
+        },
+        {
+            "query_id": 4,
+            "query": "What is the workaround for the Reporting module 403 error?",
+            "expected_answer": "Re-authorize the Okta app in Settings > Integrations, then log out and back in. Caused by Okta tokens expiring silently after 30 days of inactivity.",
+            "reasoning_type": "multi_hop",
+            "difficulty": "medium",
+            "trap": "Session 1 gives the workaround. Session 5 explains the root cause. Full answer requires combining both.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 5,
+            "query": "What is Falcon Ridge's account ID?",
+            "expected_answer": "FR-00421",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 6,
+            "query": "Who is Falcon Ridge's Customer Success Manager?",
+            "expected_answer": "Jordan Ellis.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [3, 4]
+        },
+        {
+            "query_id": 7,
+            "query": "What is the CSV export row limit, and is there an improvement coming?",
+            "expected_answer": "Currently capped at 10,000 rows. Engineering has a ticket to raise it to 100,000 in an upcoming release.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 8,
+            "query": "Has Falcon Ridge ever requested to be a reference customer?",
+            "expected_answer": "Yes. Tyler Bowen offered in session 6. Flagged on account FR-00421 for Jordan Ellis to follow up.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [6]
+        },
+        {
+            "query_id": 9,
+            "query": "What bugs has Falcon Ridge encountered since going live?",
+            "expected_answer": "Three issues: (1) Okta SSO 403 on Reporting module (workaround: re-auth, recurring); (2) CSV export silent failure over 10K rows (workaround: chunk by date); (3) ERR-5512 bulk workspace 500 error (fixed in v3.8).",
+            "reasoning_type": "aggregation",
+            "difficulty": "hard",
+            "trap": "Requires spanning all sessions and noting current status (workaround vs. resolved) for each bug.",
+            "relevant_sessions": [1, 2, 3, 4]
+        },
+        {
+            "query_id": 10,
+            "query": "Who is Tyler Bowen?",
+            "expected_answer": "CEO of Falcon Ridge Logistics.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [3, 4]
+        },
+        {
+            "query_id": 11,
+            "query": "Is the 403 Reporting error a new bug or a known recurring issue?",
+            "expected_answer": "Recurring known issue — same Okta token expiration problem reported in session 1 and again in session 5. Engineering has a fix planned but no ETA.",
+            "reasoning_type": "pattern_recognition",
+            "difficulty": "hard",
+            "trap": "System must connect the two separate instances of the same bug across sessions and recognize the pattern.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 12,
+            "query": "What plan is Falcon Ridge on?",
+            "expected_answer": "Enterprise plan.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 13,
+            "query": "What was the workaround for ERR-5512 before the fix was deployed?",
+            "expected_answer": "Batch bulk user assignments in groups of 25 instead of 50+ at a time.",
+            "reasoning_type": "historical_recall",
+            "difficulty": "medium",
+            "trap": "Bug is now fixed, but system should still recall the workaround used while the bug was active.",
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 14,
+            "query": "Why was an escalation requested?",
+            "expected_answer": "CEO Tyler Bowen was frustrated after three bugs in two weeks. Escalated to CSM Jordan Ellis.",
+            "reasoning_type": "causal_chain",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 15,
+            "query": "Is Kim Park still the admin for Falcon Ridge?",
+            "expected_answer": "No. Kim Park left the company. The new admin is Priya Mehta.",
+            "reasoning_type": "negative_current_state",
+            "difficulty": "medium",
+            "trap": "Directly tests stale-fact rejection. Kim was admin for sessions 1-4.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 16,
+            "query": "What SSO provider does Falcon Ridge use?",
+            "expected_answer": "Okta.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 17,
+            "query": "How many total shipment records does Falcon Ridge have in the system?",
+            "expected_answer": "Approximately 45,000 shipment records.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 18,
+            "query": "What version of the platform fixed the bulk workspace assignment bug?",
+            "expected_answer": "v3.8",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [3, 4]
+        },
+        {
+            "query_id": 19,
+            "query": "Is the 403 Reporting module error permanently fixed?",
+            "expected_answer": "No. The Okta token expiration issue recurred in session 5. Engineering has a long-term fix planned but no ETA. Current resolution is the re-auth workaround.",
+            "reasoning_type": "negative_known_state",
+            "difficulty": "hard",
+            "trap": "Session 1 shows it was 'fixed' via workaround. Session 5 shows it happened again. System must not claim it is resolved.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 20,
+            "query": "What outstanding engineering requests exist for Falcon Ridge's account?",
+            "expected_answer": "CSV export limit increase (10K to 100K rows) — open. Okta 403 permanent fix — planned, no ETA.",
+            "reasoning_type": "aggregation",
+            "difficulty": "hard",
+            "trap": "ERR-5512 was resolved in v3.8 and should not be listed. The two open items span sessions 2 and 5. System must filter to only open items.",
+            "relevant_sessions": [2, 3, 4, 5]
+        }
+    ]
+}

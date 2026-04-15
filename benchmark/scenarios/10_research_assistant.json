@@ -1,0 +1,263 @@
+{
+    "scenario_id": "10_research_assistant",
+    "name": "Academic Research Assistant — PhD Student",
+    "description": "AI research assistant supporting a PhD student in computational biology over 6 months. Tracks thesis evolution, literature findings, methodology changes, and advisor feedback.",
+    "sessions": [
+        {
+            "session_id": 1,
+            "label": "Research onboarding",
+            "turns": [
+                {"role": "user", "content": "I'm Priya, PhD student in computational biology at UMich, third year. My advisor is Dr. Kwon."},
+                {"role": "assistant", "content": "Context: Priya, 3rd-year CompBio PhD, University of Michigan, advisor Dr. Kwon."},
+                {"role": "user", "content": "My thesis is on predicting protein-protein interaction networks from single-cell RNA-seq data using graph neural networks."},
+                {"role": "assistant", "content": "Thesis: PPI network prediction from scRNA-seq using GNNs. Frontier intersection of three fields."},
+                {"role": "user", "content": "I'm using PyTorch Geometric and Scanpy as my main tools. Running experiments on a 40-GPU cluster at UMich."},
+                {"role": "assistant", "content": "Tech stack: PyTorch Geometric, Scanpy. Compute: UMich 40-GPU cluster."},
+                {"role": "user", "content": "My main dataset is the Human Cell Atlas — about 1.2M cells across 33 tissues."},
+                {"role": "assistant", "content": "Primary dataset: Human Cell Atlas, 1.2M cells, 33 tissues."}
+            ]
+        },
+        {
+            "session_id": 2,
+            "label": "Literature synthesis and methodology decision",
+            "turns": [
+                {"role": "user", "content": "Found a key paper: Yao et al. 2023 in Nature Methods — they use a graph autoencoder for PPI prediction but only on bulk RNA-seq. My novelty is the single-cell resolution."},
+                {"role": "assistant", "content": "Key related work: Yao et al. 2023 (Nature Methods), graph autoencoder for PPI from bulk RNA-seq. Priya's novelty: single-cell resolution."},
+                {"role": "user", "content": "I initially planned to use a vanilla GCN but Dr. Kwon suggested Graph Transformers might capture long-range dependencies better. I'm switching."},
+                {"role": "assistant", "content": "Architecture decision: vanilla GCN dropped, switching to Graph Transformers per Dr. Kwon's advice for better long-range dependency capture."},
+                {"role": "user", "content": "Dr. Kwon also wants me to benchmark against STRING database predictions. Adding that to the eval plan."},
+                {"role": "assistant", "content": "Eval plan updated: add STRING database benchmark as a comparison baseline."}
+            ]
+        },
+        {
+            "session_id": 3,
+            "label": "Preliminary results and setback",
+            "turns": [
+                {"role": "user", "content": "First experiments done. Graph Transformer is overfitting badly — validation AUC is 0.61 while training AUC hits 0.97. Not good."},
+                {"role": "assistant", "content": "Overfitting issue: Graph Transformer training AUC 0.97, validation AUC 0.61. Large gap — classic overfit."},
+                {"role": "user", "content": "Dr. Kwon reviewed and said the model complexity is too high for the number of labeled PPI edges we have. He wants me to try a simpler GraphSAGE approach with dropout."},
+                {"role": "assistant", "content": "Architecture change: Graph Transformer → GraphSAGE with dropout. Reason: too complex for labeled data volume."},
+                {"role": "user", "content": "Also found a problem in my preprocessing — I was using raw counts instead of normalized log1p counts. Fixed. This changes all prior results."},
+                {"role": "assistant", "content": "CRITICAL bug: raw counts used instead of log1p normalized. Fixed. All prior experiments are invalid — need rerun."}
+            ]
+        },
+        {
+            "session_id": 4,
+            "label": "Recovery and positive results",
+            "turns": [
+                {"role": "user", "content": "After the normalization fix and switching to GraphSAGE: validation AUC is 0.84. Much better."},
+                {"role": "assistant", "content": "Results improved significantly: validation AUC 0.84 with GraphSAGE + correct normalization."},
+                {"role": "user", "content": "We also outperform STRING baseline by 7 points on the held-out tissue panel. Dr. Kwon is happy."},
+                {"role": "assistant", "content": "Benchmark: +7% AUC over STRING baseline. Dr. Kwon satisfied with progress."},
+                {"role": "user", "content": "My thesis chapter 2 draft is done. Dr. Kwon wants me to add a section on computational complexity — he thinks reviewers will ask about scalability."},
+                {"role": "assistant", "content": "Chapter 2 draft complete. Action: add computational complexity/scalability section per Dr. Kwon."}
+            ]
+        },
+        {
+            "session_id": 5,
+            "label": "New data and scope expansion",
+            "turns": [
+                {"role": "user", "content": "Got access to a new dataset — Allen Brain Cell Atlas, 3.4M cells across the nervous system. This is huge."},
+                {"role": "assistant", "content": "New dataset: Allen Brain Cell Atlas, 3.4M cells, nervous system. Nearly 3x the primary dataset size."},
+                {"role": "user", "content": "Dr. Kwon wants to expand the thesis to include a neural-tissue-specific PPI analysis. This adds a third thesis chapter."},
+                {"role": "assistant", "content": "Thesis scope expanded: new Chapter 3 on neural-tissue PPI. Thesis now three chapters instead of two."},
+                {"role": "user", "content": "I switched from PyTorch Geometric to DGL — better scaling for the Allen data. Scanpy stays."},
+                {"role": "assistant", "content": "Tech stack update: PyTorch Geometric → DGL (better scaling). Scanpy unchanged."}
+            ]
+        },
+        {
+            "session_id": 6,
+            "label": "Conference submission and timeline",
+            "turns": [
+                {"role": "user", "content": "Submitting a paper to NeurIPS workshop on computational biology. Title: 'Single-cell GNN for PPI Network Inference at Tissue Resolution.'"},
+                {"role": "assistant", "content": "Paper submission: NeurIPS CompBio workshop. Title: 'Single-cell GNN for PPI Network Inference at Tissue Resolution.'"},
+                {"role": "user", "content": "Dr. Kwon set the thesis defense date for May of next year. That's about 11 months away."},
+                {"role": "assistant", "content": "Defense date: May next year. ~11 months out."},
+                {"role": "user", "content": "The normalization bug I fixed earlier — I'm documenting it as a key methods contribution. The correct log1p treatment turns out to matter a lot for downstream GNN stability."},
+                {"role": "assistant", "content": "Methods contribution: log1p normalization importance for GNN stability documented as a finding. What started as a bug became a validated insight."}
+            ]
+        }
+    ],
+    "queries": [
+        {
+            "query_id": 1,
+            "query": "What neural network architecture is Priya currently using?",
+            "expected_answer": "GraphSAGE with dropout. Started with GCN (original plan), switched to Graph Transformer (Dr. Kwon's suggestion), then switched again to GraphSAGE due to overfitting.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "hard",
+            "trap": "Architecture changed three times. Must return the final architecture, not GCN or Graph Transformer.",
+            "relevant_sessions": [1, 2, 3]
+        },
+        {
+            "query_id": 2,
+            "query": "What is the current primary deep learning library being used?",
+            "expected_answer": "DGL (Deep Graph Library). Replaced PyTorch Geometric in session 5 for better scaling with the Allen Brain dataset.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "PyTorch Geometric established in session 1. Session 5 replaces it with DGL. Scanpy unchanged.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 3,
+            "query": "What validation AUC did the first Graph Transformer experiments achieve?",
+            "expected_answer": "0.61 validation AUC (with 0.97 training AUC — severe overfitting).",
+            "reasoning_type": "historical_recall",
+            "difficulty": "medium",
+            "trap": "Current model achieves 0.84. Must return the historical value for the Graph Transformer specifically.",
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 4,
+            "query": "What preprocessing bug was found and what was the impact?",
+            "expected_answer": "Raw counts were used instead of log1p normalized counts. All prior experiments were invalid and had to be rerun. The fix also turned out to be a key methods contribution — log1p normalization critically affects GNN stability.",
+            "reasoning_type": "multi_hop",
+            "difficulty": "hard",
+            "trap": "Session 3 flags the bug. Session 6 recasts it as a contribution. Must connect both sessions for the full answer.",
+            "relevant_sessions": [3, 6]
+        },
+        {
+            "query_id": 5,
+            "query": "What are both datasets Priya has access to?",
+            "expected_answer": "Human Cell Atlas (1.2M cells, 33 tissues — primary) and Allen Brain Cell Atlas (3.4M cells, nervous system — added in session 5).",
+            "reasoning_type": "aggregation",
+            "difficulty": "medium",
+            "trap": "Must list both datasets, not just the original one.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 6,
+            "query": "How many chapters does the thesis have now?",
+            "expected_answer": "Three. A third chapter on neural-tissue PPI was added when the Allen Brain dataset was incorporated.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "medium",
+            "trap": "Session 4 references Chapter 2, implying two chapters. Session 5 adds a third.",
+            "relevant_sessions": [4, 5]
+        },
+        {
+            "query_id": 7,
+            "query": "What is Priya's current validation AUC?",
+            "expected_answer": "0.84 — after switching to GraphSAGE and fixing the normalization bug.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "medium",
+            "trap": "Previous AUC was 0.61. Must return the improved, current figure.",
+            "relevant_sessions": [3, 4]
+        },
+        {
+            "query_id": 8,
+            "query": "Why did Dr. Kwon suggest switching away from Graph Transformers?",
+            "expected_answer": "Model complexity was too high for the number of labeled PPI edges in the dataset, causing severe overfitting.",
+            "reasoning_type": "causal_chain",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 9,
+            "query": "What conference is Priya submitting a paper to?",
+            "expected_answer": "NeurIPS Computational Biology workshop. Paper title: 'Single-cell GNN for PPI Network Inference at Tissue Resolution.'",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [6]
+        },
+        {
+            "query_id": 10,
+            "query": "Who is Priya's thesis advisor?",
+            "expected_answer": "Dr. Kwon.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 11,
+            "query": "What is the key related work paper, and how does Priya's thesis differ from it?",
+            "expected_answer": "Yao et al. 2023 (Nature Methods) — graph autoencoder for PPI prediction from bulk RNA-seq. Priya's novelty: single-cell resolution using scRNA-seq, enabling tissue-specific PPI inference.",
+            "reasoning_type": "multi_hop",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 12,
+            "query": "What feedback did Dr. Kwon give on Chapter 2?",
+            "expected_answer": "Add a section on computational complexity and scalability — anticipating reviewer questions.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 13,
+            "query": "By how much does the model outperform the STRING database baseline?",
+            "expected_answer": "7 percentage points AUC on the held-out tissue panel.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 14,
+            "query": "When is Priya's thesis defense?",
+            "expected_answer": "May of next year (~11 months away from when the defense date was set).",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [6]
+        },
+        {
+            "query_id": 15,
+            "query": "What is the original thesis architecture that was abandoned?",
+            "expected_answer": "Vanilla GCN — the original plan before Dr. Kwon suggested Graph Transformers.",
+            "reasoning_type": "historical_recall",
+            "difficulty": "medium",
+            "trap": "Two architectures were abandoned (GCN and Graph Transformer). The question asks for the original — which is GCN.",
+            "relevant_sessions": [1, 2]
+        },
+        {
+            "query_id": 16,
+            "query": "Is PyTorch Geometric still in use?",
+            "expected_answer": "No. Replaced by DGL in session 5 for better scaling with the Allen Brain dataset.",
+            "reasoning_type": "negative_current_state",
+            "difficulty": "medium",
+            "trap": "PyTorch Geometric established in session 1. Session 5 replaces it. Naive systems say yes.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 17,
+            "query": "What was the training vs. validation AUC gap during the overfitting phase?",
+            "expected_answer": "Training AUC 0.97, validation AUC 0.61 — a gap of 0.36, indicating severe overfitting.",
+            "reasoning_type": "arithmetic_from_memory",
+            "difficulty": "medium",
+            "trap": "Requires recalling both values and computing the delta.",
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 18,
+            "query": "What is the original dataset size compared to the new one?",
+            "expected_answer": "Human Cell Atlas: 1.2M cells. Allen Brain Cell Atlas: 3.4M cells — about 2.8x larger.",
+            "reasoning_type": "arithmetic_from_memory",
+            "difficulty": "medium",
+            "trap": "Requires recalling both dataset sizes and computing the relative scale.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 19,
+            "query": "What was added to the evaluation plan per Dr. Kwon?",
+            "expected_answer": "STRING database benchmark as a comparison baseline.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 20,
+            "query": "Describe the full architecture evolution from start to current.",
+            "expected_answer": "1) Started with vanilla GCN (original plan). 2) Switched to Graph Transformer (Dr. Kwon's suggestion for long-range dependencies). 3) Graph Transformer overfit severely (train AUC 0.97, val 0.61). 4) Switched to GraphSAGE with dropout (Dr. Kwon: too complex for labeled data). 5) Also fixed log1p normalization bug — reran all experiments. 6) GraphSAGE achieved validation AUC 0.84.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "hard",
+            "trap": "Requires reconstructing the full evolution in order across sessions 1-4, including the bug fix that invalidated intermediate results.",
+            "relevant_sessions": [1, 2, 3, 4]
+        }
+    ]
+}

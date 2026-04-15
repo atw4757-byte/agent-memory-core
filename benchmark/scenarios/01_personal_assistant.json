@@ -1,0 +1,263 @@
+{
+    "scenario_id": "01_personal_assistant",
+    "name": "Personal Assistant Over 6 Months",
+    "description": "Life admin, preferences, schedule, and plans that evolve over time. Tests address changes, preference updates, and learned behavioral rules.",
+    "sessions": [
+        {
+            "session_id": 1,
+            "label": "Initial setup",
+            "turns": [
+                {"role": "user", "content": "I just moved to 42 Oak Street, Naperville, IL 60540."},
+                {"role": "assistant", "content": "Got it. I've updated your home address to 42 Oak Street, Naperville, IL 60540."},
+                {"role": "user", "content": "My coffee order at the office is an oat milk cappuccino, medium."},
+                {"role": "assistant", "content": "Noted — oat milk cappuccino, medium, at the office."},
+                {"role": "user", "content": "I have a standing lunch with my manager Sarah every Tuesday at noon."},
+                {"role": "assistant", "content": "Recurring Tuesday noon lunch with Sarah is saved."},
+                {"role": "user", "content": "My gym is LA Fitness on Route 59. I go Monday, Wednesday, Friday mornings."},
+                {"role": "assistant", "content": "LA Fitness on Route 59, MWF mornings. Got it."}
+            ]
+        },
+        {
+            "session_id": 2,
+            "label": "Preference and rule additions",
+            "turns": [
+                {"role": "user", "content": "Never schedule anything before 9 AM — I'm useless before then."},
+                {"role": "assistant", "content": "Rule set: no meetings or commitments before 9 AM."},
+                {"role": "user", "content": "I'm lactose intolerant but oat milk is fine. Avoid dairy suggestions."},
+                {"role": "assistant", "content": "Noted. I'll keep dairy out of all food and drink suggestions."},
+                {"role": "user", "content": "I had a cold brew before my quarterly review and my hands were shaking the whole time. Never again before high-stakes meetings."},
+                {"role": "assistant", "content": "Lesson saved: avoid cold brew (and high-caffeine drinks) before important or high-stakes meetings."}
+            ]
+        },
+        {
+            "session_id": 3,
+            "label": "Address and coffee order change",
+            "turns": [
+                {"role": "user", "content": "I bought a house! Moving to 1814 Willow Creek Drive, Geneva, IL 60134 at the end of the month."},
+                {"role": "assistant", "content": "Congratulations. I'll update your address to 1814 Willow Creek Drive, Geneva, IL 60134 once you confirm the move is complete."},
+                {"role": "user", "content": "Move is done as of today."},
+                {"role": "assistant", "content": "Address updated to 1814 Willow Creek Drive, Geneva, IL 60134. Oak Street is no longer current."},
+                {"role": "user", "content": "Also switched to flat whites. The barista near the new house makes incredible ones."},
+                {"role": "assistant", "content": "Coffee order updated to flat white. Oat milk preference still applies."}
+            ]
+        },
+        {
+            "session_id": 4,
+            "label": "Routine changes",
+            "turns": [
+                {"role": "user", "content": "Sarah left the company. No more Tuesday lunches."},
+                {"role": "assistant", "content": "Tuesday noon lunch with Sarah has been removed from recurring events."},
+                {"role": "user", "content": "I joined a new gym closer to the house — it's called Geneva Athletic Club on Kirk Road."},
+                {"role": "assistant", "content": "Gym updated to Geneva Athletic Club on Kirk Road. Same MWF morning schedule?"},
+                {"role": "user", "content": "Yes, same schedule."},
+                {"role": "assistant", "content": "Got it. MWF mornings at Geneva Athletic Club on Kirk Road."}
+            ]
+        },
+        {
+            "session_id": 5,
+            "label": "New contacts and preferences",
+            "turns": [
+                {"role": "user", "content": "My new manager is Derek Chen. We're doing bi-weekly 1:1s on Thursdays at 2 PM."},
+                {"role": "assistant", "content": "Saved: bi-weekly Thursday 2 PM 1:1 with Derek Chen."},
+                {"role": "user", "content": "I prefer to prep for 1:1s the day before — so Wednesday afternoons are blocked for me."},
+                {"role": "assistant", "content": "Rule saved: block Wednesday afternoons for 1:1 prep."},
+                {"role": "user", "content": "My cell is 630-555-0192 and my work direct line is 312-555-0847."},
+                {"role": "assistant", "content": "Saved both numbers: cell 630-555-0192, work direct 312-555-0847."}
+            ]
+        },
+        {
+            "session_id": 6,
+            "label": "Goal setting and travel preference",
+            "turns": [
+                {"role": "user", "content": "I want to run a half marathon by October. Training starts next week."},
+                {"role": "assistant", "content": "Goal set: half marathon by October. Training begins next week."},
+                {"role": "user", "content": "For work travel, I always want aisle seats and Marriott properties when possible."},
+                {"role": "assistant", "content": "Travel preferences: aisle seat, Marriott properties preferred."},
+                {"role": "user", "content": "I also need to be home by Thursday nights during the school year because of my kid's soccer games on Fridays."},
+                {"role": "assistant", "content": "Travel rule noted: back home by Thursday night during school year for Friday soccer games."}
+            ]
+        }
+    ],
+    "queries": [
+        {
+            "query_id": 1,
+            "query": "What is my current home address?",
+            "expected_answer": "1814 Willow Creek Drive, Geneva, IL 60134",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "Early sessions establish 42 Oak Street as the address. A naive system returns the first address seen. The correct answer is the most recent.",
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 2,
+            "query": "What coffee should I order before my investor presentation tomorrow?",
+            "expected_answer": "Flat white (oat milk). Avoid cold brew before high-stakes meetings — learned from the quarterly review incident.",
+            "reasoning_type": "contradiction_resolution_plus_lesson",
+            "difficulty": "hard",
+            "trap": "Coffee changed from oat milk cappuccino to flat white. Must also surface the learned rule about cold brew before important meetings.",
+            "relevant_sessions": [1, 2, 3]
+        },
+        {
+            "query_id": 3,
+            "query": "Where do I go to work out?",
+            "expected_answer": "Geneva Athletic Club on Kirk Road, Monday/Wednesday/Friday mornings.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "LA Fitness on Route 59 was the original gym. Updated to Geneva Athletic Club after the move.",
+            "relevant_sessions": [1, 4]
+        },
+        {
+            "query_id": 4,
+            "query": "Do I have a standing Tuesday lunch on my calendar?",
+            "expected_answer": "No. The standing Tuesday lunch with Sarah was cancelled when she left the company.",
+            "reasoning_type": "negative_with_history",
+            "difficulty": "hard",
+            "trap": "Session 1 establishes the recurring Tuesday lunch. A naive system says yes. The correct answer accounts for the cancellation in session 4.",
+            "relevant_sessions": [1, 4]
+        },
+        {
+            "query_id": 5,
+            "query": "What is my manager's name?",
+            "expected_answer": "Derek Chen.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "easy",
+            "trap": "Sarah was the original manager. Derek Chen replaced her. Must return the current manager.",
+            "relevant_sessions": [1, 4, 5]
+        },
+        {
+            "query_id": 6,
+            "query": "What is my cell phone number?",
+            "expected_answer": "630-555-0192",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5]
+        },
+        {
+            "query_id": 7,
+            "query": "What should I avoid scheduling before 9 AM?",
+            "expected_answer": "Anything — no meetings or commitments before 9 AM is a standing rule.",
+            "reasoning_type": "rule_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 8,
+            "query": "Can you book a hotel for my Chicago trip next week? Any preferences?",
+            "expected_answer": "Marriott properties preferred. Aisle seat for flights.",
+            "reasoning_type": "preference_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [6]
+        },
+        {
+            "query_id": 9,
+            "query": "Is there a food I need to avoid?",
+            "expected_answer": "Dairy — lactose intolerant. Oat milk is fine.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 10,
+            "query": "What fitness goal am I working toward?",
+            "expected_answer": "Half marathon by October.",
+            "reasoning_type": "goal_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [6]
+        },
+        {
+            "query_id": 11,
+            "query": "Should I be available Thursday evenings for a team dinner during school months?",
+            "expected_answer": "No. Must be home by Thursday night during the school year for Friday soccer games.",
+            "reasoning_type": "constraint_reasoning",
+            "difficulty": "medium",
+            "trap": "System must derive that Thursday nights are off-limits from the travel rule, not just pattern-match on 'Thursday meeting'.",
+            "relevant_sessions": [6]
+        },
+        {
+            "query_id": 12,
+            "query": "What happened with the cold brew before a meeting?",
+            "expected_answer": "Had cold brew before a quarterly review; hands were shaking the whole time. Now a rule: no cold brew before high-stakes meetings.",
+            "reasoning_type": "lesson_lookup",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 13,
+            "query": "How often do I meet with my current manager?",
+            "expected_answer": "Bi-weekly on Thursdays at 2 PM.",
+            "reasoning_type": "multi_hop",
+            "difficulty": "medium",
+            "trap": "Must first identify current manager (Derek Chen, not Sarah), then retrieve cadence. Two-hop reasoning required.",
+            "relevant_sessions": [4, 5]
+        },
+        {
+            "query_id": 14,
+            "query": "What do I do the day before a 1:1 with Derek?",
+            "expected_answer": "Block Wednesday afternoon for 1:1 prep.",
+            "reasoning_type": "multi_hop",
+            "difficulty": "medium",
+            "trap": "Must connect: 1:1s are Thursdays → day before is Wednesday → Wednesday afternoons are blocked for prep.",
+            "relevant_sessions": [5]
+        },
+        {
+            "query_id": 15,
+            "query": "What was my previous address before moving to Geneva?",
+            "expected_answer": "42 Oak Street, Naperville, IL 60540.",
+            "reasoning_type": "temporal_historical",
+            "difficulty": "medium",
+            "trap": "Tests historical recall without confusing it for current state. System must know this is the old address.",
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 16,
+            "query": "I have a 6 AM meeting request from a vendor. Should I accept?",
+            "expected_answer": "No. Standing rule: nothing before 9 AM.",
+            "reasoning_type": "rule_application",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 17,
+            "query": "What gym was I going to before the current one?",
+            "expected_answer": "LA Fitness on Route 59.",
+            "reasoning_type": "temporal_historical",
+            "difficulty": "medium",
+            "trap": "Tests explicit historical recall — the old gym, not the current one.",
+            "relevant_sessions": [1, 4]
+        },
+        {
+            "query_id": 18,
+            "query": "What is my work direct line?",
+            "expected_answer": "312-555-0847",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5]
+        },
+        {
+            "query_id": 19,
+            "query": "Did I ever have a standing lunch meeting? With whom and when was it?",
+            "expected_answer": "Yes, previously had a standing Tuesday noon lunch with Sarah, my former manager. It was cancelled when she left the company.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "hard",
+            "trap": "Must report historical fact accurately while flagging that it no longer exists. Tests both temporal recall and current state.",
+            "relevant_sessions": [1, 4]
+        },
+        {
+            "query_id": 20,
+            "query": "What are all the rules or preferences I've given you about scheduling?",
+            "expected_answer": "No meetings before 9 AM; Wednesday afternoons blocked for 1:1 prep; home by Thursday nights during school year; avoid cold brew before high-stakes meetings.",
+            "reasoning_type": "aggregation",
+            "difficulty": "hard",
+            "trap": "Requires pulling scheduling-adjacent rules from sessions 2, 5, and 6. No single session contains all rules.",
+            "relevant_sessions": [2, 5, 6]
+        }
+    ]
+}

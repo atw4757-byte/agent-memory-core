@@ -1,0 +1,263 @@
+{
+    "scenario_id": "04_health_coach",
+    "name": "AI Health Coach — 5 Months",
+    "description": "Longitudinal health coaching relationship. Tracks fitness goals, dietary constraints, medical context, and behavioral patterns that change over time.",
+    "sessions": [
+        {
+            "session_id": 1,
+            "label": "Initial intake",
+            "turns": [
+                {"role": "user", "content": "I'm 34, female, 5'6\", 168 lbs. Want to lose about 20 lbs and build some muscle."},
+                {"role": "assistant", "content": "Got it — 34F, 5'6\", 168 lbs, goal: lose 20 lbs and build muscle. What's your current activity level?"},
+                {"role": "user", "content": "Pretty sedentary. I sit at a desk all day. I used to run in college but haven't done it consistently in years."},
+                {"role": "assistant", "content": "Starting point: sedentary, desk job, running background. We'll build back gradually."},
+                {"role": "user", "content": "I have mild asthma, well-controlled with an inhaler. It flares up in cold, dry air."},
+                {"role": "assistant", "content": "Noted: mild asthma, flares in cold/dry conditions. Keep inhaler accessible for outdoor winter workouts."},
+                {"role": "user", "content": "I'm vegetarian. No meat, no fish. I eat eggs and dairy."},
+                {"role": "assistant", "content": "Diet: lacto-ovo vegetarian. Plenty of protein options — eggs, Greek yogurt, legumes, cottage cheese."}
+            ]
+        },
+        {
+            "session_id": 2,
+            "label": "Progress and first adjustment",
+            "turns": [
+                {"role": "user", "content": "It's been 6 weeks. Lost 4 lbs, feel stronger. Running 3x/week now, 20-25 mins."},
+                {"role": "assistant", "content": "Great progress — 4 lbs down, running 3x/week. Current weight: 164 lbs."},
+                {"role": "user", "content": "I was diagnosed with iron-deficiency anemia. My doctor wants me to focus on iron-rich foods."},
+                {"role": "assistant", "content": "Iron deficiency noted. Top vegetarian iron sources: lentils, spinach, tofu, fortified cereals, pumpkin seeds. Combine with vitamin C for better absorption. Avoid coffee/tea with meals."},
+                {"role": "user", "content": "I started taking iron supplements in the mornings."},
+                {"role": "assistant", "content": "Iron supplement (morning) logged. Take with OJ or a vitamin C source, and avoid coffee for at least 1 hour after."}
+            ]
+        },
+        {
+            "session_id": 3,
+            "label": "Injury and modification",
+            "turns": [
+                {"role": "user", "content": "I twisted my left ankle pretty badly last week. Doctor says no running for 4-6 weeks."},
+                {"role": "assistant", "content": "Left ankle sprain — running on hold for 4-6 weeks. Switching to low-impact: swimming, cycling, upper body strength."},
+                {"role": "user", "content": "I don't have pool access. Can I do the elliptical?"},
+                {"role": "assistant", "content": "Elliptical is fine — minimal ankle impact. Also: upper body weights, seated yoga. Avoid high-impact until cleared."},
+                {"role": "user", "content": "The anemia is worse actually — my ferritin came back at 8. Doctor doubled my supplement dose."},
+                {"role": "assistant", "content": "Ferritin 8 is quite low. Supplement dose doubled (now 2x morning dose). Prioritize iron-rich meals every day."}
+            ]
+        },
+        {
+            "session_id": 4,
+            "label": "Recovery and goal shift",
+            "turns": [
+                {"role": "user", "content": "Ankle is healed. Cleared to run again as of Monday."},
+                {"role": "assistant", "content": "Running cleared. We'll restart gradually — don't jump back to 25-min runs immediately."},
+                {"role": "user", "content": "My weight is at 161 now. Down 7 lbs total. I want to shift the goal — less focused on weight, more on running a 5K."},
+                {"role": "assistant", "content": "Goal updated: 5K race goal, weight loss secondary. Current weight 161 lbs. Let's build a training plan."},
+                {"role": "user", "content": "I went vegan last month. Cutting out eggs and dairy too."},
+                {"role": "assistant", "content": "Diet updated to fully vegan. This increases protein challenge — need deliberate planning: legumes, tofu, tempeh, edamame, nutritional yeast. Iron absorption remains critical."}
+            ]
+        },
+        {
+            "session_id": 5,
+            "label": "Race prep and new issues",
+            "turns": [
+                {"role": "user", "content": "I signed up for a 5K on October 12. About 8 weeks out."},
+                {"role": "assistant", "content": "Race date set: October 12. 8 weeks to go — solid timeline for a goal finish."},
+                {"role": "user", "content": "My ferritin is at 22 now. Doctor reduced supplement back to one dose in the morning."},
+                {"role": "assistant", "content": "Ferritin improved to 22. Back to single morning iron supplement dose."},
+                {"role": "user", "content": "I've been getting shin splints on longer runs. Right leg mostly."},
+                {"role": "assistant", "content": "Shin splints (right leg) noted. Reduce mileage 20%, increase rest days, check shoe cushioning. Avoid running consecutive days until resolved."}
+            ]
+        },
+        {
+            "session_id": 6,
+            "label": "Post-race and maintenance",
+            "turns": [
+                {"role": "user", "content": "I finished the 5K! Time was 34:22."},
+                {"role": "assistant", "content": "Congratulations — 5K done at 34:22. That's a great first race."},
+                {"role": "user", "content": "Weight is 158 lbs now. I feel good where I am. New goal is just to maintain and run a 10K next spring."},
+                {"role": "assistant", "content": "Goal updated: maintain 158 lbs, train for 10K next spring."},
+                {"role": "user", "content": "Shin splints are gone. I think it was my old shoes."},
+                {"role": "assistant", "content": "Shin splints resolved — attributed to footwear. Note: replace running shoes every 300-500 miles to prevent recurrence."}
+            ]
+        }
+    ],
+    "queries": [
+        {
+            "query_id": 1,
+            "query": "What is the client's current weight and primary fitness goal?",
+            "expected_answer": "158 lbs. Goal: maintain current weight and train for a 10K in the spring.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "hard",
+            "trap": "Weight updated three times (168 → 164 → 161 → 158) and goal shifted from weight loss to 5K to 10K. Must return the latest values for both.",
+            "relevant_sessions": [1, 2, 4, 6]
+        },
+        {
+            "query_id": 2,
+            "query": "What diet does this client follow?",
+            "expected_answer": "Fully vegan. Previously lacto-ovo vegetarian (ate eggs and dairy), switched to fully vegan in session 4.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "Early sessions establish lacto-ovo vegetarian. Session 4 updates to fully vegan. Must return current state.",
+            "relevant_sessions": [1, 4]
+        },
+        {
+            "query_id": 3,
+            "query": "What is the current iron supplement regimen?",
+            "expected_answer": "Single morning iron supplement. Was doubled during severe anemia (ferritin 8), then reduced back to one dose when ferritin improved to 22.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "hard",
+            "trap": "Supplement dose changed: none → single → double → single. Must return final (current) state.",
+            "relevant_sessions": [2, 3, 5]
+        },
+        {
+            "query_id": 4,
+            "query": "Is the client currently cleared to run?",
+            "expected_answer": "Yes. The ankle injury (4-6 week restriction) was resolved in session 4. Shin splints also resolved.",
+            "reasoning_type": "negative_resolved",
+            "difficulty": "medium",
+            "trap": "Session 3 puts running on hold. Session 4 clears it. Session 5 adds shin splints. Session 6 resolves shin splints. System must integrate all four sessions.",
+            "relevant_sessions": [3, 4, 5, 6]
+        },
+        {
+            "query_id": 5,
+            "query": "What medical conditions does this client have?",
+            "expected_answer": "Mild asthma (well-controlled, inhaler, flares in cold/dry air) and iron-deficiency anemia (ferritin improved to 22, on single iron supplement).",
+            "reasoning_type": "aggregation",
+            "difficulty": "medium",
+            "trap": "Asthma established in session 1; anemia added in session 2. Must list both with current status.",
+            "relevant_sessions": [1, 2, 3, 5]
+        },
+        {
+            "query_id": 6,
+            "query": "What was the original weight loss goal?",
+            "expected_answer": "Lose 20 lbs from starting weight of 168 lbs.",
+            "reasoning_type": "historical_recall",
+            "difficulty": "easy",
+            "trap": "Goal has since changed to running-focused. System should correctly recall original goal without confusing it for the current one.",
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 7,
+            "query": "What happened with the shin splints?",
+            "expected_answer": "Shin splints in the right leg developed during 5K training. Resolved — likely caused by worn-out shoes. Recommendation: replace shoes every 300-500 miles.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "medium",
+            "trap": "Session 5 introduces shin splints; session 6 resolves them. Must return resolved state with root cause.",
+            "relevant_sessions": [5, 6]
+        },
+        {
+            "query_id": 8,
+            "query": "What protein sources are recommended for this client?",
+            "expected_answer": "Fully vegan sources only: legumes, tofu, tempeh, edamame, nutritional yeast. Eggs and dairy are no longer in the diet.",
+            "reasoning_type": "conditional_on_current_state",
+            "difficulty": "hard",
+            "trap": "Early sessions recommend eggs and Greek yogurt. Session 4 switches client to fully vegan. Recommendations must reflect the updated diet.",
+            "relevant_sessions": [1, 4]
+        },
+        {
+            "query_id": 9,
+            "query": "Did the client complete a race? What was the result?",
+            "expected_answer": "Yes — completed a 5K on October 12 with a time of 34:22.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5, 6]
+        },
+        {
+            "query_id": 10,
+            "query": "What exercise modifications were made when the ankle was injured?",
+            "expected_answer": "Switched to elliptical, upper body weights, and seated yoga. Running and high-impact exercise avoided for 4-6 weeks.",
+            "reasoning_type": "historical_recall",
+            "difficulty": "medium",
+            "trap": "Ankle is now healed. System must recall the modification period without applying it to current state.",
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 11,
+            "query": "What is the client's ferritin level and anemia status?",
+            "expected_answer": "Ferritin at 22 — improved from a low of 8. Still on iron supplement (single morning dose). Anemia being managed.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "medium",
+            "trap": "Ferritin: not mentioned initially → 8 (session 3) → 22 (session 5). Must return most recent value.",
+            "relevant_sessions": [2, 3, 5]
+        },
+        {
+            "query_id": 12,
+            "query": "What should this client avoid eating with their iron supplement?",
+            "expected_answer": "Avoid coffee and tea for at least 1 hour after taking the iron supplement. Take with vitamin C (e.g., orange juice) to boost absorption.",
+            "reasoning_type": "lesson_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 13,
+            "query": "How much weight has this client lost since starting?",
+            "expected_answer": "10 lbs — from 168 lbs to 158 lbs.",
+            "reasoning_type": "arithmetic_from_memory",
+            "difficulty": "medium",
+            "trap": "Requires remembering starting weight (168) and current weight (158) and computing the delta.",
+            "relevant_sessions": [1, 6]
+        },
+        {
+            "query_id": 14,
+            "query": "Is this client currently eating eggs?",
+            "expected_answer": "No. Switched from lacto-ovo vegetarian to fully vegan in session 4. No eggs or dairy.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "Session 1 explicitly states she eats eggs. Session 4 updates to fully vegan. Naive systems say yes.",
+            "relevant_sessions": [1, 4]
+        },
+        {
+            "query_id": 15,
+            "query": "What is the asthma management note for outdoor exercise?",
+            "expected_answer": "Keep inhaler accessible for outdoor workouts, especially in cold or dry air conditions.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 16,
+            "query": "What is the client's running history and current level?",
+            "expected_answer": "Ran in college, was sedentary for years, rebuilt to 3x/week during coaching, completed a 5K in 34:22, now training for a 10K.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "hard",
+            "trap": "Must span all sessions to reconstruct the full progression accurately.",
+            "relevant_sessions": [1, 2, 3, 4, 5, 6]
+        },
+        {
+            "query_id": 17,
+            "query": "What was the client's lowest ferritin reading?",
+            "expected_answer": "8. Measured during session 3, which prompted the supplement dose to be doubled.",
+            "reasoning_type": "temporal_extremal",
+            "difficulty": "medium",
+            "trap": "Tests recall of a low-point value across multiple measurements.",
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 18,
+            "query": "What is the next race goal?",
+            "expected_answer": "A 10K next spring.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "easy",
+            "trap": "5K was the previous race goal and has been completed. Current goal is the 10K.",
+            "relevant_sessions": [6]
+        },
+        {
+            "query_id": 19,
+            "query": "Was there ever a period when running was medically restricted?",
+            "expected_answer": "Yes — 4-6 week restriction after a left ankle sprain (session 3). Also reduced mileage recommended for right-leg shin splints (session 5).",
+            "reasoning_type": "aggregation_historical",
+            "difficulty": "medium",
+            "trap": "Both restrictions are now resolved. System must accurately report historical restrictions as historical, not current.",
+            "relevant_sessions": [3, 4, 5, 6]
+        },
+        {
+            "query_id": 20,
+            "query": "What are all the dietary restrictions and nutritional priorities for this client?",
+            "expected_answer": "Fully vegan (no meat, fish, eggs, or dairy). Iron deficiency — prioritize iron-rich vegan foods (lentils, tofu, spinach, fortified cereals) with vitamin C. Take iron supplement every morning. Avoid coffee/tea with supplement.",
+            "reasoning_type": "aggregation",
+            "difficulty": "hard",
+            "trap": "Dietary restrictions evolved across sessions. Recommendations from session 1 (eggs, dairy) are now invalid. Must combine vegan diet with iron management protocols.",
+            "relevant_sessions": [1, 2, 3, 4, 5]
+        }
+    ]
+}

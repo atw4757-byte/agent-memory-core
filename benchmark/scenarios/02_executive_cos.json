@@ -1,0 +1,259 @@
+{
+    "scenario_id": "02_executive_cos",
+    "name": "Executive Chief of Staff",
+    "description": "Supporting a C-suite executive over 8 months. Tracks board members, strategic pivots, vendor relationships, key decisions, and priorities that shift.",
+    "sessions": [
+        {
+            "session_id": 1,
+            "label": "Onboarding and initial context",
+            "turns": [
+                {"role": "user", "content": "I'm the CEO of Meridian Dynamics. We make industrial IoT sensors. About 240 employees, Series B, $22M ARR."},
+                {"role": "assistant", "content": "Context saved: Meridian Dynamics, industrial IoT sensors, 240 employees, Series B, $22M ARR."},
+                {"role": "user", "content": "Our board members are: Patricia Owens (lead investor, Vertex Capital), Marcus Webb (independent director), and Lena Strauss (strategic investor, Bosch Ventures)."},
+                {"role": "assistant", "content": "Board saved: Patricia Owens (Vertex Capital, lead), Marcus Webb (independent), Lena Strauss (Bosch Ventures)."},
+                {"role": "user", "content": "Q3 priority is closing a strategic partnership with Siemens. Marcus has a contact there — James Holloway."},
+                {"role": "assistant", "content": "Q3 priority: Siemens partnership. Contact: James Holloway via Marcus Webb."}
+            ]
+        },
+        {
+            "session_id": 2,
+            "label": "Vendor negotiations",
+            "turns": [
+                {"role": "user", "content": "We're in contract renegotiation with Apex Logistics for our fulfillment. Current deal is $180K/year, we want to cut to $140K."},
+                {"role": "assistant", "content": "Apex Logistics renegotiation: current $180K/year, target $140K/year."},
+                {"role": "user", "content": "Our contact at Apex is Dana Ruiz. She's responsive but her boss Greg Tanaka has final sign-off."},
+                {"role": "assistant", "content": "Apex: Dana Ruiz (day-to-day contact), Greg Tanaka (final approval authority)."},
+                {"role": "user", "content": "We got to $155K. I told Dana that's our last offer and we'd go to RFP if they don't accept."},
+                {"role": "assistant", "content": "Status: Apex negotiation at $155K — final offer on the table. Deadline: accept or we issue RFP."}
+            ]
+        },
+        {
+            "session_id": 3,
+            "label": "Board change and strategic pivot",
+            "turns": [
+                {"role": "user", "content": "Marcus Webb resigned from the board — personal reasons. We're replacing him with Dr. Angela Nori, a supply chain expert from MIT."},
+                {"role": "assistant", "content": "Board updated: Marcus Webb resigned, replaced by Dr. Angela Nori (MIT, supply chain)."},
+                {"role": "user", "content": "With Marcus gone, the Siemens intro through James Holloway is probably dead. We're pivoting the Q3 priority to winning Bosch as a direct customer — Lena can facilitate."},
+                {"role": "assistant", "content": "Q3 priority updated: Siemens partnership dropped. New focus: Bosch as direct customer via Lena Strauss."},
+                {"role": "user", "content": "ARR hit $26M this month. Updated our Series C target to $40M."},
+                {"role": "assistant", "content": "ARR updated to $26M. Series C target: $40M."}
+            ]
+        },
+        {
+            "session_id": 4,
+            "label": "Hiring and org changes",
+            "turns": [
+                {"role": "user", "content": "We promoted Ryan Park from VP Engineering to CTO. He starts in the new role Monday."},
+                {"role": "assistant", "content": "Ryan Park promoted to CTO, effective this Monday."},
+                {"role": "user", "content": "We're hiring a CFO. Top candidate is Mei-Ling Torres. She's currently at SolarEdge. Second choice is Damian Favre from Honeywell."},
+                {"role": "assistant", "content": "CFO candidates: Mei-Ling Torres (SolarEdge, top pick), Damian Favre (Honeywell, second choice)."},
+                {"role": "user", "content": "Headcount is now 265 after the last batch of engineering hires."},
+                {"role": "assistant", "content": "Headcount updated to 265."}
+            ]
+        },
+        {
+            "session_id": 5,
+            "label": "Apex resolution and new vendor",
+            "turns": [
+                {"role": "user", "content": "Apex Logistics accepted the $155K deal. Contract signed this morning."},
+                {"role": "assistant", "content": "Apex Logistics contract closed at $155K. Saving $25K/year vs. prior deal."},
+                {"role": "user", "content": "We're also onboarding CloudBridge for data infrastructure. Pilot cost is $8K/month."},
+                {"role": "assistant", "content": "CloudBridge pilot started: $8K/month for data infrastructure."}
+            ]
+        },
+        {
+            "session_id": 6,
+            "label": "CFO decision and fundraising",
+            "turns": [
+                {"role": "user", "content": "Mei-Ling accepted the CFO offer. She starts in three weeks."},
+                {"role": "assistant", "content": "CFO hire confirmed: Mei-Ling Torres starts in three weeks."},
+                {"role": "user", "content": "Patricia Owens at Vertex is leading our Series C. She's committing $15M of the $40M target."},
+                {"role": "assistant", "content": "Series C: Patricia Owens (Vertex) leads with $15M anchor. Target remains $40M."},
+                {"role": "user", "content": "ARR is now $29M heading into Q4."},
+                {"role": "assistant", "content": "ARR updated to $29M for Q4 planning."}
+            ]
+        }
+    ],
+    "queries": [
+        {
+            "query_id": 1,
+            "query": "Who are the current board members?",
+            "expected_answer": "Patricia Owens (Vertex Capital, lead investor), Dr. Angela Nori (MIT, supply chain expert), and Lena Strauss (Bosch Ventures). Marcus Webb resigned and was replaced by Dr. Nori.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "hard",
+            "trap": "Session 1 lists three board members including Marcus Webb. Session 3 replaces him. Naive systems return the original list.",
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 2,
+            "query": "What is the current ARR?",
+            "expected_answer": "$29M.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "medium",
+            "trap": "ARR was updated three times: $22M, $26M, $29M. Must return the most recent value.",
+            "relevant_sessions": [1, 3, 6]
+        },
+        {
+            "query_id": 3,
+            "query": "What is the Q3 strategic priority?",
+            "expected_answer": "Winning Bosch as a direct customer, facilitated by Lena Strauss. The Siemens partnership was dropped after Marcus Webb resigned.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "hard",
+            "trap": "Session 1 sets Siemens as Q3 priority. Session 3 changes it to Bosch. Must reflect the updated priority and explain the reason for the change.",
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 4,
+            "query": "What is the status of the Apex Logistics contract?",
+            "expected_answer": "Closed. Signed at $155K/year — down from $180K, saving $25K annually.",
+            "reasoning_type": "temporal_sequence",
+            "difficulty": "medium",
+            "trap": "Session 2 shows negotiation in progress. Session 5 closes the deal. Must return the final resolved state.",
+            "relevant_sessions": [2, 5]
+        },
+        {
+            "query_id": 5,
+            "query": "Who is the CFO?",
+            "expected_answer": "Mei-Ling Torres, recently hired from SolarEdge. Starts in three weeks.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "medium",
+            "trap": "Session 4 presents two candidates. Session 6 resolves the hire. Naive systems might return both candidates or the wrong one.",
+            "relevant_sessions": [4, 6]
+        },
+        {
+            "query_id": 6,
+            "query": "Who has the James Holloway contact at Siemens?",
+            "expected_answer": "Marcus Webb had that contact, but he resigned from the board. The Siemens path is likely no longer viable.",
+            "reasoning_type": "multi_hop_with_invalidation",
+            "difficulty": "hard",
+            "trap": "System must connect: Marcus → Holloway → Siemens → Marcus resigned → contact no longer available. Three-hop chain.",
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 7,
+            "query": "What is current headcount?",
+            "expected_answer": "265 employees.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "easy",
+            "trap": "Original headcount was 240. Must return updated figure of 265.",
+            "relevant_sessions": [1, 4]
+        },
+        {
+            "query_id": 8,
+            "query": "Who leads final approval at Apex Logistics?",
+            "expected_answer": "Greg Tanaka.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 9,
+            "query": "Who is the CTO?",
+            "expected_answer": "Ryan Park, promoted from VP Engineering.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 10,
+            "query": "What is the Series C fundraising status?",
+            "expected_answer": "Target $40M. Patricia Owens (Vertex Capital) is leading with a $15M anchor commitment.",
+            "reasoning_type": "multi_hop",
+            "difficulty": "medium",
+            "trap": "Target changed from unspecified to $40M in session 3. Anchor commitment added in session 6. Must combine both facts.",
+            "relevant_sessions": [3, 6]
+        },
+        {
+            "query_id": 11,
+            "query": "Is there an ongoing negotiation with Apex Logistics?",
+            "expected_answer": "No — it concluded. Contract signed at $155K/year.",
+            "reasoning_type": "negative_with_history",
+            "difficulty": "medium",
+            "trap": "Session 2 shows active negotiation. Session 5 resolves it. System should report completed state, not the negotiation-in-progress state.",
+            "relevant_sessions": [2, 5]
+        },
+        {
+            "query_id": 12,
+            "query": "Who was the second-choice CFO candidate?",
+            "expected_answer": "Damian Favre from Honeywell.",
+            "reasoning_type": "historical_recall",
+            "difficulty": "medium",
+            "trap": "Tests deliberate historical recall of a non-chosen candidate without confusing them for the actual hire.",
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 13,
+            "query": "What board member can help connect us with Bosch?",
+            "expected_answer": "Lena Strauss from Bosch Ventures.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 14,
+            "query": "How much did we cut the Apex Logistics contract by?",
+            "expected_answer": "$25K/year — from $180K down to $155K.",
+            "reasoning_type": "arithmetic_from_memory",
+            "difficulty": "medium",
+            "trap": "Requires remembering both the original figure ($180K) and the final figure ($155K) and computing the delta.",
+            "relevant_sessions": [2, 5]
+        },
+        {
+            "query_id": 15,
+            "query": "What is the monthly cost of the CloudBridge pilot?",
+            "expected_answer": "$8K/month.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [5]
+        },
+        {
+            "query_id": 16,
+            "query": "Who is the lead investor on our current round?",
+            "expected_answer": "Patricia Owens at Vertex Capital, committing $15M as the anchor.",
+            "reasoning_type": "multi_hop",
+            "difficulty": "medium",
+            "trap": "Patricia was identified as board/investor in session 1, and her lead role on Series C established in session 6. Must connect both.",
+            "relevant_sessions": [1, 6]
+        },
+        {
+            "query_id": 17,
+            "query": "What happened to our original Q3 Siemens partnership plan?",
+            "expected_answer": "Dropped after Marcus Webb resigned — he was the connection to James Holloway at Siemens. Replaced by Bosch customer initiative.",
+            "reasoning_type": "causal_chain",
+            "difficulty": "hard",
+            "trap": "Tests multi-session causal reasoning: board change → lost contact → strategy pivot.",
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 18,
+            "query": "What was our ARR when we started Series B?",
+            "expected_answer": "$22M ARR was the figure at initial context setup (Series B stage).",
+            "reasoning_type": "temporal_historical",
+            "difficulty": "medium",
+            "trap": "ARR has grown — must retrieve the original figure, not the current one.",
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 19,
+            "query": "What did we tell Apex Logistics we would do if they didn't accept our $155K offer?",
+            "expected_answer": "Issue an RFP to find alternative vendors.",
+            "reasoning_type": "lesson_or_commitment_recall",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 20,
+            "query": "Summarize all active vendor relationships and their current status.",
+            "expected_answer": "Apex Logistics: contract signed at $155K/year (closed). CloudBridge: pilot at $8K/month (active).",
+            "reasoning_type": "aggregation",
+            "difficulty": "hard",
+            "trap": "Requires aggregating across sessions 2, 5 for Apex (with status update) and session 5 for CloudBridge. Must reflect final state of each.",
+            "relevant_sessions": [2, 5]
+        }
+    ]
+}

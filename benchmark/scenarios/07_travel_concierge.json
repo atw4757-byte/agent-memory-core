@@ -1,0 +1,251 @@
+{
+    "scenario_id": "07_travel_concierge",
+    "name": "Personal Travel Concierge",
+    "description": "AI travel agent managing a frequent business traveler's preferences, loyalty accounts, and trip history over a year. Tests preference drift, itinerary changes, and loyalty tier updates.",
+    "sessions": [
+        {
+            "session_id": 1,
+            "label": "Initial travel profile",
+            "turns": [
+                {"role": "user", "content": "I travel about 3-4 times a month for work. Always flying out of Chicago O'Hare, terminal preference is the United terminal."},
+                {"role": "assistant", "content": "Profile: Chicago O'Hare home base, United terminal preferred."},
+                {"role": "user", "content": "My United MileagePlus number is MP-4471-38829. I'm currently Gold status."},
+                {"role": "assistant", "content": "United MileagePlus: MP-4471-38829, Gold status."},
+                {"role": "user", "content": "Hotel preference: Marriott properties, always request a high floor corner room, away from the elevator. Bonvoy number is 7723-998-1144."},
+                {"role": "assistant", "content": "Hotel: Marriott preferred, high floor corner room away from elevator. Bonvoy 7723-998-1144."},
+                {"role": "user", "content": "I always want an aisle seat, never a window. And I need to be back by Thursday evenings when school is in session for my kid's Friday games."},
+                {"role": "assistant", "content": "Seat: always aisle. Travel constraint: home by Thursday evening during school year."}
+            ]
+        },
+        {
+            "session_id": 2,
+            "label": "Preference refinements",
+            "turns": [
+                {"role": "user", "content": "Add Global Entry to my profile — number is GE-7829344. Makes TSA much faster."},
+                {"role": "assistant", "content": "Global Entry saved: GE-7829344."},
+                {"role": "user", "content": "I've started preferring Hyatt over Marriott in New York. The Park Hyatt Midtown is my go-to there."},
+                {"role": "assistant", "content": "New York exception: Park Hyatt Midtown preferred over Marriott."},
+                {"role": "user", "content": "I had a bad experience with United on a flight to Boston — they lost my bag. Now I always carry on when going to Boston specifically."},
+                {"role": "assistant", "content": "Boston rule: carry-on only. No checked bags. (Lost bag incident with United.)"}
+            ]
+        },
+        {
+            "session_id": 3,
+            "label": "Status upgrade and new route",
+            "turns": [
+                {"role": "user", "content": "I hit 1K on United — upgraded to 1K status. Been flying a lot."},
+                {"role": "assistant", "content": "United status upgraded: Gold → 1K. MileagePlus MP-4471-38829."},
+                {"role": "user", "content": "I'm starting a monthly client trip to Austin. Preferred hotel there is the Fairmont."},
+                {"role": "assistant", "content": "Austin route added: monthly cadence, Fairmont Austin preferred."},
+                {"role": "user", "content": "Also — I prefer to land by 8 PM on any travel day. Gets too disruptive to the family if I'm landing late."},
+                {"role": "assistant", "content": "New preference: land by 8 PM on travel days whenever possible."}
+            ]
+        },
+        {
+            "session_id": 4,
+            "label": "Home airport change",
+            "turns": [
+                {"role": "user", "content": "I moved to the western suburbs. Midway is now closer than O'Hare. I'll be flying out of Midway for short-haul and keeping O'Hare for longer routes."},
+                {"role": "assistant", "content": "Airport preference updated: Midway (MDW) for short-haul, O'Hare (ORD) for long-haul. Old default was O'Hare only."},
+                {"role": "user", "content": "I added an AmEx Platinum card — it gives lounge access. Use that for Centurion Lounges at airports."},
+                {"role": "assistant", "content": "AmEx Platinum added for Centurion Lounge access."},
+                {"role": "user", "content": "Bonvoy number is same — 7723-998-1144 — but I hit Platinum this year."},
+                {"role": "assistant", "content": "Bonvoy status updated: Platinum Elite. Number unchanged."}
+            ]
+        },
+        {
+            "session_id": 5,
+            "label": "Route preference reversal",
+            "turns": [
+                {"role": "user", "content": "The Austin trips are going monthly but I actually prefer the Westin now — the Fairmont service has declined."},
+                {"role": "assistant", "content": "Austin hotel preference updated: Fairmont → Westin Austin Downtown."},
+                {"role": "user", "content": "Moved my Thursday-home constraint to apply year-round now, not just school year. My schedule is better that way."},
+                {"role": "assistant", "content": "Travel constraint updated: home by Thursday evening — now year-round, not school year only."},
+                {"role": "user", "content": "I've also started flying Southwest from Midway on certain short routes because of their open boarding. Add that as an option."},
+                {"role": "assistant", "content": "Southwest added as option for short-haul from Midway (open boarding appeal)."}
+            ]
+        }
+    ],
+    "queries": [
+        {
+            "query_id": 1,
+            "query": "What is my United MileagePlus status?",
+            "expected_answer": "1K status. Started as Gold, upgraded after reaching 1,000 qualifying flights.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "easy",
+            "trap": "Gold established in session 1. 1K achieved in session 3. Must return current status.",
+            "relevant_sessions": [1, 3]
+        },
+        {
+            "query_id": 2,
+            "query": "Which airport should I fly out of for a short trip to Nashville?",
+            "expected_answer": "Midway (MDW) — now preferred for short-haul routes since the move to the western suburbs.",
+            "reasoning_type": "conditional_reasoning",
+            "difficulty": "medium",
+            "trap": "O'Hare was the original home airport. Session 4 introduces the split: Midway for short-haul, O'Hare for long-haul.",
+            "relevant_sessions": [1, 4]
+        },
+        {
+            "query_id": 3,
+            "query": "Where should I stay on my next Austin trip?",
+            "expected_answer": "Westin Austin Downtown. The Fairmont was previously preferred but switched due to declined service.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "Fairmont set as Austin preference in session 3. Session 5 changes it to Westin. Naive systems return Fairmont.",
+            "relevant_sessions": [3, 5]
+        },
+        {
+            "query_id": 4,
+            "query": "Is my Thursday-home constraint only during the school year?",
+            "expected_answer": "No — it was updated to apply year-round in session 5.",
+            "reasoning_type": "contradiction_resolution",
+            "difficulty": "medium",
+            "trap": "Session 1 explicitly says 'when school is in session.' Session 5 expands it to year-round.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 5,
+            "query": "What hotel should I book for a trip to New York?",
+            "expected_answer": "Park Hyatt Midtown — exception to the general Marriott preference for New York trips.",
+            "reasoning_type": "conditional_preference",
+            "difficulty": "medium",
+            "trap": "General rule is Marriott. NY has a specific exception for Park Hyatt. System must apply the exception, not the general rule.",
+            "relevant_sessions": [1, 2]
+        },
+        {
+            "query_id": 6,
+            "query": "What is my MileagePlus number?",
+            "expected_answer": "MP-4471-38829",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 7,
+            "query": "What is my Bonvoy number and current status?",
+            "expected_answer": "Bonvoy 7723-998-1144, Platinum Elite status. Previously regular Bonvoy member.",
+            "reasoning_type": "temporal_latest",
+            "difficulty": "easy",
+            "trap": "Status updated from base to Platinum Elite in session 4. Number unchanged.",
+            "relevant_sessions": [1, 4]
+        },
+        {
+            "query_id": 8,
+            "query": "I'm booking a trip to Boston — any special instructions?",
+            "expected_answer": "Carry-on only — no checked bags. United lost a bag on a Boston trip. Also: aisle seat, land by 8 PM, and Marriott if staying overnight.",
+            "reasoning_type": "multi_hop",
+            "difficulty": "hard",
+            "trap": "Boston rule (carry-on only) from session 2 must be combined with general preferences. The specific rule overrides general luggage behavior.",
+            "relevant_sessions": [1, 2]
+        },
+        {
+            "query_id": 9,
+            "query": "What seat type do I prefer?",
+            "expected_answer": "Aisle, never window.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 10,
+            "query": "What is my Global Entry number?",
+            "expected_answer": "GE-7829344",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 11,
+            "query": "Where was I staying in Austin before the switch?",
+            "expected_answer": "The Fairmont Austin — preference before service declined and I switched to the Westin.",
+            "reasoning_type": "historical_recall",
+            "difficulty": "medium",
+            "trap": "Tests explicit historical recall of a superseded preference.",
+            "relevant_sessions": [3, 5]
+        },
+        {
+            "query_id": 12,
+            "query": "Can I schedule a return flight on Friday afternoon?",
+            "expected_answer": "No. Standing rule: home by Thursday evening, year-round (updated from school-year-only).",
+            "reasoning_type": "rule_application",
+            "difficulty": "medium",
+            "trap": "Must apply the year-round version of the constraint, not the school-year-only version.",
+            "relevant_sessions": [1, 5]
+        },
+        {
+            "query_id": 13,
+            "query": "What caused the switch away from checking bags for Boston trips?",
+            "expected_answer": "United lost a bag on a Boston flight. Now carry-on only for all Boston trips.",
+            "reasoning_type": "lesson_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [2]
+        },
+        {
+            "query_id": 14,
+            "query": "Which airlines am I open to flying for short-haul out of Midway?",
+            "expected_answer": "Southwest (open boarding) in addition to any standard options. United for longer routes from O'Hare.",
+            "reasoning_type": "aggregation",
+            "difficulty": "medium",
+            "trap": "Southwest added in session 5 specifically for Midway short-haul. Must not apply it to long-haul routes.",
+            "relevant_sessions": [4, 5]
+        },
+        {
+            "query_id": 15,
+            "query": "What hotel room preferences should be noted at check-in?",
+            "expected_answer": "High floor corner room, away from the elevator.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [1]
+        },
+        {
+            "query_id": 16,
+            "query": "What lounge access do I have at airports?",
+            "expected_answer": "United Club access via 1K status, plus Centurion Lounge access via AmEx Platinum card.",
+            "reasoning_type": "aggregation",
+            "difficulty": "medium",
+            "trap": "1K status grants United Club. AmEx Platinum (session 4) adds Centurion. Both are currently active.",
+            "relevant_sessions": [3, 4]
+        },
+        {
+            "query_id": 17,
+            "query": "What is my preferred landing time constraint?",
+            "expected_answer": "Land by 8 PM on any travel day whenever possible.",
+            "reasoning_type": "simple_lookup",
+            "difficulty": "easy",
+            "trap": null,
+            "relevant_sessions": [3]
+        },
+        {
+            "query_id": 18,
+            "query": "When did the airport preference change and why?",
+            "expected_answer": "Session 4 — moved to western suburbs, making Midway closer. Now Midway for short-haul, O'Hare for long-haul.",
+            "reasoning_type": "causal_chain",
+            "difficulty": "medium",
+            "trap": null,
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 19,
+            "query": "I'm booking a long-haul international trip from Chicago. Which airport?",
+            "expected_answer": "O'Hare (ORD) — kept as the preference for long-haul routes.",
+            "reasoning_type": "conditional_reasoning",
+            "difficulty": "medium",
+            "trap": "Session 4 splits airport preferences. Must apply the correct branch: long-haul → O'Hare.",
+            "relevant_sessions": [4]
+        },
+        {
+            "query_id": 20,
+            "query": "List all my exception rules that override the general preferences.",
+            "expected_answer": "New York: Park Hyatt instead of Marriott. Boston: carry-on only, no checked bags. Austin: Westin, not Fairmont. Short-haul from Midway: Southwest is acceptable. Thursday evening constraint: year-round (not just school year).",
+            "reasoning_type": "aggregation",
+            "difficulty": "hard",
+            "trap": "Requires collecting all city-specific and situation-specific overrides across sessions 2, 3, 5 — separate from general preferences.",
+            "relevant_sessions": [2, 3, 5]
+        }
+    ]
+}
