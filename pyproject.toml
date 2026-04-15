@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agent-memory-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "Agent memory that actually works: drops into any Python agent in 3 lines."
 readme = "README.md"
 license = { file = "LICENSE" }

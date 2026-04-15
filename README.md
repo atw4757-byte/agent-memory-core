@@ -37,11 +37,11 @@ print(results[0].text)  # "The API key is stored in the keychain"
 6. **Entity relationship graph** — memory files linked by shared entities and topics; 2-hop neighbor expansion surfaces related context; graph connectivity boosts salience
 7. **Working memory buffer** — 4-7 short-term slots (Miller's Law) that survive session restarts; flush() serializes to long-term store
 
-## Eval Score: 7.6/10
+## Eval Score: 7.7/10
 
 Baseline (naive ChromaDB cosine): 3.1/10
 With salience + adaptive weights: 5.4/10
-With cross-encoder + MMR + fact layer: **7.6/10**
+With cross-encoder + MMR + fact layer: **7.7/10**
 
 Metrics: Recall@5 82%, Precision@5 61%, Answer 74% across 30 stratified queries.
 

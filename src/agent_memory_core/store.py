@@ -59,6 +59,44 @@ except Exception:
 _CREDENTIAL_WORDS = frozenset(["key", "password", "token", "api", "secret", "credential", "auth", "oauth"])
 _RECENCY_WORDS    = frozenset(["current", "now", "today", "status", "latest", "recent", "right now"])
 _LESSON_WORDS     = frozenset(["mistake", "wrong", "fix", "error", "rule", "should", "lesson", "correction", "bug"])
+_PERSONAL_WORDS   = frozenset(["personal", "preference", "habit", "name", "family", "home", "location"])
+_TECHNICAL_WORDS  = frozenset(["code", "script", "install", "config", "port", "ssh", "docker", "server", "python", "function"])
+_PROJECT_WORDS    = frozenset(["project", "app", "build", "release", "version", "feature"])
+_SESSION_WORDS    = frozenset(["session", "last", "yesterday", "week", "ago", "previous", "earlier", "history"])
+
+# Cross-encoder relevance gate thresholds (raw CE scores, higher = more relevant).
+# ms-marco-MiniLM-L-6-v2 typically ranges roughly -10 to +10.
+CE_THRESHOLDS: dict[str, float] = {
+    "credential":     -3.0,   # slightly loose to keep partial matches
+    "lesson":         -4.0,
+    "personal":       -4.0,
+    "project_status": -5.0,   # broad — status queries vary widely
+    "technical":      -4.0,
+    "session":        -6.0,   # very broad — recency queries
+    "default":        -5.0,
+}
+
+
+def detect_query_type(query: str) -> str:
+    """Classify a query into a type label used to select the CE relevance-gate threshold.
+
+    Returns one of: credential / lesson / personal / technical / project_status / session / default.
+    This classification is independent of chunk_type — it is purely for threshold lookup.
+    """
+    words = set(query.lower().split())
+    if words & _CREDENTIAL_WORDS:
+        return "credential"
+    if words & _LESSON_WORDS:
+        return "lesson"
+    if words & _PERSONAL_WORDS:
+        return "personal"
+    if words & _TECHNICAL_WORDS:
+        return "technical"
+    if words & _PROJECT_WORDS:
+        return "project_status"
+    if words & _SESSION_WORDS:
+        return "session"
+    return "default"
 
 
 def _detect_query_weights(query: str) -> tuple[float, float, float]:
@@ -494,6 +532,17 @@ class MemoryStore:
 
         raw_results.sort(key=lambda x: x["combined_score"])
 
+        # BM25-style keyword boost: reward chunks that contain literal query words.
+        # Applied before cross-encoder so CE sees pre-boosted ordering.
+        # Lower combined_score = better, so we subtract the boost amount.
+        _query_words = set(query.lower().split())
+        for _r in raw_results:
+            _text_lower = _r["text"].lower()
+            _keyword_hits = sum(1 for w in _query_words if len(w) > 2 and w in _text_lower)
+            _keyword_boost = min(_keyword_hits * 0.02, 0.1)  # cap at 0.1
+            _r["combined_score"] = round(_r["combined_score"] - _keyword_boost, 4)
+        raw_results.sort(key=lambda x: x["combined_score"])
+
         # Cross-encoder re-ranking (if sentence-transformers installed)
         if HAS_RERANKER and _RERANKER and raw_results:
             pairs = [(query, r["text"]) for r in raw_results]
@@ -508,6 +557,16 @@ class MemoryStore:
                     )
                     r["ce_score"] = round(float(ce_scores[idx]), 4)
                 raw_results.sort(key=lambda x: x["combined_score"])
+
+                # Relevance gate: drop results whose raw CE score falls below the
+                # per-query-type threshold. Always keep at least 2 results.
+                _qtype = detect_query_type(query)
+                _ce_threshold = CE_THRESHOLDS.get(_qtype, CE_THRESHOLDS["default"])
+                _gated = [r for r in raw_results if r.get("ce_score", 0.0) >= _ce_threshold]
+                if len(_gated) >= 2:
+                    raw_results = _gated
+                elif len(raw_results) >= 2:
+                    raw_results = raw_results[:2]  # floor: keep best 2 even below threshold
             except Exception:
                 pass
 

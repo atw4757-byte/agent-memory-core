@@ -18,7 +18,7 @@ ForgettingPolicy — Stale detection, soft/hard delete, health scoring
 MemoryEval      — 30-query eval harness with recall/precision/answer metrics
 """
 
-from .store import MemoryStore
+from .store import MemoryStore, CE_THRESHOLDS, detect_query_type
 from .working import WorkingMemory
 from .consolidation import Consolidator
 from .graph import MemoryGraph
@@ -35,7 +35,7 @@ from .types import (
     TYPE_TO_BANK,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __all__ = [
     "MemoryStore",
     "WorkingMemory",
@@ -49,4 +49,6 @@ __all__ = [
     "EvalResult",
     "VALID_TYPES",
     "TYPE_TO_BANK",
+    "CE_THRESHOLDS",
+    "detect_query_type",
 ]
