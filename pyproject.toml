@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agent-memory-core"
+version = "0.1.0"
+description = "Agent memory that actually works: drops into any Python agent in 3 lines."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Andy Williams" },
+]
+keywords = ["ai", "agent", "memory", "chromadb", "rag", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "chromadb>=0.5.0",
+]
+
+[project.optional-dependencies]
+reranker = [
+    "sentence-transformers>=3.0.0",
+]
+graph = [
+    "networkx>=3.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov",
+    "hatchling",
+]
+
+[project.urls]
+Homepage = "https://github.com/Divergence-Router/agent-memory-core"
+Repository = "https://github.com/Divergence-Router/agent-memory-core"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_memory_core"]
+exclude = ["**/__pycache__", "**/*.pyc"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
