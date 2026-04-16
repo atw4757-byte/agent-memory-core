@@ -4,7 +4,7 @@
 
 ## The Problem
 
-Every AI memory system degrades. LangChain's buffer forgets after k turns by design. Naive vector stores drown in noise at scale — a credential from day one competes equally with every ephemeral session log you've added since. Even advanced systems like Mem0 and MemGPT accumulate without compressing. After six months of real use, they're worse than day one. The retrieval signal degrades. Contradictions stack. Stale facts surface.
+Every AI memory system degrades. LangChain's buffer forgets after 10 turns by design. Naive vector stores drown in noise at scale — a credential from day one competes equally with every ephemeral session log you've added since. Even advanced systems like Mem0 and MemGPT accumulate without compressing. After six months of real use, they're worse than day one. The retrieval signal degrades. Contradictions stack. Stale facts surface.
 
 No one has solved the core problem: memory should compound, not decay.
 
