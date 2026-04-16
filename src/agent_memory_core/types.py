@@ -104,8 +104,9 @@ class MemoryResult:
     combined_score: float
     age_days: int
     metadata: dict[str, Any] = field(default_factory=dict)
-    ce_score: Optional[float] = None   # cross-encoder score, if reranker ran
-    has_fact: bool = False             # True when an atomic fact was merged in
+    ce_score: Optional[float] = None        # cross-encoder score, if reranker ran
+    has_fact: bool = False                  # True when an atomic fact was merged in
+    retrieval_mode: Optional[str] = None    # "lightweight", "standard", or "full"
 
     def __repr__(self) -> str:  # noqa: D105
         preview = self.text[:80].replace("\n", " ")

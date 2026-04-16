@@ -425,8 +425,73 @@ class MemoryStore:
         Returns
         -------
         list[MemoryResult]: Results sorted by combined_score (lower = better).
+            Each result includes a ``retrieval_mode`` field: "lightweight",
+            "standard", or "full", indicating which scoring policy was applied.
+
+        Notes
+        -----
+        Retrieval mode is selected automatically based on corpus size:
+
+        - **lightweight** (<100 chunks): pure normalized vector distance.
+          No salience, no recency weighting, no keyword boost, no cross-encoder.
+          Salience/keyword signals have no variance to exploit on tiny corpora —
+          raw cosine similarity wins. Consolidated summaries are penalised (+0.05)
+          to prefer raw source chunks.
+
+        - **standard** (100-4999 chunks): light salience + recency weighting
+          (sim 0.7 / rec 0.15 / sal 0.15), keyword boost on, cross-encoder
+          enabled only when corpus > 200, no CE relevance gate.
+
+        - **full** (5000+ chunks): everything on. Query-intent-adaptive weights
+          (sim 0.5 / rec 0.2 / sal 0.3 baseline), keyword boost, cross-encoder
+          re-ranking, CE relevance gate.
         """
         collection = self._get_collection()
+
+        # ------------------------------------------------------------------
+        # Adaptive retrieval policy — chosen by corpus size.
+        # On small corpora salience/reranking/keyword-boost all hurt because
+        # there is not enough signal variance. Pure vector wins on tiny sets;
+        # complexity is added only once the corpus is large enough to benefit.
+        # ------------------------------------------------------------------
+        corpus_size = collection.count()
+
+        if corpus_size < 100:
+            # LIGHTWEIGHT: pure vector, no extras
+            retrieval_k = max(min(n * 2, corpus_size), 1)
+            use_salience = False
+            use_reranker = False
+            use_keyword_boost = False
+            use_ce_gate = False
+            sim_weight = 1.0
+            rec_weight = 0.0
+            sal_weight = 0.0
+            retrieval_mode = "lightweight"
+        elif corpus_size < 5000:
+            # STANDARD: light salience, optional reranker
+            retrieval_k = max(n * 3, 15)
+            use_salience = True
+            use_reranker = HAS_RERANKER and corpus_size > 200
+            use_keyword_boost = True
+            use_ce_gate = False
+            sim_weight = 0.7
+            rec_weight = 0.15
+            sal_weight = 0.15
+            retrieval_mode = "standard"
+        else:
+            # FULL: everything on
+            retrieval_k = max(n * 4, 20)
+            use_salience = True
+            use_reranker = HAS_RERANKER
+            use_keyword_boost = True
+            use_ce_gate = True
+            sim_weight = 0.5
+            rec_weight = 0.2
+            sal_weight = 0.3
+            retrieval_mode = "full"
+
+        if corpus_size == 0:
+            return []
 
         # Build ChromaDB where clause
         base_filters = []
@@ -454,15 +519,9 @@ class MemoryStore:
         elif len(base_filters) == 1:
             where = base_filters[0]
 
-        # Retrieve wider candidate pool for re-ranking
-        retrieval_k = max(n * 4, 20)
-        total = collection.count()
-        if total == 0:
-            return []
-
         kwargs: dict[str, Any] = {
             "query_texts": [query],
-            "n_results": min(retrieval_k, total),
+            "n_results": min(retrieval_k, corpus_size),
         }
         if where:
             kwargs["where"] = where
@@ -483,8 +542,12 @@ class MemoryStore:
         if not raw or not raw["ids"] or not raw["ids"][0]:
             return []
 
-        # Adaptive weights from query intent
-        w_sim, w_rec, w_sal = _detect_query_weights(query)
+        # In lightweight mode use fixed weights; otherwise detect from query intent.
+        if retrieval_mode == "lightweight":
+            w_sim, w_rec, w_sal = sim_weight, rec_weight, sal_weight
+        else:
+            w_sim, w_rec, w_sal = _detect_query_weights(query)
+
         graph = self._load_graph_connectivity()
 
         raw_results: list[dict] = []
@@ -497,14 +560,7 @@ class MemoryStore:
             if not include_archived and metadata.get("consolidated_into"):
                 continue
 
-            recency = compute_recency(metadata.get("date", ""), chunk_t)
-            sal = compute_salience(chunk_t, metadata, graph)
             norm_distance = min(distance / 2.0, 1.0)
-            combined = (
-                w_sim * norm_distance
-                + w_rec * (1.0 - recency)
-                + w_sal * (1.0 - sal)
-            )
 
             date_str = metadata.get("date", "")
             age_days = 0
@@ -514,6 +570,25 @@ class MemoryStore:
                     age_days = max((datetime.now() - mem_date).days, 0)
                 except (ValueError, TypeError):
                     age_days = 30
+
+            if retrieval_mode == "lightweight":
+                # Pure normalized distance — no salience, no recency weighting.
+                recency = 0.0
+                sal = 0.0
+                combined = norm_distance
+
+                # Demote consolidated summaries: prefer raw source chunks on
+                # small corpora where derived summaries add noise, not signal.
+                if metadata.get("source_file") == "consolidation":
+                    combined += 0.05
+            else:
+                recency = compute_recency(date_str, chunk_t)
+                sal = compute_salience(chunk_t, metadata, graph) if use_salience else 0.5
+                combined = (
+                    w_sim * norm_distance
+                    + w_rec * (1.0 - recency)
+                    + w_sal * (1.0 - sal)
+                )
 
             raw_results.append({
                 "id": doc_id,
@@ -528,6 +603,7 @@ class MemoryStore:
                 "date": date_str,
                 "metadata": metadata,
                 "has_fact": False,
+                "retrieval_mode": retrieval_mode,
             })
 
         raw_results.sort(key=lambda x: x["combined_score"])
@@ -535,16 +611,19 @@ class MemoryStore:
         # BM25-style keyword boost: reward chunks that contain literal query words.
         # Applied before cross-encoder so CE sees pre-boosted ordering.
         # Lower combined_score = better, so we subtract the boost amount.
-        _query_words = set(query.lower().split())
-        for _r in raw_results:
-            _text_lower = _r["text"].lower()
-            _keyword_hits = sum(1 for w in _query_words if len(w) > 2 and w in _text_lower)
-            _keyword_boost = min(_keyword_hits * 0.02, 0.1)  # cap at 0.1
-            _r["combined_score"] = round(_r["combined_score"] - _keyword_boost, 4)
-        raw_results.sort(key=lambda x: x["combined_score"])
+        # Skipped in lightweight mode — pure vector distance is enough.
+        if use_keyword_boost:
+            _query_words = set(query.lower().split())
+            for _r in raw_results:
+                _text_lower = _r["text"].lower()
+                _keyword_hits = sum(1 for w in _query_words if len(w) > 2 and w in _text_lower)
+                _keyword_boost = min(_keyword_hits * 0.02, 0.1)  # cap at 0.1
+                _r["combined_score"] = round(_r["combined_score"] - _keyword_boost, 4)
+            raw_results.sort(key=lambda x: x["combined_score"])
 
-        # Cross-encoder re-ranking (if sentence-transformers installed)
-        if HAS_RERANKER and _RERANKER and raw_results:
+        # Cross-encoder re-ranking — only when policy allows it.
+        # Skipped in lightweight mode (tiny corpus) and standard mode below 200 chunks.
+        if use_reranker and _RERANKER and raw_results:
             pairs = [(query, r["text"]) for r in raw_results]
             try:
                 ce_scores = _RERANKER.predict(pairs)
@@ -560,13 +639,15 @@ class MemoryStore:
 
                 # Relevance gate: drop results whose raw CE score falls below the
                 # per-query-type threshold. Always keep at least 2 results.
-                _qtype = detect_query_type(query)
-                _ce_threshold = CE_THRESHOLDS.get(_qtype, CE_THRESHOLDS["default"])
-                _gated = [r for r in raw_results if r.get("ce_score", 0.0) >= _ce_threshold]
-                if len(_gated) >= 2:
-                    raw_results = _gated
-                elif len(raw_results) >= 2:
-                    raw_results = raw_results[:2]  # floor: keep best 2 even below threshold
+                # Only applied in full mode (use_ce_gate=True).
+                if use_ce_gate:
+                    _qtype = detect_query_type(query)
+                    _ce_threshold = CE_THRESHOLDS.get(_qtype, CE_THRESHOLDS["default"])
+                    _gated = [r for r in raw_results if r.get("ce_score", 0.0) >= _ce_threshold]
+                    if len(_gated) >= 2:
+                        raw_results = _gated
+                    elif len(raw_results) >= 2:
+                        raw_results = raw_results[:2]  # floor: keep best 2 even below threshold
             except Exception:
                 pass
 
@@ -603,6 +684,7 @@ class MemoryStore:
                 metadata=r["metadata"],
                 ce_score=r.get("ce_score"),
                 has_fact=r.get("has_fact", False),
+                retrieval_mode=r.get("retrieval_mode"),
             )
             for r in raw_results
         ]
