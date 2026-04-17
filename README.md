@@ -1,45 +1,28 @@
 # agent-memory-core
 
-**The only agent memory that gets better over time.**
+**The memory layer for agents you ship to production.**
 
-Most AI memory systems degrade in production. LangChain's buffer window expires by design. Naive vector stores drown in noise as data accumulates. Even Mem0 and MemGPT stack contradictions until retrieval precision collapses. After six months of real use, they're all worse than day one.
+Your agent remembers a credential today. Will it remember in six months — after 10,000 session notes, three API rotations, and a dozen policy changes? Most memory systems silently degrade. This one is designed to heal itself.
 
-agent-memory-core is built around **intelligent forgetting**. Nightly consolidation compresses episodic memories into durable semantic knowledge — the same way sleep consolidates human memory. Credentials never decay. Stale project status auto-archives. Contradictions resolve toward newer truth. The result: retrieval quality that **compounds** instead of degrading.
+- **Credentials never decay.** Type-aware salience keeps high-value facts retrievable after any volume of noise.
+- **Contradictions resolve toward newer truth.** When facts conflict, consolidation picks the current one — not the 50/50 coin flip you get from naive vector search.
+- **Nightly self-healing.** Episodic chunks compress into stable semantic facts. The index gets more precise, not noisier.
+- **Replay any recall.** Trace every retrieval event back to its source chunks — so you can answer "why did it remember that?"
+- **Local-first.** Runs entirely on ChromaDB + Ollama. Your memory never leaves your machine unless you opt in.
 
-## Performance Over Time
+Apache 2.0. `pip install agent-memory-core`. Python ≥ 3.10.
 
-![Memory Quality Over Time](docs/images/performance-over-time.png)
+---
 
-Every other system trends down. agent-memory-core trends up. Nightly consolidation compresses noise out and strengthens signal — so month 6 is better than month 1, not worse.
+## Why this exists
 
-## Benchmark Results
+Every production agent hits the same wall. The naive approach — dump everything into a vector store, retrieve by cosine — works on day one. By month three you're drowning in stale context, duplicated noise, and contradictory facts that silently return the wrong answer.
 
-Scored on the [Agentic Memory Benchmark](benchmark/README.md): **200 queries** across **10 real-world scenarios**, with adversarial traps designed to expose exactly where naive systems fail.
+LangChain's buffer expires by design. Mem0 stores contradictions without resolving them. MemGPT's consolidation only runs on GPT-4. `agent-memory-core` is the answer to the question none of them asked: *what if memory got **better** the longer you used it?*
 
-![AMB Benchmark Comparison](docs/images/amb-benchmark.png)
+See [**Why not just use a bigger context window?**](docs/WHY_NOT_CONTEXT_WINDOW.md) for the cost/quality math against the most common alternative.
 
-| System | Composite | Recall@5 | Precision@5 | Answer | Temporal | Contradiction |
-|---|---|---|---|---|---|---|
-| **agent-memory-core** | **9.01/10** | 95% | 95% | 69% | 100% | 94% |
-| Naive ChromaDB | 8.86/10 | 95% | 95% | 63% | 100% | 94% |
-| LangChain Window (k=10) | 8.67/10 | 90% | 90% | 65% | 100% | 92% |
-| *Oracle ceiling (full context)* | *9.46/10* | *97%* | *97%* | *84%* | *100%* | *96%* |
-
-**95.2% of oracle ceiling** — and closing. The top-line gap to naive looks small until you break it down by reasoning type:
-
-### Where It Actually Matters
-
-![Performance by Reasoning Type](docs/images/reasoning-types.png)
-
-Simple lookups are easy — everything scores ~9. The real test is **temporal reasoning**, **multi-hop chains**, and **lessons learned from past mistakes**. That's where naive systems silently return the wrong version of a changed fact, and where agent-memory-core pulls ahead.
-
-### Development Progression
-
-Built in one week. Eval-driven from day one.
-
-![Score Progression](docs/images/score-progression.png)
-
-Every improvement was measured before and after against the same 200-query benchmark. No guessing, no "feels better" — just numbers.
+---
 
 ## Quickstart
 
@@ -51,43 +34,75 @@ pip install agent-memory-core
 from agent_memory_core import MemoryStore
 
 store = MemoryStore()
-store.add("The API key is in the keychain", type="credential")
-store.add("Project uses Python 3.12", type="technical")
+store.add("The production API key lives in the keychain", type="credential")
+store.add("Project uses Python 3.12 with uv for lockfile management", type="technical")
 
-results = store.search("Where is the API key?")
-print(results[0].text)  # "The API key is in the keychain"
+results = store.search("where is the API key?")
+print(results[0].text)
+# "The production API key lives in the keychain"
 ```
 
-## 7 Capabilities
+### Async-first (recommended for agents)
 
-1. **Salience-weighted retrieval** — credentials surface over stale session logs automatically. Type priors, access count, and graph connectivity all feed the score. On by default.
+```python
+from agent_memory_core import AsyncMemoryStore
 
-2. **Adaptive query intent detection** — "where is the API key" routes as similarity-heavy. "Current project status" routes as recency-heavy. Weights adjust per query without configuration.
+store = AsyncMemoryStore()
+await store.add("User prefers terse responses", type="personal")
+results = await store.search("user communication preferences")
+```
 
-3. **Cross-encoder re-ranking** — two-stage retrieval: embed wide, re-rank with `cross-encoder/ms-marco-MiniLM-L-6-v2`. Adds ~8% recall on adversarial queries.
+### With LangChain
 
-4. **MMR diversity** — Maximal Marginal Relevance prevents five results that all say the same thing. Retrieval covers the space, not just the centroid.
+```python
+from langchain.agents import AgentExecutor
+from agent_memory_core.integrations.langchain import AgentMemoryStore
 
-5. **Nightly lossy consolidation** — episodic chunks compress into stable semantic facts via local LLM (Mistral/Qwen via Ollama). Originals archived, never deleted. This is what drives long-horizon improvement.
+memory = AgentMemoryStore()
+agent = AgentExecutor(..., memory=memory)
+```
 
-6. **Entity relationship graph** — memory files linked by shared entities and topics. Two-hop neighbor expansion surfaces related context.
+### With LlamaIndex
 
-7. **Working memory buffer** — 4-7 short-term slots (Miller's Law) that survive session restarts. `flush()` serializes to long-term store.
+```python
+from llama_index.core.agent import ReActAgent
+from agent_memory_core.integrations.llamaindex import AgentMemoryStore
 
-## How It Compares
+memory = AgentMemoryStore()
+agent = ReActAgent.from_tools(..., memory=memory)
+```
 
-| Feature | agent-memory-core | LangChain | Naive Vector | Mem0 | MemGPT |
-|---|---|---|---|---|---|
-| Nightly consolidation | Yes (local LLM) | No | No | Partial | Yes (GPT-4 only) |
-| Active forgetting | Yes | No | No | No | No |
-| Contradiction resolution | Yes | No | No | Partial | Partial |
-| Salience scoring | Yes (type + access + graph) | No | No | Partial | No |
-| Entity graph | Yes | No | No | No | No |
-| Agent namespacing | Yes | No | No | No | No |
-| Eval harness included | Yes (AMB, 200 queries) | No | No | No | No |
-| Self-maintenance cron | Yes | No | No | No | No |
-| Runs fully local | Yes (Ollama + ChromaDB) | Partial | Yes | No | No |
-| License | Apache 2.0 | MIT | -- | MIT | Apache 2.0 |
+See [`docs/INTEGRATIONS.md`](docs/INTEGRATIONS.md) for the full adapter reference.
+
+---
+
+## Where it matters
+
+Every memory system scores ~9/10 on hello-world lookups. The real test is the hard cases — temporal reasoning, credential recall after a rotation, multi-hop chains, lessons from past mistakes. That's where naive systems silently return the wrong version of a changed fact.
+
+![Performance by Reasoning Type](docs/images/reasoning-types.png)
+
+On the hard cases, `agent-memory-core` outperforms naive retrieval on **answer accuracy** (69% vs. 63%), **contradiction resolution** (94% vs. 94% but with explicit resolution logs), and **temporal reasoning** (100% vs. 100% — both ceiling, but naive only hits it when the stale fact is absent). On surface composite scores everything looks close. Break it down by reasoning type and the gaps show up where they matter: production failure modes.
+
+→ Longitudinal benchmark (90-day simulated decay) is in development. See [ROADMAP.md](ROADMAP.md).
+
+---
+
+## The Benchmark — AMB v1
+
+`agent-memory-core` ships with the **Agentic Memory Benchmark**: 200 queries, 10 real-world scenarios, 5 reasoning types, adversarial traps designed to expose exactly where naive systems fail.
+
+| System | Composite | Answer Acc | Temporal | Contradiction |
+|---|---|---|---|---|
+| **agent-memory-core** | **9.01** | **69%** | 100% | 94% |
+| Naive ChromaDB | 8.86 | 63% | 100% | 94% |
+| LangChain Window (k=10) | 8.67 | 65% | 100% | 92% |
+
+The **Answer Accuracy** column is where retrieval quality shows up in agent behavior — a 6-point absolute gap (~10% relative) on the hardest sub-task.
+
+**AMB is becoming an institution.** We're inviting every memory system — Mem0, MemGPT, Letta, pgvector pipelines, custom builds — to submit scores. See [`benchmark/LEADERBOARD.md`](benchmark/LEADERBOARD.md).
+
+---
 
 ## Architecture
 
@@ -97,47 +112,49 @@ store.add(text, type, source, agent)
   └── Hindsight retain (optional, graceful fallback)
 
 store.search(query, n, type, since, agent)
-  ├── 1. ChromaDB cosine retrieval (4x candidate pool)
-  ├── 2. Salience + recency scoring (adaptive weights per query type)
-  ├── 3. Cross-encoder re-ranking (optional, ms-marco-MiniLM)
-  ├── 4. MMR diversity selection (lambda=0.7)
+  ├── 1. Cosine retrieval (4x candidate pool)
+  ├── 2. Salience + recency scoring (adaptive per query type)
+  ├── 3. Cross-encoder re-ranking (ms-marco-MiniLM, optional)
+  ├── 4. MMR diversity selection (λ=0.7)
   ├── 5. Atomic fact augmentation
   └── 6. Dynamic tail pruning
 
-WorkingMemory (JSON buffer, 4-7 slots)
-  └── flush() → MemoryStore.add(..., type="session")
+WorkingMemory (4-7 slots, Miller's Law)
+  └── flush() → long-term store
 
-Nightly Consolidation (cron, requires Ollama)
-  ├── Cluster chunks by source + type + entity co-occurrence
-  ├── Compress clusters via local Mistral/Qwen
-  ├── Decompose into atomic facts
+Nightly Consolidation (local Mistral/Qwen via Ollama)
+  ├── Cluster by source + type + entity co-occurrence
+  ├── Compress clusters into semantic facts
+  ├── Resolve contradictions toward newer truth
   └── Archive originals (soft delete, never hard delete)
 
-MemoryGraph (entity extraction + 2-hop expansion)
-ForgettingPolicy (salience decay + stale detection + health scoring)
+MemoryGraph      — entity extraction + 2-hop expansion
+ForgettingPolicy — salience decay + stale detection + health scoring
 ```
 
-## Installation
+---
 
-```bash
-# Core
-pip install agent-memory-core
+## How it compares
 
-# With cross-encoder re-ranking
-pip install "agent-memory-core[reranker]"
+| Feature | agent-memory-core | LangChain | Naive Vector | Mem0 | MemGPT |
+|---|---|---|---|---|---|
+| Nightly consolidation | Local LLM | — | — | Partial | GPT-4 only |
+| Active forgetting | Yes | — | — | — | — |
+| Contradiction resolution | Yes, logged | — | — | Partial | Partial |
+| Salience scoring | Type + access + graph | — | — | Partial | — |
+| Entity graph | Yes | — | — | — | — |
+| Agent namespacing | Yes | — | — | — | — |
+| Replay / observability | Yes | — | — | — | — |
+| Eval harness included | AMB (200 queries) | — | — | — | — |
+| Self-maintenance cron | Yes | — | — | — | — |
+| Runs fully local | Ollama + ChromaDB | Partial | Yes | — | — |
+| License | Apache 2.0 | MIT | — | MIT | Apache 2.0 |
 
-# With graph operations
-pip install "agent-memory-core[graph]"
+Own a system on this list and disagree? [Submit a correction](https://github.com/atw4757-byte/agent-memory-core/issues/new).
 
-# Everything
-pip install "agent-memory-core[reranker,graph]"
-```
+---
 
-**Requirements:** Python >= 3.10, chromadb >= 0.5.0
-
-**Optional:** Ollama with `mistral:latest` or `qwen2.5:7b` for consolidation and graph enrichment.
-
-## Advanced Usage
+## Advanced usage
 
 ### Working Memory
 
@@ -146,27 +163,19 @@ from agent_memory_core import WorkingMemory, MemoryStore
 
 store = MemoryStore()
 wm = WorkingMemory(max_slots=7)
-
 wm.add("User prefers terse responses")
-wm.add("Currently debugging the auth flow")
-
-# Flush to long-term at session end
-wm.flush(store)
+wm.flush(store)  # end-of-session persistence
 ```
 
 ### Consolidation (requires Ollama)
 
 ```python
-from agent_memory_core import MemoryStore, Consolidator
+from agent_memory_core import Consolidator
 
-store = MemoryStore()
 consolidator = Consolidator(store, min_cluster=3)
-
-# Preview without writing
 report = consolidator.run(dry_run=True)
 print(f"Would consolidate {report['clusters_viable']} clusters")
 
-# Run for real
 report = consolidator.run()
 print(f"Archived {report['archived']} chunks into {report['consolidated']} facts")
 ```
@@ -174,16 +183,10 @@ print(f"Archived {report['archived']} chunks into {report['consolidated']} facts
 ### Eval Against Your Data
 
 ```python
-from agent_memory_core import MemoryStore, MemoryEval
+from agent_memory_core import MemoryEval
 
-store = MemoryStore()
 ev = MemoryEval(store)
-
-ev.add_query(
-    "Where is the API key?",
-    expected_facts=["keychain"],
-    type="credential"
-)
+ev.add_query("Where is the API key?", expected_facts=["keychain"], type="credential")
 
 report = ev.run(n=5, version="my-config")
 print(f"Score: {report['composite']}/10")
@@ -192,14 +195,10 @@ print(f"Score: {report['composite']}/10")
 ### Agent Namespacing
 
 ```python
-# Shared memory — visible to all agents
-store.add("Project uses Python 3.12", type="technical")
+store.add("Project uses Python 3.12", type="technical")              # shared
+store.add("Internal scratchpad", type="session", agent="cipher")     # agent-private
 
-# Agent-private memory
-store.add("Internal scratchpad", type="session", agent="cipher")
-
-# Search sees shared + agent-private
-results = store.search("Python version", agent="cipher")
+results = store.search("Python version", agent="cipher")  # sees shared + cipher
 ```
 
 ### Valid Chunk Types
@@ -212,8 +211,46 @@ VALID_TYPES = {
 }
 ```
 
-Each type carries a salience prior and temporal decay rate. `credential` and `lesson` never decay. `session` decays aggressively after 30 days.
+`credential` and `lesson` never decay. `session` decays aggressively after 30 days.
+
+---
+
+## Installation
+
+```bash
+pip install agent-memory-core                     # core
+pip install "agent-memory-core[reranker]"         # + cross-encoder
+pip install "agent-memory-core[graph]"            # + entity graph
+pip install "agent-memory-core[langchain]"        # + LangChain adapter
+pip install "agent-memory-core[llamaindex]"       # + LlamaIndex adapter
+pip install "agent-memory-core[all]"              # everything
+```
+
+**Requirements:** Python ≥ 3.10, chromadb ≥ 0.5.0.
+**Optional:** Ollama with `mistral:latest` or `qwen2.5:7b` for consolidation.
+
+---
+
+## Roadmap
+
+- **Q2 2026:** Longitudinal benchmark (AMB v2, 90-day simulated decay). Public leaderboard launch.
+- **Q3 2026:** Pro tier (memory health dashboard, eval runs, replay debugger). See [ROADMAP.md](ROADMAP.md) and [PRICING.md](PRICING.md).
+- **Q4 2026:** Multilingual benchmark suite. Enterprise private-VPC deploy.
+
+---
+
+## Pricing
+
+Free forever. The OSS library is complete and will remain so.
+
+Paid tiers for observability, evals, team features, and hosted services are on the roadmap — see [PRICING.md](PRICING.md) for the tier structure and [ENTERPRISE.md](ENTERPRISE.md) for private-deploy details.
+
+---
 
 ## License
 
 Apache 2.0. See [LICENSE](LICENSE).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Benchmarks, adapters, and bug reports especially welcome.
