@@ -118,7 +118,7 @@ class MemoryEval:
             else Path.home() / ".agent-memory-core" / "eval-history.json"
         )
         self._history_path.parent.mkdir(parents=True, exist_ok=True)
-        self._queries: list[dict] = list(queries) if queries else list(DEFAULT_EVAL_QUERIES)
+        self._queries: list[dict] = list(queries) if queries is not None else list(DEFAULT_EVAL_QUERIES)
 
     # ------------------------------------------------------------------
     # Query management
