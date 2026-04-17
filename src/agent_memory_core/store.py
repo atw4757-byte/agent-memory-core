@@ -813,6 +813,32 @@ class MemoryStore:
                 return len(results["ids"])
         return 0
 
+    def delete_by_source(self, source: str) -> int:
+        """Delete all chunks whose ``source_file`` metadata equals *source*.
+
+        Convenience wrapper used by framework adapters (e.g. the LangChain and
+        LlamaIndex integrations) to clear their own entries without touching
+        chunks written by other sources.
+
+        Returns the number of chunks removed.
+        """
+        return self.forget(source=source)
+
+    def delete_by_agent(self, agent: str) -> int:
+        """Delete all chunks tagged with the given *agent* namespace.
+
+        Returns the number of chunks removed.
+        """
+        collection = self._get_collection()
+        try:
+            results = collection.get(where={"agent": {"$eq": agent}})
+            if results and results["ids"]:
+                collection.delete(ids=results["ids"])
+                return len(results["ids"])
+        except Exception:
+            pass
+        return 0
+
     def status(self) -> dict:
         """Return DB stats: total chunk count, breakdown by type, disk size, Hindsight health."""
         collection = self._get_collection()
