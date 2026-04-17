@@ -1,6 +1,8 @@
 # agent-memory-core
 
-**The memory layer for agents you ship to production.**
+**Reasoning has no horizon without memory.**
+
+Frontier models keep getting better at thinking. They are not getting better at remembering. Every long-horizon agent hits the same wall — memory that decays, contradicts itself, and buries the signal. This is the memory layer that survives the horizon.
 
 Your agent remembers a credential today. Will it remember in six months — after 10,000 session notes, three API rotations, and a dozen policy changes? Most memory systems silently degrade. This one is designed to heal itself.
 
