@@ -49,6 +49,7 @@ See [PRICING.md](PRICING.md) for the full tier structure. [ENTERPRISE.md](ENTERP
 - **AMB hidden challenge set** — protect against scenario-specific tuning
 - **Consolidation fine-tunes** — ship tuned Mistral/Qwen LoRAs specifically for consolidation quality
 - **Replay debugger — collaborative** — multi-user debugging sessions on shared recall events
+- **Explore: discipline/routines layer as companion library** — adoption-gated; framed as "the other side of the same problem" (memory + discipline). No commitment, watch item only.
 
 ---
 
