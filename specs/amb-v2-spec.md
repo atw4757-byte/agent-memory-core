@@ -1,14 +1,30 @@
 ---
 title: "AMB v2 — Longitudinal Agentic Memory Benchmark"
-status: Phase 1 DRAFT — awaiting Phase 1.5 adversarial review
+status: Phase 1 REVISED — adversarial critique incorporated (C1)
 created: 2026-04-18
+revised: 2026-04-18 14:30 ET
 spec_owner: Archon
 reviewer: Andy
-adversary: Cipher (via archon-adversary)
+adversary: Cipher / Gemini 2.5 Pro
+adversary_review: Memory/adversary-reviews/2026-04-18_amb-v2-adversary.md
 supersedes: none (extends AMB v1)
-next_phase: Phase 1.5 Adversarial Review
+next_phase: Phase 2 Plan
 target_launch: 2026-05-15 (public leaderboard), aligning with roadmap commitment
 ---
+
+## Phase 1.5 review summary
+
+Adversarial review by Cipher / Gemini 2.5 Pro (verdict 3/10) flagged three legitimate critiques. All three are incorporated into this revision:
+
+1. **Privileged operations (`consolidate()` is a backdoor for the home-team adapter)** → fixed via D10 (Stock vs Tuned mode reporting).
+2. **Synthetic data is not a valid proxy for real usage** → mitigated via D12 (v2.1 real-data validation track), publicly committed in v2.0 README.
+3. **Author bias on held-out set** → fixed via D5 update (Cipher authors held-out scenarios from public spec only).
+
+Plus: distribution targets (30% updates, 45% noise) are guesses → addressed via D11 (sensitivity analysis across 4 noise rates).
+
+Rejected: Gemini's "scrap synthetic, use Wikipedia for v2.0" — would push launch past 2026-05-15. Pre-registration accusation of "theater" rejected.
+
+Full review and dispositions: `Memory/adversary-reviews/2026-04-18_amb-v2-adversary.md`.
 
 ## Context
 
@@ -105,9 +121,9 @@ Two derived scores:
 AMB v1 has 10 scenarios. AMB v2 uses:
 
 - **Public set:** 7 of the v1 scenarios, temporally extended (each rewritten so that the 5–8 sessions are spread across 90 days instead of all front-loaded).
-- **Held-out set:** 3 new scenarios, authored for v2, never published. Used by us to score any adapter that gets submitted; only composite numbers published, raw held-out queries never.
+- **Held-out set:** 3 new scenarios, **authored by Cipher / Gemini 2.5 Pro using the public spec only**, never seen the agent-memory-core implementation. The exact prompt used for held-out generation is committed verbatim to `PREREGISTERED.md`. The held-out scenarios are stored encrypted in `held_out/`, decrypted at run time only. Used by us to score any adapter that gets submitted; only composite numbers published, raw held-out queries never.
 
-Total: 10 scenarios, same N as v1.
+Total: 10 scenarios, same N as v1. Authorship split: 7 Archon (extended from v1), 3 Cipher (de-novo from public spec).
 
 Each scenario now carries a **timeline** field: a list of `(day, event)` tuples describing when updates, additions, and noise happen. Authoring is manual; LLM-generated timelines reliably lack the adversarial structure we need.
 
@@ -148,15 +164,54 @@ Before any adapter runs publicly, commit `benchmark/amb_v2/PREREGISTERED.md` con
 
 Results runs happen *after* this commit. Any methodology change post-registration bumps the version to v2.1 and triggers a 60-day grace period.
 
-### D9. Chart generation
+### D10. Stock vs Tuned mode (fairness fix)
+
+`consolidate()` is a privileged operation — agent-memory-core uses it; LangChain `ConversationSummaryBufferMemory` and stock LlamaIndex memory do not. Running with consolidation enabled gives the home-team adapter a "thinking step" that out-of-the-box adapters lack.
+
+Therefore every adapter is run in **two modes** and both numbers are published side-by-side:
+
+- **Stock** — `consolidate()` is a no-op. Tests the adapter's out-of-the-box behavior.
+- **Tuned** — `consolidate()` is invoked once per simulated day. Adapters that don't implement consolidation no-op silently. Tests the adapter when given the same daily compute budget as agent-memory-core.
+
+The composite-metric ranking is published per-mode. There is **no combined ranking** that mixes the two. The decay-curve chart shows two lines per adapter (`stock` solid, `tuned` dashed), color-coded by adapter. This is honest: it surfaces where consolidation is the wedge and where it isn't, without hiding either result.
+
+Adapter must declare in `metadata.json` whether it implements consolidation. Lying disqualifies the run from the leaderboard.
+
+### D11. Sensitivity analysis on noise distribution
+
+The distribution targets in D1 (30% updates / 45% noise) are calibration parameters, not measurements from real corpora. To prevent the benchmark from being a fragile artifact of a single noise rate, the full benchmark is run at **four noise rates: {20%, 30%, 45%, 60%}** (other percentages adjust proportionally).
+
+**Stability requirement:** the top-3 adapter ranking on Quality@90 (per mode) must hold across at least 3 of 4 noise rates. If the ranking flips more than once, the headline number is flagged "unstable" and the benchmark itself is re-calibrated before publication.
+
+The 4 noise-rate runs are reported individually in `decay-table.md`. The headline chart uses noise=30% (the central case).
+
+Compute cost: 4 noise rates × 2 modes × 4 adapters × 90 days × 200 queries × 6 checkpoints. Bosgame can absorb this within the 6-hour-per-adapter budget if checkpoints are parallelized across noise rates.
+
+### D12. Real-data validation track (v2.1 commitment)
+
+The v2.0 benchmark is synthetic. This is its single largest credibility risk. To pre-empt the dismissal, v2.0 ships with a public commitment in `README.md`:
+
+> *AMB v2.0 ships with synthetic scenarios. AMB v2.1, due within 30 days of v2.0 launch, adds a parallel "real-data validation track" derived from a longitudinal public corpus. If the synthetic-set adapter ranking diverges by more than 1 position from the real-data ranking, AMB v2.0 results will be marked "invalidated, re-calibration in progress" until the synthetic generator is fixed.*
+
+Candidate corpora (decision deferred to Phase 2):
+- Wikipedia full edit history of a single moderately-complex article (e.g. a public company, a long-running TV show)
+- SEC filings of a single public company over 5+ years
+- Issue/PR timeline of a stable open-source repository
+
+Selection criterion: organic temporal distribution + verifiable ground truth at multiple time points.
+
+This commitment is publicly visible from day one. It exists to make the v2.0 launch defensible: synthetic-only is the current limitation, but the path to real-data validation is on the calendar, not aspirational.
+
+### D13. Chart generation
 
 Component: `benchmark/amb_v2/chart.py`.
 
-Inputs: all `*-seed*.json` in `results/`.
+Inputs: all `*-seed*.json` in `results/` (across 4 noise rates × 2 modes × 4 adapters).
 Outputs:
-- `decay-curves.svg` — primary marketing asset. One line per adapter, x=day, y=Quality.
+- `decay-curves.svg` — primary marketing asset. Two lines per adapter (stock solid, tuned dashed), x=day, y=Quality. Headline noise rate: 30%.
 - `decay-curves.png` — for embedding in the website.
-- `decay-table.md` — machine-generated markdown with per-checkpoint + AUC.
+- `decay-table.md` — machine-generated markdown with per-checkpoint + AUC, broken out by noise rate and mode.
+- `sensitivity-grid.svg` — secondary chart: 4 noise rates as small multiples, showing ranking stability.
 
 Matplotlib + no seaborn (avoid heavy deps for library consumers).
 
@@ -247,6 +302,10 @@ Coverage target: ≥ 90% for simulator + metrics + harness. Adapters tested beha
 | R5. Composite formula weighting is arbitrary | MEDIUM | Report all 4 sub-metrics individually, not only composite. Let readers re-weight. |
 | R6. Public claim of "improves with age" could be false | HIGH | Spec explicitly does NOT claim agent-memory-core wins. The chart shows what it shows. If we lose, we publish anyway. |
 | R7. Someone tunes to our public scenarios | MEDIUM | Held-out set + spec-pinned methodology + 60-day grace on changes |
+| R8. Synthetic-only is dismissed as a vanity metric | HIGH | D12 commits to real-data validation in v2.1 within 30 days. v2.0 README explicitly acknowledges the limitation. |
+| R9. `consolidate()` is a backdoor for the home-team adapter | HIGH | D10 — every adapter run in stock + tuned modes, both published, no combined ranking |
+| R10. Author bias on held-out set | HIGH | D5 — Cipher / Gemini 2.5 Pro authors held-out scenarios from public spec only; generation prompt committed verbatim to PREREGISTERED.md |
+| R11. Fixed noise distribution makes results brittle | MEDIUM | D11 — sensitivity analysis across 4 noise rates {20, 30, 45, 60}%; ranking instability triggers re-calibration |
 
 ## Dependencies + blockers
 
@@ -265,20 +324,37 @@ Coverage target: ≥ 90% for simulator + metrics + harness. Adapters tested beha
 - Phase 6 (Alpha results): full run, chart, commit alpha
 - **Target timeline:** 5 focused days of work, gated by Andy approval at Phase 2
 
-## Open questions (to resolve in Phase 1.5)
+## Open questions
 
-1. **Should the composite weights be the same as v1 (0.25/0.20/0.25/0.15/0.15)?** Spec currently proposes 0.40/0.30/0.15/0.15 — different from v1 because v2 has different sub-metrics (no precision, no recall). Need reviewer check that this framing is principled, not opportunistic.
-2. **Is 6 checkpoints enough, or should we sample at every 7 days (14 checkpoints)?** More checkpoints = smoother curves but 2x query load.
-3. **Held-out scenario count: 3 of 10, or 5 of 10?** More held-out = more overfitting resistance but less public transparency.
-4. **Do we allow adapters to opt out of consolidate()?** Currently yes. Some reviewers may argue this favors agent-memory-core (which opts in).
-5. **Should the pre-registration include our *predicted* numbers for each adapter?** Yes per D8, but this requires us to publish a prediction we may lose on.
-6. **Ingestion budget per simulated day — cap at 200 chunks/day?** Burstier distributions might be more realistic but hurt reproducibility.
+### Resolved in Phase 1.5
+
+1. ~~**Composite weights**~~ → KEEP 0.40/0.30/0.15/0.15. Sub-metrics differ from v1; weights reflect that contradictions and answer-accuracy carry the commercial argument. All 4 sub-metrics still reported individually so reviewers can re-weight.
+2. ~~**6 checkpoints vs 14**~~ → KEEP 6. Smoother curves not worth 2x query load; we already have AUC computed via trapezoid.
+3. ~~**3 vs 5 held-out scenarios**~~ → KEEP 3 (now Cipher-authored per D5 update). Stronger fairness fix than larger held-out count.
+4. ~~**Adapters opt out of `consolidate()`**~~ → REPLACED by D10 (every adapter run in both modes; no opt-out, only a no-op).
+5. ~~**Pre-registration includes predicted numbers**~~ → YES per D8. Publish predictions even if we lose. Losing publicly is more credible than not predicting.
+6. ~~**Ingestion budget per day cap**~~ → 200 chunks/day soft cap, enforced as a clipping warning, not a hard error. Burstiness preserved.
+
+### New from Phase 1.5 — for Andy to confirm before Phase 2
+
+7. **Stock + Tuned mode reporting (D10).** Two headline numbers per adapter. Implies ~2x compute. Default: APPROVED unless Andy objects.
+8. **Cipher-authored held-out scenarios (D5).** Gemini writes 3 hold-out scenarios from public spec only. Default: APPROVED.
+9. **Sensitivity analysis on 4 noise rates (D11).** ~3-4x compute over single-rate run. Bosgame absorbs it. Default: APPROVED.
+10. **v2.1 real-data validation track public commitment in v2.0 README (D12).** Default: APPROVED. Public accountability is a feature.
+11. **Real-data corpus selection** — Wikipedia article history vs SEC filings vs OSS issue/PR history. Decision deferred to Phase 2.
 
 ## Acceptance criteria
 
 Phase 1 is accepted when:
-- [ ] This spec is committed and pushed to main
-- [ ] Phase 1.5 adversarial review completes, critique is either incorporated or explicitly rejected
-- [ ] All 6 open questions have resolution from Andy (or deferred with rationale)
+- [x] This spec is committed and pushed to main (C0 commit, 2026-04-18)
+- [x] Phase 1.5 adversarial review completes, critique incorporated (C1 commit, 2026-04-18)
+- [x] All Phase 1 open questions resolved or deferred with rationale (Q1–Q6 resolved, Q7–Q11 default-approved pending Andy override)
+
+Phase 1.5 is accepted (this revision) when:
+- [x] Adversary review file committed at `Memory/adversary-reviews/2026-04-18_amb-v2-adversary.md`
+- [x] D10 (Stock vs Tuned), D11 (Sensitivity), D12 (Real-data v2.1) added
+- [x] R8, R9, R10, R11 added to risks table
+- [x] Held-out authorship moved to Cipher (D5)
+- [x] Open questions table updated to reflect Phase 1.5 resolutions
 
 Phases 2-6 have their own acceptance criteria in subsequent documents.
