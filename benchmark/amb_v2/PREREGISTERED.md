@@ -1,0 +1,187 @@
+---
+title: AMB v2 — Pre-registration (alpha)
+status: FROZEN
+spec_version: v2.0.0
+preregistered_at: 2026-04-18
+author: Archon (on behalf of Andy Williams)
+commit_pin: <filled at C5>
+---
+
+# AMB v2 Pre-registration
+
+This document is a contract with the reader. It is written **before any alpha
+results are computed** so that the methodology, the formulas, and the author's
+predictions cannot be retrofitted after the fact.
+
+If the published alpha numbers diverge from the predictions below, the
+divergence is a finding — not a bug, and not an excuse to revise the formula.
+
+## 1. Methodology summary
+
+- **Spec**: `specs/amb-v2-spec.md` (revision `5079dcc` on `main`).
+- **Scenarios**: public + held-out. Public scenarios live in
+  `benchmark/amb_v2/scenarios/`. Held-out scenarios are authored by an
+  independent model (Gemini 2.5 Pro via the Cipher Agent API) from the
+  public spec only — no access to the test harness or adapter internals —
+  and committed in ciphertext form under `held_out/*.age`.
+- **Adapters** (alpha release): naive-append-only, agent-memory-core,
+  langchain-buffer. LlamaIndex and Mem0 are deferred to v2.0.1 per the
+  Phase 3 risk note; their install paths are smoke-tested but the harness
+  skips them gracefully when their optional deps are absent.
+- **Modes** (D10 — fairness fix): every adapter is run in both `stock`
+  (no consolidation) and `tuned` (consolidation permitted). Both numbers
+  are published. There is no combined ranking.
+- **Sensitivity** (D11): the full grid sweeps four noise rates —
+  `{0.20, 0.30, 0.45, 0.60}` — and three seeds per cell. A ranking claim
+  must hold across ≥3 of the 4 noise rates to be reported.
+- **Real-data track** (D12): v2.1 (not this release) will reproduce the
+  top-3 alpha finding on a held-out slice of a real conversational
+  dataset. v2.0 is synthetic-only and clearly labels itself as such.
+
+## 2. Composite formula — FROZEN
+
+```
+quality = 0.40 · answer_accuracy
+        + 0.30 · contradiction_resolution
+        + 0.15 · (1 − stale_fact_rate)
+        + 0.15 · salience_preservation
+```
+
+- `answer_accuracy`: substring-containment match of the expected answer
+  inside the adapter's returned string (normalized case + whitespace).
+- `contradiction_resolution`: restricted to queries flagged
+  `resolution_type="contradiction"`; fraction that return the NEW value.
+- `stale_fact_rate`: fraction of contradiction queries where the answer
+  contains the OLD (superseded) value but NOT the new one.
+- `salience_preservation`: restricted to `chunk_type="credential"`
+  queries; binary top-1 hit.
+
+`auc_quality` is the trapezoid integral of `(day, quality)` checkpoints
+over the run. Checkpoint schedule: `0, 7, 14, 30, 60, 90`.
+
+These weights and this formula may **not** be tuned in response to alpha
+results. An AST-level unit test pins the literals `0.40, 0.30, 0.15,
+0.15` into `metrics.py` and fails if any of them changes.
+
+## 3. Implementation file hashes (SHA-256)
+
+Computed at pre-registration time. Any change to these files after the
+commit pin invalidates the pre-registration and requires a new
+`PREREGISTERED_v2.0.1.md`.
+
+| File | SHA-256 |
+|---|---|
+| `chunks.py` | `e9269752dbc99088dc92e64552fe56653116b47dfb2932da7d62b8f8a9c8a991` |
+| `queries.py` | `a8fb6bef2f3cde5a3ec08cedc6a51f980ad59f59ebaff851f4d762204f332c7b` |
+| `scenarios.py` | `1c52867633f0ec7ff295a26c0bef721fbf7f360ab25cfa188c9b390b70950e65` |
+| `simulator.py` | `134fbe5a2b3266f5557f8aefbfe8b3cf1d66c056b971a283d7661c69267e323c` |
+| `metrics.py` | `c6bc3df37fcf187c9a670a68070f047867e7203109a9fa25f1e5c1495b1a7dd9` |
+| `harness.py` | `bbc83368bfaa5ac828c2efe847dc7981abd6b8b4934c8a4fb199297c8c56b988` |
+| `run.py` | `5cb0838258a1e827783639b3f68e612034bc10b64251b7dcb21d4753e819b38d` |
+| `run_all.py` | `8cf0357df30d5475b1e2040c588648c6f99ddb65d10ae11f1e18e3736cc9f307` |
+| `chart.py` | `32240c9f83541f4ad8cce3d808d4f1ede60bd4ce274c547b2ea818d377f21541` |
+| `adapters/base.py` | `85952e7c5d2d03271e26a4cceb9f080ed0d1686b3a4c8dd6530804369b33d3a7` |
+| `adapters/naive.py` | `c94450492a1a319c994fe40b51a067abc75d77ee539c45bda8a38837e6d689a6` |
+| `adapters/agent_memory_core.py` | `e0f33dae78448a60e097349146e603031971e76c3f83e67c69e4b51862a27be6` |
+| `adapters/langchain_adapter.py` | `ac491363fd0b4563ef6c3f26b8854482cb3041fa19c20470a1639241c3ddb871` |
+| `scripts/generate_held_out.py` | `fcac17e20be0ba55ab720005095e48cb593056e94957416d94364cf5251f064e` |
+| `tests/fixtures/mini_scenario.json` | `4a750e8b58b206074455c8b9e78af8d2694b48e6821a514452b298532d454c7f` |
+
+Regenerate with:
+```bash
+cd benchmark/amb_v2 && shasum -a 256 chunks.py queries.py scenarios.py \
+  simulator.py metrics.py harness.py run.py run_all.py chart.py \
+  adapters/base.py adapters/naive.py adapters/agent_memory_core.py \
+  adapters/langchain_adapter.py scripts/generate_held_out.py \
+  tests/fixtures/mini_scenario.json
+```
+
+## 4. Held-out generation prompt (verbatim)
+
+The held-out scenarios are generated by sending the following prompt
+to the Cipher Agent API (`http://100.109.132.104:7799/quick`) with
+`role="researcher"` — which routes to Gemini 2.5 Pro — three times,
+once each for `n=1, 2, 3`. The template token `{n}` is substituted
+with the scenario index.
+
+```
+You are generating a held-out test scenario for AMB v2 (Agentic Memory
+Benchmark v2). This scenario will be used to score memory adapters and MUST
+NOT leak into training data.
+
+Constraints (follow exactly):
+1. Output strict JSON matching this schema:
+   {
+     "scenario_id": "h0{n}",
+     "name": "<short descriptive name>",
+     "timeline": [ {
+        "id": "h0{n}-d<DDD>-<seq>",
+        "day": <int 0-90>,
+        "text": "<one sentence fact>",
+        "type": "<fact|update|credential|preference|session>",
+        "supersedes": "<optional id of an earlier event this overrides>"
+     } ],
+     "queries": [ {
+        "query_id": "h0{n}-q<NN>",
+        "question": "<natural-language question>",
+        "expected_answer": "<short answer phrase>",
+        "resolution_type": "<fact|contradiction|credential|preference>",
+        "checkpoint_eligibility": [0, 7, 14, 30, 60, 90]
+     } ]
+   }
+2. 20–30 timeline events across days 0–90, including AT LEAST 2 contradictions
+   (later events with ``supersedes`` pointing to earlier ones) and AT LEAST 1
+   credential.
+3. 8–12 queries covering all resolution types. For contradictions, the
+   expected_answer MUST be the NEW value (from the superseding event).
+4. No real PII. Use fictional names, addresses, and phone numbers.
+5. Output JSON only. No prose, no code fences.
+
+Generate scenario {n} of 3 now.
+```
+
+The generated plaintext is encrypted with `age -R held_out/recipients.txt`
+before being written to disk; plaintext is never committed.
+
+## 5. Pre-registered Quality@90 predictions
+
+These are Archon's predictions, authored before any alpha run. Each is
+a best-guess point estimate of the Quality@90 checkpoint (at
+`noise_rate=0.30`, averaged across seeds) for the given
+(adapter, mode) pair. Predictions are made with the caveat that the
+alpha harness is new and the noise calibration was just fixed in C3.
+
+| # | Adapter | Mode | Predicted Quality@90 |
+|---|---|---|---|
+| 1 | `naive-append-only` | stock | **0.35** |
+| 2 | `naive-append-only` | tuned | **0.35** (no-op — same as stock) |
+| 3 | `agent-memory-core` | stock | **0.55** |
+| 4 | `agent-memory-core` | tuned | **0.70** |
+| 5 | `langchain-buffer` | stock | **0.40** |
+| 6 | `langchain-buffer` | tuned | **0.50** |
+| 7 | (reserved) `llama-index` | stock | — (v2.0.1) |
+| 8 | (reserved) `llama-index` | tuned | — (v2.0.1) |
+| 9 | (reserved) `mem0` | stock | — (v2.0.1) |
+| 10 | (reserved) `mem0` | tuned | — (v2.0.1) |
+
+Additionally, Archon pre-registers the following ordinal prediction,
+which must hold across ≥3 of the 4 noise rates to count as confirmed:
+
+> **Ordinal @ AUC:** `agent-memory-core (tuned) > agent-memory-core (stock) ≈ langchain (tuned) > langchain (stock) > naive`.
+
+If the mini-scenario numbers published at alpha contradict this
+ordering, that is a legitimate finding and will be reported as such
+rather than rationalized away.
+
+## 6. Non-goals for v2.0 alpha
+
+- No claim of absolute scale (these numbers are from synthetic
+  scenarios, one mini + three Cipher-generated held-outs).
+- No production recommendation yet — the v2.1 real-data track will
+  settle that.
+- No ranking across adapters from different labs on a single combined
+  leaderboard. Stock-mode scores are the fair comparison.
+
+## 7. Author signoff
+
+Archon, on behalf of Andy Williams — 2026-04-18, commit pin TBD at C5.
