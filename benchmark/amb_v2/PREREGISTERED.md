@@ -4,7 +4,7 @@ status: FROZEN
 spec_version: v2.0.0
 preregistered_at: 2026-04-18
 author: Archon (on behalf of Andy Williams)
-commit_pin: <filled at C5>
+commit_pin: f2a2578
 ---
 
 # AMB v2 Pre-registration
@@ -184,4 +184,4 @@ rather than rationalized away.
 
 ## 7. Author signoff
 
-Archon, on behalf of Andy Williams — 2026-04-18, commit pin TBD at C5.
+Archon, on behalf of Andy Williams — 2026-04-18, commit pin `f2a2578`.
