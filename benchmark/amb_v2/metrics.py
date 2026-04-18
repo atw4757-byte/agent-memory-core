@@ -25,11 +25,17 @@ def _norm(s: str) -> str:
 
 
 def _matches(actual: str, expected: str, aliases: tuple[str, ...]) -> bool:
+    """Substring-containment matching.
+
+    Adapters often return retrieval context, not extracted answers. We score
+    whether the expected answer (or any alias) appears as a substring in the
+    actual answer. Case-insensitive; whitespace-normalized.
+    """
     a = _norm(actual)
-    if a == _norm(expected):
+    if _norm(expected) in a:
         return True
     for alias in aliases:
-        if a == _norm(alias):
+        if _norm(alias) in a:
             return True
     return False
 
@@ -55,17 +61,24 @@ def contradiction_resolution(results: list[QueryResult]) -> float:
 
 
 def stale_fact_rate(results: list[QueryResult]) -> float:
-    """Fraction of queries (with a known superseded value) where the system
-    returned the OLD value instead of the current one.
+    """Fraction of queries (with a known superseded value) where the system's
+    answer contains the OLD value but NOT the current one.
 
-    Lower is better. Skips queries with no superseded_value.
+    Lower is better. Skips queries with no superseded_value. Note: if the
+    answer contains BOTH old and new (common in retrieval-context returns),
+    we credit the system for retrieving the current truth — only penalize
+    when the answer is purely stale.
     """
     eligible = [r for r in results if r.superseded_value is not None]
     if not eligible:
         return 0.0
-    stale = sum(
-        1 for r in eligible if _norm(r.actual_answer) == _norm(r.superseded_value or "")
-    )
+    stale = 0
+    for r in eligible:
+        a = _norm(r.actual_answer)
+        old = _norm(r.superseded_value or "")
+        new = _norm(r.expected_answer)
+        if old in a and new not in a:
+            stale += 1
     return stale / len(eligible)
 
 

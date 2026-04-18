@@ -1,0 +1,24 @@
+# AMB v2 — pinned dependencies for reproducible benchmark runs.
+# Last verified: 2026-04-18 on macOS arm64 + Python 3.12.
+
+# Core (always required)
+chromadb==1.5.8
+jsonschema==4.26.0
+
+# Adapter: agent-memory-core (self, installed via `pip install -e ../..`)
+
+# Adapter: langchain (stock + tuned modes)
+langchain==1.2.15
+langchain-community==0.4.1
+langchain-core==1.3.0
+
+# Charting
+matplotlib>=3.8
+
+# Dev/test only
+pytest==9.0.3
+pytest-cov==7.1.0
+
+# Deferred to v2.0.1 (smoke-tested but not yet integrated):
+#   llama-index — needs separate install; benchmark gracefully skips when absent
+#   mem0ai      — needs separate install; benchmark gracefully skips when absent
