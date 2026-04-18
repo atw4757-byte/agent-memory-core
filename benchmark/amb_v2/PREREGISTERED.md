@@ -16,6 +16,23 @@ predictions cannot be retrofitted after the fact.
 If the published alpha numbers diverge from the predictions below, the
 divergence is a finding — not a bug, and not an excuse to revise the formula.
 
+## 0. Revision log (pre-publish)
+
+- **2026-04-18 C5** — initial registration at commit `f2a2578`.
+- **2026-04-18 C6** — reviewer-pass revision (Gemini 2.5 Pro). Four impl
+  files modified, hashes in §3 updated. No methodology, formula, or
+  prediction changes. Summary of fixes:
+  - `adapters/langchain_adapter.py`: corrected
+    `implements_consolidation: False → True` (it does consolidate in
+    tuned mode — metadata must not lie).
+  - `adapters/naive.py`: tie-break on retrieval score changed from
+    older-first to newer-first, to match other adapters. Fairness fix.
+  - `adapters/agent_memory_core.py`: replaced bare `except: pass`
+    blocks with `_log.debug(...)` so silent failures are observable.
+  - `scripts/generate_held_out.py`: `CIPHER_API` now honors
+    `$CIPHER_API_URL`; JSON extraction switched to regex-based first-
+    object match so minor output format changes don't break the script.
+
 ## 1. Methodology summary
 
 - **Spec**: `specs/amb-v2-spec.md` (revision `5079dcc` on `main`).
@@ -81,10 +98,10 @@ commit pin invalidates the pre-registration and requires a new
 | `run_all.py` | `8cf0357df30d5475b1e2040c588648c6f99ddb65d10ae11f1e18e3736cc9f307` |
 | `chart.py` | `32240c9f83541f4ad8cce3d808d4f1ede60bd4ce274c547b2ea818d377f21541` |
 | `adapters/base.py` | `85952e7c5d2d03271e26a4cceb9f080ed0d1686b3a4c8dd6530804369b33d3a7` |
-| `adapters/naive.py` | `c94450492a1a319c994fe40b51a067abc75d77ee539c45bda8a38837e6d689a6` |
-| `adapters/agent_memory_core.py` | `e0f33dae78448a60e097349146e603031971e76c3f83e67c69e4b51862a27be6` |
-| `adapters/langchain_adapter.py` | `ac491363fd0b4563ef6c3f26b8854482cb3041fa19c20470a1639241c3ddb871` |
-| `scripts/generate_held_out.py` | `fcac17e20be0ba55ab720005095e48cb593056e94957416d94364cf5251f064e` |
+| `adapters/naive.py` | `62d973fc595bf9f6451fd4b47c40714a87927db2f332b1dade837245bf2c08ea` |
+| `adapters/agent_memory_core.py` | `8eb133969da5a413351a6959a9cf3dfca7060a1e9ff94947bd99165e9c71db0a` |
+| `adapters/langchain_adapter.py` | `4ceadc31fc98d4050236e2907b8b517434d7221e094172265d6d98bdc7a4d970` |
+| `scripts/generate_held_out.py` | `360d5c0bb696cf1f69556dc38cbdf3bdc895ad67fecf993755c34ed4bc87683d` |
 | `tests/fixtures/mini_scenario.json` | `4a750e8b58b206074455c8b9e78af8d2694b48e6821a514452b298532d454c7f` |
 
 Regenerate with:

@@ -15,14 +15,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import re
 import subprocess
 import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
 
-CIPHER_API = "http://100.109.132.104:7799/quick"
+CIPHER_API = os.environ.get("CIPHER_API_URL", "http://100.109.132.104:7799/quick")
 ROLE = "researcher"  # Gemini 2.5 Pro per prompts/CIPHER.md
+_JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
 
 PROMPT_TEMPLATE = """You are generating a held-out test scenario for AMB v2 (Agentic Memory
 Benchmark v2). This scenario will be used to score memory adapters and MUST
@@ -60,7 +63,7 @@ Generate scenario {n} of 3 now."""
 
 
 def _call_cipher(prompt: str, timeout: int = 180) -> str:
-    body = json.dumps({"role": ROLE, "question": prompt}).encode("utf-8")
+    body = json.dumps({"role": ROLE, "content": prompt}).encode("utf-8")
     req = urllib.request.Request(
         CIPHER_API, data=body,
         headers={"Content-Type": "application/json"},
@@ -68,18 +71,18 @@ def _call_cipher(prompt: str, timeout: int = 180) -> str:
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         payload = json.loads(resp.read())
-    return payload.get("answer") or payload.get("response") or ""
+    return payload.get("response") or payload.get("answer") or ""
 
 
 def _extract_json(text: str) -> dict:
-    # Strip markdown fences if Cipher added them.
-    t = text.strip()
-    if t.startswith("```"):
-        t = t.split("```", 2)[1]
-        if t.startswith("json"):
-            t = t[4:]
-        t = t.rsplit("```", 1)[0]
-    return json.loads(t.strip())
+    """Locate and parse the first JSON object in `text`.
+
+    Tolerates markdown code fences, leading prose, and trailing commentary.
+    """
+    m = _JSON_OBJECT_RE.search(text)
+    if not m:
+        raise json.JSONDecodeError("no JSON object found in response", text, 0)
+    return json.loads(m.group(0))
 
 
 def _age_encrypt(plaintext: str, cipher_out: Path, recipients_file: Path) -> None:

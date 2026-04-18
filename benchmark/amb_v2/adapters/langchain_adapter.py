@@ -68,6 +68,6 @@ class LangChainAdapter:
         return {
             "name": "langchain-buffer",
             "version": v,
-            "implements_consolidation": False,
+            "implements_consolidation": True,
             "mode": self.mode,
         }

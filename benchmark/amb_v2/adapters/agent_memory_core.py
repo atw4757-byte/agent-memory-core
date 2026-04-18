@@ -5,12 +5,15 @@ Tuned mode: consolidate() runs the v1 consolidator nightly.
 """
 from __future__ import annotations
 
+import logging
 import shutil
 import tempfile
 from pathlib import Path
 
 from benchmark.amb_v2.adapters.base import Mode
 from benchmark.amb_v2.chunks import Chunk
+
+_log = logging.getLogger(__name__)
 
 try:
     from agent_memory_core import MemoryStore, WorkingMemory
@@ -29,7 +32,8 @@ class AgentMemoryCoreAdapter:
         wm_path = Path(self._tmp) / "working-memory.json"
         try:
             self._working = WorkingMemory(buffer_path=str(wm_path))
-        except Exception:
+        except Exception as e:
+            _log.debug("WorkingMemory init failed: %s", e)
             self._working = None
 
     def __del__(self) -> None:
@@ -44,8 +48,8 @@ class AgentMemoryCoreAdapter:
                     type=c.type if c.type != "noise" else "session",
                     source=f"d{day:03d}_{c.scenario_id}",
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                _log.debug("ingest chunk %s failed: %s", c.id, e)
 
     def consolidate(self, day: int) -> None:
         if self.mode == "stock":
@@ -55,13 +59,14 @@ class AgentMemoryCoreAdapter:
             consolidator = getattr(self._store, "consolidate", None)
             if callable(consolidator):
                 consolidator()
-        except Exception:
-            pass
+        except Exception as e:
+            _log.debug("consolidate day=%d failed: %s", day, e)
 
     def query(self, question: str, scenario_id: str) -> str:
         try:
             results = self._store.search(question, n=8)
-        except Exception:
+        except Exception as e:
+            _log.debug("query failed: %s", e)
             return ""
         if not results:
             return ""

@@ -37,7 +37,7 @@ class NaiveAppendOnlyAdapter:
             score = len(q_words & text_words)
             if score > 0:
                 scored.append((score, c))
-        scored.sort(key=lambda p: (-p[0], p[1].day))
+        scored.sort(key=lambda p: (-p[0], -p[1].day))
         top = scored[:5]
         return " | ".join(c.text for _, c in top)
 
