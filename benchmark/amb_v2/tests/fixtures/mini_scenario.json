@@ -1,0 +1,20 @@
+{
+  "scenario_id": "mini",
+  "name": "Mini Scenario for Tests",
+  "description": "5-day scenario covering one stable fact, one contradiction, one credential, one noise, one preference.",
+  "timeline": [
+    {"day": 0, "type": "fact", "id": "mini-d000-0", "text": "User's home address is 1 Apple Way, Cupertino CA."},
+    {"day": 0, "type": "credential", "id": "mini-d000-1", "text": "User's wifi password is bluefin-22."},
+    {"day": 0, "type": "preference", "id": "mini-d000-2", "text": "User prefers oat milk in coffee."},
+    {"day": 1, "type": "noise", "id": "mini-d001-0", "text": "Talked about the weather, asked for jokes."},
+    {"day": 2, "type": "update", "id": "mini-d002-0", "text": "User moved. New home address is 99 Oak Drive, Geneva IL.", "supersedes": "mini-d000-0"},
+    {"day": 3, "type": "noise", "id": "mini-d003-0", "text": "Brainstorm session about gardening."},
+    {"day": 4, "type": "fact", "id": "mini-d004-0", "text": "User's dog is named Cooper."}
+  ],
+  "queries": [
+    {"query_id": "mini-q1", "scenario_id": "mini", "question": "What is the user's home address?", "expected_answer": "99 Oak Drive, Geneva IL", "reasoning_type": "factual", "difficulty": "medium", "trap": "1 Apple Way, Cupertino CA", "checkpoint_eligibility": [3, 4, 7, 14, 30, 60, 90], "resolution_type": "contradiction"},
+    {"query_id": "mini-q2", "scenario_id": "mini", "question": "What is the user's wifi password?", "expected_answer": "bluefin-22", "reasoning_type": "factual", "difficulty": "easy", "trap": null, "checkpoint_eligibility": [0, 1, 2, 3, 4, 7, 14, 30, 60, 90], "resolution_type": "stable"},
+    {"query_id": "mini-q3", "scenario_id": "mini", "question": "What is the user's dog's name?", "expected_answer": "Cooper", "reasoning_type": "factual", "difficulty": "easy", "trap": null, "checkpoint_eligibility": [4, 7, 14, 30, 60, 90], "resolution_type": "stable"},
+    {"query_id": "mini-q4", "scenario_id": "mini", "question": "What does the user prefer in coffee?", "expected_answer": "oat milk", "reasoning_type": "factual", "difficulty": "easy", "trap": null, "checkpoint_eligibility": [0, 1, 2, 3, 4, 7, 14, 30, 60, 90], "resolution_type": "stable"}
+  ]
+}
