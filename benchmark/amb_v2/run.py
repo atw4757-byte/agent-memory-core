@@ -67,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
 
     bundles = list(load_public_scenarios(args.scenarios))
     if args.held_out_key is not None:
-        bundles.extend(load_held_out(args.scenarios, args.held_out_key))
+        bundles.extend(load_held_out(args.scenarios, key_path=args.held_out_key))
 
     if not bundles:
         print(f"[amb-v2] no scenarios loaded from {args.scenarios}", file=sys.stderr)

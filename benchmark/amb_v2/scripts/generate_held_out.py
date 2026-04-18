@@ -62,16 +62,23 @@ Constraints (follow exactly):
 Generate scenario {n} of 3 now."""
 
 
-def _call_cipher(prompt: str, timeout: int = 180) -> str:
+def _call_cipher(prompt: str, timeout: int = 420, retries: int = 2) -> str:
     body = json.dumps({"role": ROLE, "content": prompt}).encode("utf-8")
-    req = urllib.request.Request(
-        CIPHER_API, data=body,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        payload = json.loads(resp.read())
-    return payload.get("response") or payload.get("answer") or ""
+    last: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            req = urllib.request.Request(
+                CIPHER_API, data=body,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                payload = json.loads(resp.read())
+            return payload.get("response") or payload.get("answer") or ""
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+            last = e
+            print(f"[held-out] attempt {attempt+1}/{retries+1} failed: {e}", file=sys.stderr)
+    raise RuntimeError(f"Cipher call failed after {retries+1} attempts: {last}")
 
 
 def _extract_json(text: str) -> dict:

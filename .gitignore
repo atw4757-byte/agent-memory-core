@@ -11,3 +11,7 @@ htmlcov/
 benchmark/amb_v2/results/*.json
 !benchmark/amb_v2/results/headline-v2.0/
 !benchmark/amb_v2/results/alpha-v2.0/
+
+# Held-out private keys — never commit
+benchmark/amb_v2/held_out/identity.age
+benchmark/amb_v2/held_out/*.plain.json

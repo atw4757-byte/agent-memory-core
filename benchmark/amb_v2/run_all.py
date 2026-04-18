@@ -33,6 +33,7 @@ class GridSpec:
     checkpoints: tuple[int, ...] = DEFAULT_CHECKPOINTS
     days: int | None = None
     held_out_key: Path | None = None
+    held_out_dir: Path | None = None
 
 
 def _result_path(out_dir: Path, adapter: str, mode: str, seed: int, noise_rate: float) -> Path:
@@ -44,7 +45,8 @@ def run_grid(spec: GridSpec) -> list[Path]:
     spec.out_dir.mkdir(parents=True, exist_ok=True)
     bundles = list(load_public_scenarios(spec.scenarios_dir))
     if spec.held_out_key is not None:
-        bundles.extend(load_held_out(spec.scenarios_dir, spec.held_out_key))
+        held_dir = spec.held_out_dir or spec.scenarios_dir
+        bundles.extend(load_held_out(held_dir, key_path=spec.held_out_key))
     if not bundles:
         raise RuntimeError(f"no scenarios loaded from {spec.scenarios_dir}")
 
@@ -84,6 +86,8 @@ def main(argv: list[str] | None = None) -> int:
                         default=",".join(str(d) for d in DEFAULT_CHECKPOINTS))
     parser.add_argument("--days", type=int, default=None)
     parser.add_argument("--held-out-key", type=Path, default=None)
+    parser.add_argument("--held-out-dir", type=Path, default=None,
+                        help="Directory with *.json.age held-out scenarios (defaults to --scenarios)")
     parser.add_argument("--quick", action="store_true",
                         help="Smoke grid: 1 adapter, 1 seed, 1 noise, stock-only, short checkpoints")
     args = parser.parse_args(argv)
@@ -109,6 +113,7 @@ def main(argv: list[str] | None = None) -> int:
             scenarios_dir=args.scenarios,
             out_dir=args.out_dir,
             held_out_key=args.held_out_key,
+            held_out_dir=args.held_out_dir,
         )
 
     paths = run_grid(spec)

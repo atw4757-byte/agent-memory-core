@@ -21,14 +21,15 @@ class ScenarioBundle:
 
 
 def _bundle_from_obj(obj: dict[str, Any], *, is_held_out: bool) -> ScenarioBundle:
+    scenario_id = obj["scenario_id"]
     queries = [
         Query(
             query_id=q["query_id"],
-            scenario_id=q["scenario_id"],
+            scenario_id=q.get("scenario_id", scenario_id),
             question=q["question"],
             expected_answer=q["expected_answer"],
-            reasoning_type=q["reasoning_type"],
-            difficulty=q["difficulty"],
+            reasoning_type=q.get("reasoning_type", "factual"),
+            difficulty=q.get("difficulty", "medium"),
             trap=q.get("trap"),
             checkpoint_eligibility=frozenset(q["checkpoint_eligibility"]),
             resolution_type=q["resolution_type"],

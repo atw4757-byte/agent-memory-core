@@ -1,0 +1,66 @@
+{
+  "adapter": "agent-memory-core",
+  "version": "0.1.2",
+  "mode": "tuned",
+  "seed": 44,
+  "noise_rate": 0.2,
+  "spec_version": "v2.0.0",
+  "metadata": {
+    "name": "agent-memory-core",
+    "version": "0.1.2",
+    "implements_consolidation": true,
+    "mode": "tuned"
+  },
+  "checkpoints": [
+    {
+      "day": 0,
+      "answer_accuracy": 0.1875,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 0.1667,
+      "quality": 0.25
+    },
+    {
+      "day": 7,
+      "answer_accuracy": 0.2353,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.5,
+      "salience_preservation": 0.1667,
+      "quality": 0.1941
+    },
+    {
+      "day": 14,
+      "answer_accuracy": 0.2353,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.5,
+      "salience_preservation": 0.1667,
+      "quality": 0.1941
+    },
+    {
+      "day": 30,
+      "answer_accuracy": 0.3824,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.6,
+      "salience_preservation": 0.6667,
+      "quality": 0.3129
+    },
+    {
+      "day": 60,
+      "answer_accuracy": 0.5294,
+      "contradiction_resolution": 0.2,
+      "stale_fact_rate": 0.3,
+      "salience_preservation": 0.8333,
+      "quality": 0.5018
+    },
+    {
+      "day": 90,
+      "answer_accuracy": 0.5588,
+      "contradiction_resolution": 0.3,
+      "stale_fact_rate": 0.3,
+      "salience_preservation": 1.0,
+      "quality": 0.5685
+    }
+  ],
+  "auc_quality": 35.2441,
+  "completed_at": "2026-04-18T22:20:42.297657+00:00"
+}
