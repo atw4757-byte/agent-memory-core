@@ -10,3 +10,4 @@ build/
 htmlcov/
 benchmark/amb_v2/results/*.json
 !benchmark/amb_v2/results/headline-v2.0/
+!benchmark/amb_v2/results/alpha-v2.0/

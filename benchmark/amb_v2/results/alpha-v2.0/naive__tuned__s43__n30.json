@@ -1,0 +1,66 @@
+{
+  "adapter": "naive-append-only",
+  "version": "v2.0",
+  "mode": "tuned",
+  "seed": 43,
+  "noise_rate": 0.3,
+  "spec_version": "v2.0.0",
+  "metadata": {
+    "name": "naive-append-only",
+    "version": "v2.0",
+    "implements_consolidation": false,
+    "mode": "tuned"
+  },
+  "checkpoints": [
+    {
+      "day": 0,
+      "answer_accuracy": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0
+    },
+    {
+      "day": 7,
+      "answer_accuracy": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0
+    },
+    {
+      "day": 14,
+      "answer_accuracy": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0
+    },
+    {
+      "day": 30,
+      "answer_accuracy": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0
+    },
+    {
+      "day": 60,
+      "answer_accuracy": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0
+    },
+    {
+      "day": 90,
+      "answer_accuracy": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0
+    }
+  ],
+  "auc_quality": 90.0,
+  "completed_at": "2026-04-18T20:56:22.214063+00:00"
+}

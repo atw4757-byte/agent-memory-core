@@ -104,6 +104,14 @@ The **Answer Accuracy** column is where retrieval quality shows up in agent beha
 
 **AMB is becoming an institution.** We're inviting every memory system — Mem0, MemGPT, Letta, pgvector pipelines, custom builds — to submit scores. See [`benchmark/LEADERBOARD.md`](benchmark/LEADERBOARD.md).
 
+### AMB v2 — alpha (2026-04-18)
+
+The v2 harness is pre-registered and sensitivity-swept. Every adapter runs in both stock (no consolidation) and tuned (consolidation permitted) modes — no combined ranking. Composite formula (`0.40·answer + 0.30·contradiction + 0.15·(1−stale) + 0.15·salience`) is frozen and pinned at the impl-file level.
+
+The **v2.0-alpha run is a null result** — the test scenario is too small to separate adapters under synthetic noise, which is itself a methodology finding. Full details: [`benchmark/amb_v2/README.md`](benchmark/amb_v2/README.md), [`benchmark/amb_v2/PREREGISTERED.md`](benchmark/amb_v2/PREREGISTERED.md), [`benchmark/amb_v2/results/alpha-v2.0/REPORT.md`](benchmark/amb_v2/results/alpha-v2.0/REPORT.md).
+
+v2.0.1 adds held-out scenarios + LlamaIndex/Mem0 adapters; v2.1 adds a real-data validation track.
+
 ---
 
 ## Architecture

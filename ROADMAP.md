@@ -2,7 +2,7 @@
 
 Public roadmap for `agent-memory-core`. Updated monthly. The OSS library is the core; everything else is scaffolding around it.
 
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-18
 
 ---
 
@@ -12,7 +12,7 @@ Public roadmap for `agent-memory-core`. Updated monthly. The OSS library is the 
 - **LangChain adapter** — `agent_memory_core.integrations.langchain` → ships with v0.2
 - **LlamaIndex adapter** — `agent_memory_core.integrations.llamaindex` → ships with v0.2
 - **Async-first API** — `AsyncMemoryStore` with full parity → v0.2
-- **Longitudinal benchmark (AMB v2)** — 90-day simulated decay across 10K-chunk ingest → alpha May, GA June
+- **Longitudinal benchmark (AMB v2)** — 90-day simulated decay across 10K-chunk ingest → **alpha released 2026-04-18** (null result on mini scenario; v2.0.1 with held-out scenarios in-flight). GA June.
 - **Demo video** — 60-second failure → replay → fix walkthrough
 - **Public AMB leaderboard** — `amb.divergencerouter.com` → launches 2026-05-15
 

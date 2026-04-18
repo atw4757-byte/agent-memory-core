@@ -2,6 +2,8 @@
 
 A rigorous, open benchmark for evaluating long-horizon memory systems. 10 real-world scenarios, 200 queries, adversarial traps designed to expose exactly where naive systems fail.
 
+> **AMB v2 is alpha-released** (2026-04-18). v2 is pre-registered, stock/tuned-split, and sensitivity-swept. See [`amb_v2/README.md`](amb_v2/README.md) and [`amb_v2/PREREGISTERED.md`](amb_v2/PREREGISTERED.md). v1 (below) remains the legacy scenario corpus.
+
 ## The Problem With Existing Evals
 
 Most memory evals test retrieval of static facts. Real agents deal with facts that *change*. A user's address updates. A stakeholder leaves a company. A preference reverses. A diet changes. A bug gets fixed.
