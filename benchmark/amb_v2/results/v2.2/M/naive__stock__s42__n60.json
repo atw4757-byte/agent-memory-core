@@ -1,0 +1,67 @@
+{
+  "adapter": "naive-append-only",
+  "version": "v2.0",
+  "mode": "stock",
+  "seed": 42,
+  "noise_rate": 0.6,
+  "spec_version": "v2.1.0",
+  "metadata": {
+    "name": "naive-append-only",
+    "version": "v2.0",
+    "implements_consolidation": false,
+    "mode": "stock"
+  },
+  "checkpoints": [
+    {
+      "day": 0,
+      "answer_accuracy": 0.1875,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 0.1667,
+      "quality": 0.25
+    },
+    {
+      "day": 7,
+      "answer_accuracy": 0.2647,
+      "contradiction_resolution": 0.1,
+      "stale_fact_rate": 0.3,
+      "salience_preservation": 0.1667,
+      "quality": 0.2659
+    },
+    {
+      "day": 14,
+      "answer_accuracy": 0.3529,
+      "contradiction_resolution": 0.1,
+      "stale_fact_rate": 0.3,
+      "salience_preservation": 0.1667,
+      "quality": 0.3012
+    },
+    {
+      "day": 30,
+      "answer_accuracy": 0.5588,
+      "contradiction_resolution": 0.3,
+      "stale_fact_rate": 0.2,
+      "salience_preservation": 0.6667,
+      "quality": 0.5335
+    },
+    {
+      "day": 60,
+      "answer_accuracy": 0.7647,
+      "contradiction_resolution": 0.6,
+      "stale_fact_rate": 0.1,
+      "salience_preservation": 0.8333,
+      "quality": 0.7459
+    },
+    {
+      "day": 90,
+      "answer_accuracy": 0.9118,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 0.8333,
+      "quality": 0.9397
+    }
+  ],
+  "auc_quality": 54.9431,
+  "temporal_improvement": 0.4673,
+  "completed_at": "2026-04-19T12:01:30.630048+00:00"
+}

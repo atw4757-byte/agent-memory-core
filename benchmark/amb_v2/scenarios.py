@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +18,10 @@ class ScenarioBundle:
     timeline: list[dict[str, Any]]   # list of timeline events: {day, type, id, text, supersedes?}
     queries: list[Query]
     is_held_out: bool
+    # v2.3: per-query confuser chunks. Shape: {query_id: [{"day": int, "text": str}, ...]}
+    # Confusers share vocabulary with the query but contain wrong/no answer.
+    # Injected into timeline by the simulator at the specified days.
+    confusers: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
 
 
 def _bundle_from_obj(obj: dict[str, Any], *, is_held_out: bool) -> ScenarioBundle:
@@ -36,12 +40,16 @@ def _bundle_from_obj(obj: dict[str, Any], *, is_held_out: bool) -> ScenarioBundl
         )
         for q in obj["queries"]
     ]
+    confusers: dict[str, list[dict[str, Any]]] = {}
+    for qid, items in obj.get("confusers", {}).items():
+        confusers[qid] = [dict(x) for x in items]
     return ScenarioBundle(
         scenario_id=obj["scenario_id"],
         name=obj["name"],
         timeline=list(obj["timeline"]),
         queries=queries,
         is_held_out=is_held_out,
+        confusers=confusers,
     )
 
 

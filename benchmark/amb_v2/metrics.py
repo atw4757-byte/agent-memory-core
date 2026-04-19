@@ -18,6 +18,8 @@ class QueryResult:
     resolution_type: str
     chunk_type: str
     superseded_value: str | None
+    top1_chunk: str | None = None
+    returned_chunks: tuple[str, ...] = ()
 
 
 def _norm(s: str) -> str:
@@ -45,6 +47,57 @@ def answer_accuracy(results: list[QueryResult]) -> float:
         return 0.0
     correct = sum(1 for r in results if _matches(r.actual_answer, r.expected_answer, r.aliases))
     return correct / len(results)
+
+
+def top1_answer_accuracy(results: list[QueryResult]) -> float:
+    """v2.3 muddiness metric: answer must appear in the TOP-ranked chunk.
+
+    Simulates LLM misattribution: real models bias toward the most-prominent
+    retrieved chunk. If top-1 is a confuser or trap, generation goes wrong
+    even though the right answer sits at rank 3. Current ``answer_accuracy``
+    gives full credit for "answer somewhere in top-k"; this metric doesn't.
+
+    Falls back to actual_answer when top1_chunk is None (pre-v2.3 results).
+    """
+    if not results:
+        return 0.0
+    correct = 0
+    for r in results:
+        target = r.top1_chunk if r.top1_chunk is not None else r.actual_answer
+        if _matches(target, r.expected_answer, r.aliases):
+            correct += 1
+    return correct / len(results)
+
+
+def confuser_resistance(
+    results: list[QueryResult],
+    confuser_texts: dict[str, tuple[str, ...]],
+) -> float:
+    """v2.3 muddiness metric: fraction of queries where NO confuser chunk
+    appeared in top-k returned_chunks.
+
+    Input map: query_id → tuple of confuser chunk texts for that query.
+    For each result with returned_chunks populated, check whether any
+    returned chunk contains any of its confusers. Score 1 = resisted,
+    0 = polluted.
+
+    Queries without confusers, or without returned_chunks populated,
+    are skipped. Returns 1.0 when none qualify (no failures triggered).
+    """
+    eligible = [r for r in results
+                if r.returned_chunks and confuser_texts.get(r.query_id)]
+    if not eligible:
+        return 1.0
+    resisted = 0
+    for r in eligible:
+        confusers = confuser_texts[r.query_id]
+        polluted = any(
+            any(_norm(c) in _norm(chunk) for c in confusers)
+            for chunk in r.returned_chunks
+        )
+        if not polluted:
+            resisted += 1
+    return resisted / len(eligible)
 
 
 def contradiction_resolution(results: list[QueryResult]) -> float:
@@ -104,6 +157,32 @@ def quality_at(*, answer: float, contradiction: float, stale: float, salience: f
         + 0.30 * contradiction
         + 0.15 * (1.0 - stale)
         + 0.15 * salience
+    )
+
+
+def quality_at_v2_3(
+    *,
+    top1_answer: float,
+    any_answer: float,
+    contradiction: float,
+    stale: float,
+    salience: float,
+    confuser_resist: float,
+) -> float:
+    """v2.3 composite. Top-1 weighted more than any-of-top-k to reflect that
+    real LLM generation mis-attributes when the top chunk is wrong.
+
+    Weights (sum to 1.0):
+      0.25·top1_answer + 0.15·any_answer + 0.20·contradiction
+      + 0.10·(1 − stale) + 0.10·salience + 0.20·confuser_resist
+    """
+    return (
+        0.25 * top1_answer
+        + 0.15 * any_answer
+        + 0.20 * contradiction
+        + 0.10 * (1.0 - stale)
+        + 0.10 * salience
+        + 0.20 * confuser_resist
     )
 
 

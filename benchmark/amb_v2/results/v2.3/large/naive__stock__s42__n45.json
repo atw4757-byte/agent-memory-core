@@ -1,0 +1,85 @@
+{
+  "adapter": "naive-append-only",
+  "version": "v2.0",
+  "mode": "stock",
+  "seed": 42,
+  "noise_rate": 0.45,
+  "spec_version": "v2.1.0",
+  "metadata": {
+    "name": "naive-append-only",
+    "version": "v2.0",
+    "implements_consolidation": false,
+    "mode": "stock"
+  },
+  "checkpoints": [
+    {
+      "day": 0,
+      "answer_accuracy": 0.0,
+      "top1_answer_accuracy": 0.0,
+      "confuser_resistance": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 0.6,
+      "quality_v2_3": 0.6
+    },
+    {
+      "day": 7,
+      "answer_accuracy": 0.4967,
+      "top1_answer_accuracy": 0.053,
+      "confuser_resistance": 0.7231,
+      "contradiction_resolution": 0.098,
+      "stale_fact_rate": 0.0196,
+      "salience_preservation": 1.0,
+      "quality": 0.5251,
+      "quality_v2_3": 0.45
+    },
+    {
+      "day": 14,
+      "answer_accuracy": 0.148,
+      "top1_answer_accuracy": 0.0,
+      "confuser_resistance": 0.5328,
+      "contradiction_resolution": 0.0067,
+      "stale_fact_rate": 0.0067,
+      "salience_preservation": 1.0,
+      "quality": 0.3602,
+      "quality_v2_3": 0.3294
+    },
+    {
+      "day": 30,
+      "answer_accuracy": 0.092,
+      "top1_answer_accuracy": 0.0,
+      "confuser_resistance": 0.3974,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 0.3368,
+      "quality_v2_3": 0.2933
+    },
+    {
+      "day": 60,
+      "answer_accuracy": 0.052,
+      "top1_answer_accuracy": 0.0,
+      "confuser_resistance": 0.4061,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 0.3208,
+      "quality_v2_3": 0.289
+    },
+    {
+      "day": 90,
+      "answer_accuracy": 0.008,
+      "top1_answer_accuracy": 0.0,
+      "confuser_resistance": 0.4061,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 0.3032,
+      "quality_v2_3": 0.2824
+    }
+  ],
+  "auc_quality": 31.8364,
+  "temporal_improvement": -0.1748,
+  "completed_at": "2026-04-19T13:09:38.849851+00:00"
+}

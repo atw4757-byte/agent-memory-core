@@ -12,16 +12,19 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from benchmark.amb_v2.adapters.base import Mode, validate_metadata
+from benchmark.amb_v2.adapters.base import Mode, split_returned_chunks, validate_metadata
 from benchmark.amb_v2.metrics import (
     QueryResult,
     answer_accuracy,
     auc_quality,
+    confuser_resistance,
     contradiction_resolution,
     quality_at,
+    quality_at_v2_3,
     salience_preservation,
     stale_fact_rate,
     temporal_improvement,
+    top1_answer_accuracy,
 )
 from benchmark.amb_v2.scenarios import ScenarioBundle
 from benchmark.amb_v2.simulator import simulate
@@ -105,12 +108,22 @@ def _build_chunk_type_index(scenarios: list[ScenarioBundle]) -> dict[str, str]:
     return index
 
 
+def _build_confuser_index(scenarios: list[ScenarioBundle]) -> dict[str, tuple[str, ...]]:
+    """Flatten per-bundle confusers into a query_id → texts map for metric use."""
+    out: dict[str, tuple[str, ...]] = {}
+    for b in scenarios:
+        for qid, items in b.confusers.items():
+            out[qid] = tuple(item["text"] for item in items)
+    return out
+
+
 def _run_checkpoint(
     adapter: Any,
     scenarios: list[ScenarioBundle],
     day: int,
     supersede_idx: dict[str, str],
     chunk_type_idx: dict[str, str],
+    confuser_idx: dict[str, tuple[str, ...]] | None = None,
 ) -> dict[str, Any]:
     qrs: list[QueryResult] = []
     for b in scenarios:
@@ -121,6 +134,8 @@ def _run_checkpoint(
                 ans = adapter.query(q.question, b.scenario_id) or ""
             except Exception:
                 ans = ""
+            returned = split_returned_chunks(ans)
+            top1 = returned[0] if returned else None
             key = f"{b.scenario_id}::{q.query_id}"
             qrs.append(QueryResult(
                 query_id=q.query_id,
@@ -131,21 +146,32 @@ def _run_checkpoint(
                 resolution_type=q.resolution_type,
                 chunk_type=chunk_type_idx.get(key, "fact"),
                 superseded_value=supersede_idx.get(key),
+                top1_chunk=top1,
+                returned_chunks=returned,
             ))
 
     aa = answer_accuracy(qrs)
     cr = contradiction_resolution(qrs)
     sfr = stale_fact_rate(qrs)
     sp = salience_preservation(qrs)
+    t1a = top1_answer_accuracy(qrs)
+    cres = confuser_resistance(qrs, confuser_idx or {})
     q = quality_at(answer=aa, contradiction=cr, stale=sfr, salience=sp)
+    q23 = quality_at_v2_3(
+        top1_answer=t1a, any_answer=aa, contradiction=cr,
+        stale=sfr, salience=sp, confuser_resist=cres,
+    )
 
     return {
         "day": day,
         "answer_accuracy": round(aa, 4),
+        "top1_answer_accuracy": round(t1a, 4),
+        "confuser_resistance": round(cres, 4),
         "contradiction_resolution": round(cr, 4),
         "stale_fact_rate": round(sfr, 4),
         "salience_preservation": round(sp, 4),
         "quality": round(q, 4),
+        "quality_v2_3": round(q23, 4),
     }
 
 
@@ -174,6 +200,7 @@ def run_one(
 
     supersede_idx = _build_supersede_index(scenarios)
     chunk_type_idx = _build_chunk_type_index(scenarios)
+    confuser_idx = _build_confuser_index(scenarios)
 
     checkpoint_results: list[dict[str, Any]] = []
     for day, chunks in simulate(scenarios, seed=seed, noise_rate=noise_rate,
@@ -186,6 +213,7 @@ def run_one(
         if day in cps:
             checkpoint_results.append(_run_checkpoint(
                 adapter, scenarios, day, supersede_idx, chunk_type_idx,
+                confuser_idx,
             ))
 
     pts = [(c["day"], c["quality"]) for c in checkpoint_results]

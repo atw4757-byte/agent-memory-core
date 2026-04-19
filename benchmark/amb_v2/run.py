@@ -38,6 +38,12 @@ try:
 except ImportError:
     pass
 
+try:
+    from benchmark.amb_v2.adapters import langchain_dump as _ld
+    ADAPTER_REGISTRY["langchain-dump"] = _ld.LangChainDumpAdapter
+except ImportError:
+    pass
+
 
 def _parse_checkpoints(raw: str) -> tuple[int, ...]:
     return tuple(sorted({int(x.strip()) for x in raw.split(",") if x.strip()}))

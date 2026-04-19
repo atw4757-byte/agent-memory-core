@@ -1,0 +1,1212 @@
+{
+  "scenario_id": "small-v23",
+  "name": "Small v2.3",
+  "description": "Programmatically generated v2.3 scenario, 4 users \u00d7 5 archetypes \u00d7 up to 8 confusers each.",
+  "timeline": [
+    {
+      "day": 0,
+      "type": "fact",
+      "id": "u000-home-fact",
+      "text": "Alice's home address is 1 Apple Way, Cupertino CA."
+    },
+    {
+      "day": 2,
+      "type": "update",
+      "id": "u000-home-update",
+      "text": "Alice moved. New home address is 99 Oak Drive, Geneva IL.",
+      "supersedes": "u000-home-fact"
+    },
+    {
+      "day": 1,
+      "type": "fact",
+      "id": "u000-wifi-fact",
+      "text": "Alice's wifi password is bluefin-22."
+    },
+    {
+      "day": 11,
+      "type": "update",
+      "id": "u000-wifi-update",
+      "text": "Alice rotated wifi password. New one is tiger-shark-44.",
+      "supersedes": "u000-wifi-fact"
+    },
+    {
+      "day": 0,
+      "type": "fact",
+      "id": "u000-dog-fact",
+      "text": "Alice's dog is named Cooper."
+    },
+    {
+      "day": 1,
+      "type": "fact",
+      "id": "u000-coffee-fact",
+      "text": "Alice prefers oat milk in coffee."
+    },
+    {
+      "day": 2,
+      "type": "fact",
+      "id": "u000-employer-fact",
+      "text": "Alice works at Northwind Systems as a senior engineer."
+    },
+    {
+      "day": 7,
+      "type": "update",
+      "id": "u000-employer-update",
+      "text": "Alice changed jobs. Now works at Helios Robotics.",
+      "supersedes": "u000-employer-fact"
+    },
+    {
+      "day": 2,
+      "type": "fact",
+      "id": "u001-home-fact",
+      "text": "Ben's home address is 42 Maple Ln, Portland OR."
+    },
+    {
+      "day": 4,
+      "type": "update",
+      "id": "u001-home-update",
+      "text": "Ben moved. New home address is 7 Birch St, Boulder CO.",
+      "supersedes": "u001-home-fact"
+    },
+    {
+      "day": 2,
+      "type": "fact",
+      "id": "u001-wifi-fact",
+      "text": "Ben's wifi password is harborglow-7."
+    },
+    {
+      "day": 10,
+      "type": "update",
+      "id": "u001-wifi-update",
+      "text": "Ben rotated wifi password. New one is sunset-ridge-11.",
+      "supersedes": "u001-wifi-fact"
+    },
+    {
+      "day": 3,
+      "type": "fact",
+      "id": "u001-dog-fact",
+      "text": "Ben's dog is named Biscuit."
+    },
+    {
+      "day": 3,
+      "type": "fact",
+      "id": "u001-coffee-fact",
+      "text": "Ben prefers almond milk in coffee."
+    },
+    {
+      "day": 1,
+      "type": "fact",
+      "id": "u001-employer-fact",
+      "text": "Ben works at Aria Labs as a senior engineer."
+    },
+    {
+      "day": 11,
+      "type": "update",
+      "id": "u001-employer-update",
+      "text": "Ben changed jobs. Now works at Sentinel Health.",
+      "supersedes": "u001-employer-fact"
+    },
+    {
+      "day": 0,
+      "type": "fact",
+      "id": "u002-home-fact",
+      "text": "Cara's home address is 15 Pine Rd, Austin TX."
+    },
+    {
+      "day": 3,
+      "type": "update",
+      "id": "u002-home-update",
+      "text": "Cara moved. New home address is 200 Cedar Ave, Madison WI.",
+      "supersedes": "u002-home-fact"
+    },
+    {
+      "day": 2,
+      "type": "fact",
+      "id": "u002-wifi-fact",
+      "text": "Cara's wifi password is violet-owl-9."
+    },
+    {
+      "day": 11,
+      "type": "update",
+      "id": "u002-wifi-update",
+      "text": "Cara rotated wifi password. New one is copper-ridge-15.",
+      "supersedes": "u002-wifi-fact"
+    },
+    {
+      "day": 0,
+      "type": "fact",
+      "id": "u002-dog-fact",
+      "text": "Cara's dog is named Pepper."
+    },
+    {
+      "day": 0,
+      "type": "fact",
+      "id": "u002-coffee-fact",
+      "text": "Cara prefers black, no sugar in coffee."
+    },
+    {
+      "day": 1,
+      "type": "fact",
+      "id": "u002-employer-fact",
+      "text": "Cara works at Delta Cartographic as a senior engineer."
+    },
+    {
+      "day": 6,
+      "type": "update",
+      "id": "u002-employer-update",
+      "text": "Cara changed jobs. Now works at Orbital Mutual.",
+      "supersedes": "u002-employer-fact"
+    },
+    {
+      "day": 0,
+      "type": "fact",
+      "id": "u003-home-fact",
+      "text": "Dan's home address is 8 Willow Ct, Phoenix AZ."
+    },
+    {
+      "day": 10,
+      "type": "update",
+      "id": "u003-home-update",
+      "text": "Dan moved. New home address is 31 Aspen Way, Denver CO.",
+      "supersedes": "u003-home-fact"
+    },
+    {
+      "day": 3,
+      "type": "fact",
+      "id": "u003-wifi-fact",
+      "text": "Dan's wifi password is mango-tango-5."
+    },
+    {
+      "day": 7,
+      "type": "update",
+      "id": "u003-wifi-update",
+      "text": "Dan rotated wifi password. New one is velvet-kite-12.",
+      "supersedes": "u003-wifi-fact"
+    },
+    {
+      "day": 0,
+      "type": "fact",
+      "id": "u003-dog-fact",
+      "text": "Dan's dog is named Scout."
+    },
+    {
+      "day": 2,
+      "type": "fact",
+      "id": "u003-coffee-fact",
+      "text": "Dan prefers cream and one sugar in coffee."
+    },
+    {
+      "day": 3,
+      "type": "fact",
+      "id": "u003-employer-fact",
+      "text": "Dan works at Pyrite Software as a senior engineer."
+    },
+    {
+      "day": 6,
+      "type": "update",
+      "id": "u003-employer-update",
+      "text": "Dan changed jobs. Now works at Vale Biotech.",
+      "supersedes": "u003-employer-fact"
+    }
+  ],
+  "queries": [
+    {
+      "query_id": "u000-home",
+      "scenario_id": "small-v23",
+      "question": "What is Alice's home address?",
+      "expected_answer": "99 Oak Drive, Geneva IL",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "1 Apple Way, Cupertino CA",
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u000-wifi",
+      "scenario_id": "small-v23",
+      "question": "What is Alice's wifi password?",
+      "expected_answer": "tiger-shark-44",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "bluefin-22",
+      "checkpoint_eligibility": [
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u000-dog",
+      "scenario_id": "small-v23",
+      "question": "What is the name of Alice's dog?",
+      "expected_answer": "Cooper",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "stable"
+    },
+    {
+      "query_id": "u000-coffee",
+      "scenario_id": "small-v23",
+      "question": "What does Alice prefer in coffee?",
+      "expected_answer": "oat milk",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "stable"
+    },
+    {
+      "query_id": "u000-employer",
+      "scenario_id": "small-v23",
+      "question": "Where does Alice currently work?",
+      "expected_answer": "Helios Robotics",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "Northwind Systems",
+      "checkpoint_eligibility": [
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u001-home",
+      "scenario_id": "small-v23",
+      "question": "What is Ben's home address?",
+      "expected_answer": "7 Birch St, Boulder CO",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "42 Maple Ln, Portland OR",
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u001-wifi",
+      "scenario_id": "small-v23",
+      "question": "What is Ben's wifi password?",
+      "expected_answer": "sunset-ridge-11",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "harborglow-7",
+      "checkpoint_eligibility": [
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u001-dog",
+      "scenario_id": "small-v23",
+      "question": "What is the name of Ben's dog?",
+      "expected_answer": "Biscuit",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "stable"
+    },
+    {
+      "query_id": "u001-coffee",
+      "scenario_id": "small-v23",
+      "question": "What does Ben prefer in coffee?",
+      "expected_answer": "almond milk",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "stable"
+    },
+    {
+      "query_id": "u001-employer",
+      "scenario_id": "small-v23",
+      "question": "Where does Ben currently work?",
+      "expected_answer": "Sentinel Health",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "Aria Labs",
+      "checkpoint_eligibility": [
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u002-home",
+      "scenario_id": "small-v23",
+      "question": "What is Cara's home address?",
+      "expected_answer": "200 Cedar Ave, Madison WI",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "15 Pine Rd, Austin TX",
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u002-wifi",
+      "scenario_id": "small-v23",
+      "question": "What is Cara's wifi password?",
+      "expected_answer": "copper-ridge-15",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "violet-owl-9",
+      "checkpoint_eligibility": [
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u002-dog",
+      "scenario_id": "small-v23",
+      "question": "What is the name of Cara's dog?",
+      "expected_answer": "Pepper",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "stable"
+    },
+    {
+      "query_id": "u002-coffee",
+      "scenario_id": "small-v23",
+      "question": "What does Cara prefer in coffee?",
+      "expected_answer": "black, no sugar",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "stable"
+    },
+    {
+      "query_id": "u002-employer",
+      "scenario_id": "small-v23",
+      "question": "Where does Cara currently work?",
+      "expected_answer": "Orbital Mutual",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "Delta Cartographic",
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u003-home",
+      "scenario_id": "small-v23",
+      "question": "What is Dan's home address?",
+      "expected_answer": "31 Aspen Way, Denver CO",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "8 Willow Ct, Phoenix AZ",
+      "checkpoint_eligibility": [
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u003-wifi",
+      "scenario_id": "small-v23",
+      "question": "What is Dan's wifi password?",
+      "expected_answer": "velvet-kite-12",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "mango-tango-5",
+      "checkpoint_eligibility": [
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "u003-dog",
+      "scenario_id": "small-v23",
+      "question": "What is the name of Dan's dog?",
+      "expected_answer": "Scout",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "stable"
+    },
+    {
+      "query_id": "u003-coffee",
+      "scenario_id": "small-v23",
+      "question": "What does Dan prefer in coffee?",
+      "expected_answer": "cream and one sugar",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "stable"
+    },
+    {
+      "query_id": "u003-employer",
+      "scenario_id": "small-v23",
+      "question": "Where does Dan currently work?",
+      "expected_answer": "Vale Biotech",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "Pyrite Software",
+      "checkpoint_eligibility": [
+        7,
+        14,
+        30,
+        60,
+        90
+      ],
+      "resolution_type": "contradiction"
+    }
+  ],
+  "confusers": {
+    "u000-home": [
+      {
+        "day": 4,
+        "text": "Alice's home gym setup includes a rowing machine."
+      },
+      {
+        "day": 4,
+        "text": "Alice mentioned that home is where the heart is."
+      },
+      {
+        "day": 5,
+        "text": "Alice's home team in the NBA is a west-coast franchise."
+      },
+      {
+        "day": 12,
+        "text": "Alice's home base for conferences last year was an Airbnb."
+      },
+      {
+        "day": 28,
+        "text": "Alice's home security system was installed last spring."
+      },
+      {
+        "day": 30,
+        "text": "Alice's home internet speed has been slow this week."
+      },
+      {
+        "day": 65,
+        "text": "Alice's home-cooked meal preference is pasta with pesto."
+      },
+      {
+        "day": 78,
+        "text": "Alice's home state is originally different from where they live now."
+      }
+    ],
+    "u000-wifi": [
+      {
+        "day": 13,
+        "text": "Alice's wifi bandwidth is shared with three roommates."
+      },
+      {
+        "day": 15,
+        "text": "Alice's wifi uptime is tracked in a Grafana dashboard."
+      },
+      {
+        "day": 21,
+        "text": "Alice's wifi dropped during a call with their manager."
+      },
+      {
+        "day": 29,
+        "text": "Alice's wifi signal is weakest in the garage."
+      },
+      {
+        "day": 37,
+        "text": "Alice's wifi router model is an ASUS mesh system from 2023."
+      },
+      {
+        "day": 45,
+        "text": "Alice's wifi provider bumped prices again last quarter."
+      },
+      {
+        "day": 45,
+        "text": "Alice's wifi password policy at work requires rotation monthly."
+      },
+      {
+        "day": 50,
+        "text": "Alice's wifi range extender lives in the hallway closet."
+      }
+    ],
+    "u000-dog": [
+      {
+        "day": 11,
+        "text": "Alice's dog loves a specific peanut butter treat brand."
+      },
+      {
+        "day": 38,
+        "text": "Alice's dog used to belong to their cousin before adoption."
+      },
+      {
+        "day": 47,
+        "text": "Alice's dog fetches a specific frisbee and ignores all others."
+      },
+      {
+        "day": 49,
+        "text": "Alice's dog-sitter last summer was the neighbor's kid."
+      },
+      {
+        "day": 71,
+        "text": "Alice's dog walker comes on Tuesdays and Thursdays."
+      },
+      {
+        "day": 74,
+        "text": "Alice's dog-training class meets at the rec center."
+      },
+      {
+        "day": 80,
+        "text": "Alice's dog is due for a vet appointment soon."
+      },
+      {
+        "day": 81,
+        "text": "Alice's dog wears a harness with reflective stitching."
+      }
+    ],
+    "u000-coffee": [
+      {
+        "day": 14,
+        "text": "Alice's coffee-and-book routine is on Saturday mornings."
+      },
+      {
+        "day": 22,
+        "text": "Alice's coffee intake drops on weekends by half."
+      },
+      {
+        "day": 37,
+        "text": "Alice's coffee subscription ships beans every four weeks."
+      },
+      {
+        "day": 48,
+        "text": "Alice's coffee shop of choice on the commute is a pour-over spot."
+      },
+      {
+        "day": 49,
+        "text": "Alice's coffee ritual includes grinding beans by hand on Sundays."
+      },
+      {
+        "day": 50,
+        "text": "Alice's coffee order when traveling is usually a flat white."
+      },
+      {
+        "day": 60,
+        "text": "Alice's coffee grinder makes too much noise in the morning."
+      },
+      {
+        "day": 83,
+        "text": "Alice's coffee budget is higher than their tea budget."
+      }
+    ],
+    "u000-employer": [
+      {
+        "day": 23,
+        "text": "Alice's work benefits include a monthly wellness stipend."
+      },
+      {
+        "day": 31,
+        "text": "Alice's work-from-home setup has been upgraded recently."
+      },
+      {
+        "day": 37,
+        "text": "Alice's work badge includes RFID for the parking garage."
+      },
+      {
+        "day": 51,
+        "text": "Alice's work laptop was swapped out during the refresh cycle."
+      },
+      {
+        "day": 62,
+        "text": "Alice's commute time has doubled since moving offices."
+      },
+      {
+        "day": 74,
+        "text": "Alice's work calendar is blocked off on Friday afternoons."
+      },
+      {
+        "day": 84,
+        "text": "Alice's work channels include an active book-club thread."
+      }
+    ],
+    "u001-home": [
+      {
+        "day": 20,
+        "text": "Ben's home screensaver shows a slideshow of mountain photos."
+      },
+      {
+        "day": 21,
+        "text": "Ben's home automation uses Home Assistant on a Raspberry Pi."
+      },
+      {
+        "day": 34,
+        "text": "Ben's home gym setup includes a rowing machine."
+      },
+      {
+        "day": 36,
+        "text": "Ben's home state is originally different from where they live now."
+      },
+      {
+        "day": 53,
+        "text": "Ben's home team in the NBA is a west-coast franchise."
+      },
+      {
+        "day": 61,
+        "text": "Ben mentioned that home is where the heart is."
+      },
+      {
+        "day": 74,
+        "text": "Ben's home security system was installed last spring."
+      },
+      {
+        "day": 85,
+        "text": "Ben dreams about buying a second home near a lake someday."
+      }
+    ],
+    "u001-wifi": [
+      {
+        "day": 11,
+        "text": "Ben's wifi range extender lives in the hallway closet."
+      },
+      {
+        "day": 17,
+        "text": "Ben's wifi provider bumped prices again last quarter."
+      },
+      {
+        "day": 22,
+        "text": "Ben's wifi router model is an ASUS mesh system from 2023."
+      },
+      {
+        "day": 23,
+        "text": "Ben's wifi SSID is a pun on their favorite movie."
+      },
+      {
+        "day": 57,
+        "text": "Ben's wifi password policy at work requires rotation monthly."
+      },
+      {
+        "day": 79,
+        "text": "Ben's wifi uptime is tracked in a Grafana dashboard."
+      },
+      {
+        "day": 83,
+        "text": "Ben's wifi signal is weakest in the garage."
+      },
+      {
+        "day": 90,
+        "text": "Ben's wifi dropped during a call with their manager."
+      }
+    ],
+    "u001-dog": [
+      {
+        "day": 18,
+        "text": "Ben's dog loves a specific peanut butter treat brand."
+      },
+      {
+        "day": 24,
+        "text": "Ben's dog-sitter last summer was the neighbor's kid."
+      },
+      {
+        "day": 38,
+        "text": "Ben's dog park trips usually happen on weekends."
+      },
+      {
+        "day": 41,
+        "text": "Ben's dog walker comes on Tuesdays and Thursdays."
+      },
+      {
+        "day": 47,
+        "text": "Ben's dog wears a harness with reflective stitching."
+      },
+      {
+        "day": 59,
+        "text": "Ben's dog-training class meets at the rec center."
+      },
+      {
+        "day": 72,
+        "text": "Ben's dog is due for a vet appointment soon."
+      },
+      {
+        "day": 86,
+        "text": "Ben's dog fetches a specific frisbee and ignores all others."
+      }
+    ],
+    "u001-coffee": [
+      {
+        "day": 23,
+        "text": "Ben's coffee intake drops on weekends by half."
+      },
+      {
+        "day": 29,
+        "text": "Ben's coffee ritual includes grinding beans by hand on Sundays."
+      },
+      {
+        "day": 42,
+        "text": "Ben's coffee-and-book routine is on Saturday mornings."
+      },
+      {
+        "day": 51,
+        "text": "Ben's coffee budget is higher than their tea budget."
+      },
+      {
+        "day": 68,
+        "text": "Ben's coffee shop of choice on the commute is a pour-over spot."
+      },
+      {
+        "day": 81,
+        "text": "Ben's coffee subscription ships beans every four weeks."
+      },
+      {
+        "day": 84,
+        "text": "Ben's coffee order when traveling is usually a flat white."
+      },
+      {
+        "day": 85,
+        "text": "Ben's coffee grinder makes too much noise in the morning."
+      }
+    ],
+    "u001-employer": [
+      {
+        "day": 9,
+        "text": "Ben's work benefits include a monthly wellness stipend."
+      },
+      {
+        "day": 16,
+        "text": "Ben's work channels include an active book-club thread."
+      },
+      {
+        "day": 32,
+        "text": "Ben's work laptop was swapped out during the refresh cycle."
+      },
+      {
+        "day": 32,
+        "text": "Ben's work calendar is blocked off on Friday afternoons."
+      },
+      {
+        "day": 41,
+        "text": "Ben's commute time has doubled since moving offices."
+      },
+      {
+        "day": 48,
+        "text": "Ben's work-from-home setup has been upgraded recently."
+      },
+      {
+        "day": 74,
+        "text": "Ben's work badge includes RFID for the parking garage."
+      }
+    ],
+    "u002-home": [
+      {
+        "day": 26,
+        "text": "Cara's home internet speed has been slow this week."
+      },
+      {
+        "day": 28,
+        "text": "Cara's home security system was installed last spring."
+      },
+      {
+        "day": 40,
+        "text": "Cara dreams about buying a second home near a lake someday."
+      },
+      {
+        "day": 52,
+        "text": "Cara's home base for conferences last year was an Airbnb."
+      },
+      {
+        "day": 70,
+        "text": "Cara's home office has a standing desk and a ring light."
+      },
+      {
+        "day": 84,
+        "text": "Cara's home-cooked meal preference is pasta with pesto."
+      },
+      {
+        "day": 86,
+        "text": "Cara's home automation uses Home Assistant on a Raspberry Pi."
+      },
+      {
+        "day": 89,
+        "text": "Cara's home state is originally different from where they live now."
+      }
+    ],
+    "u002-wifi": [
+      {
+        "day": 3,
+        "text": "Cara's wifi dropped during a call with their manager."
+      },
+      {
+        "day": 10,
+        "text": "Cara's wifi SSID is a pun on their favorite movie."
+      },
+      {
+        "day": 11,
+        "text": "Cara's wifi password policy at work requires rotation monthly."
+      },
+      {
+        "day": 12,
+        "text": "Cara's wifi provider bumped prices again last quarter."
+      },
+      {
+        "day": 31,
+        "text": "Cara's wifi router model is an ASUS mesh system from 2023."
+      },
+      {
+        "day": 32,
+        "text": "Cara's wifi channel was changed to avoid interference."
+      },
+      {
+        "day": 78,
+        "text": "Cara's wifi bandwidth is shared with three roommates."
+      },
+      {
+        "day": 83,
+        "text": "Cara's wifi signal is weakest in the garage."
+      }
+    ],
+    "u002-dog": [
+      {
+        "day": 13,
+        "text": "Cara's dog wears a harness with reflective stitching."
+      },
+      {
+        "day": 25,
+        "text": "Cara's dog used to belong to their cousin before adoption."
+      },
+      {
+        "day": 32,
+        "text": "Cara's dog walker comes on Tuesdays and Thursdays."
+      },
+      {
+        "day": 53,
+        "text": "Cara's dog-sitter last summer was the neighbor's kid."
+      },
+      {
+        "day": 61,
+        "text": "Cara's dog-training class meets at the rec center."
+      },
+      {
+        "day": 61,
+        "text": "Cara's dog fetches a specific frisbee and ignores all others."
+      },
+      {
+        "day": 74,
+        "text": "Cara's dog is due for a vet appointment soon."
+      },
+      {
+        "day": 74,
+        "text": "Cara's dog loves a specific peanut butter treat brand."
+      }
+    ],
+    "u002-coffee": [
+      {
+        "day": 8,
+        "text": "Cara's coffee budget is higher than their tea budget."
+      },
+      {
+        "day": 13,
+        "text": "Cara's coffee grinder makes too much noise in the morning."
+      },
+      {
+        "day": 14,
+        "text": "Cara's coffee ritual includes grinding beans by hand on Sundays."
+      },
+      {
+        "day": 44,
+        "text": "Cara's coffee-and-book routine is on Saturday mornings."
+      },
+      {
+        "day": 52,
+        "text": "Cara's coffee order when traveling is usually a flat white."
+      },
+      {
+        "day": 83,
+        "text": "Cara's coffee intake drops on weekends by half."
+      },
+      {
+        "day": 84,
+        "text": "Cara's coffee shop of choice on the commute is a pour-over spot."
+      },
+      {
+        "day": 87,
+        "text": "Cara's coffee subscription ships beans every four weeks."
+      }
+    ],
+    "u002-employer": [
+      {
+        "day": 11,
+        "text": "Cara's work calendar is blocked off on Friday afternoons."
+      },
+      {
+        "day": 14,
+        "text": "Cara's commute time has doubled since moving offices."
+      },
+      {
+        "day": 33,
+        "text": "Cara's work channels include an active book-club thread."
+      },
+      {
+        "day": 37,
+        "text": "Cara's work badge includes RFID for the parking garage."
+      },
+      {
+        "day": 58,
+        "text": "Cara's work benefits include a monthly wellness stipend."
+      },
+      {
+        "day": 61,
+        "text": "Cara's work-from-home setup has been upgraded recently."
+      },
+      {
+        "day": 72,
+        "text": "Cara's work laptop was swapped out during the refresh cycle."
+      }
+    ],
+    "u003-home": [
+      {
+        "day": 1,
+        "text": "Dan dreams about buying a second home near a lake someday."
+      },
+      {
+        "day": 34,
+        "text": "Dan's home gym setup includes a rowing machine."
+      },
+      {
+        "day": 37,
+        "text": "Dan's home screensaver shows a slideshow of mountain photos."
+      },
+      {
+        "day": 49,
+        "text": "Dan's home-cooked meal preference is pasta with pesto."
+      },
+      {
+        "day": 50,
+        "text": "Dan's home security system was installed last spring."
+      },
+      {
+        "day": 55,
+        "text": "Dan's home team in the NBA is a west-coast franchise."
+      },
+      {
+        "day": 59,
+        "text": "Dan's home automation uses Home Assistant on a Raspberry Pi."
+      },
+      {
+        "day": 90,
+        "text": "Dan's home base for conferences last year was an Airbnb."
+      }
+    ],
+    "u003-wifi": [
+      {
+        "day": 10,
+        "text": "Dan's wifi range extender lives in the hallway closet."
+      },
+      {
+        "day": 11,
+        "text": "Dan's wifi signal is weakest in the garage."
+      },
+      {
+        "day": 11,
+        "text": "Dan's wifi provider bumped prices again last quarter."
+      },
+      {
+        "day": 24,
+        "text": "Dan's wifi channel was changed to avoid interference."
+      },
+      {
+        "day": 65,
+        "text": "Dan's wifi dropped during a call with their manager."
+      },
+      {
+        "day": 68,
+        "text": "Dan's wifi uptime is tracked in a Grafana dashboard."
+      },
+      {
+        "day": 71,
+        "text": "Dan's wifi router model is an ASUS mesh system from 2023."
+      },
+      {
+        "day": 78,
+        "text": "Dan's wifi bandwidth is shared with three roommates."
+      }
+    ],
+    "u003-dog": [
+      {
+        "day": 6,
+        "text": "Dan's dog used to belong to their cousin before adoption."
+      },
+      {
+        "day": 11,
+        "text": "Dan's dog wears a harness with reflective stitching."
+      },
+      {
+        "day": 54,
+        "text": "Dan's dog park trips usually happen on weekends."
+      },
+      {
+        "day": 75,
+        "text": "Dan's dog-sitter last summer was the neighbor's kid."
+      },
+      {
+        "day": 75,
+        "text": "Dan's dog fetches a specific frisbee and ignores all others."
+      },
+      {
+        "day": 77,
+        "text": "Dan's dog walker comes on Tuesdays and Thursdays."
+      },
+      {
+        "day": 80,
+        "text": "Dan's dog is due for a vet appointment soon."
+      },
+      {
+        "day": 85,
+        "text": "Dan's dog loves a specific peanut butter treat brand."
+      }
+    ],
+    "u003-coffee": [
+      {
+        "day": 4,
+        "text": "Dan's coffee grinder makes too much noise in the morning."
+      },
+      {
+        "day": 12,
+        "text": "Dan's coffee ritual includes grinding beans by hand on Sundays."
+      },
+      {
+        "day": 19,
+        "text": "Dan's coffee intake drops on weekends by half."
+      },
+      {
+        "day": 41,
+        "text": "Dan's coffee subscription ships beans every four weeks."
+      },
+      {
+        "day": 43,
+        "text": "Dan's coffee shop of choice on the commute is a pour-over spot."
+      },
+      {
+        "day": 61,
+        "text": "Dan's coffee order when traveling is usually a flat white."
+      },
+      {
+        "day": 85,
+        "text": "Dan's coffee budget is higher than their tea budget."
+      },
+      {
+        "day": 88,
+        "text": "Dan's coffee-and-book routine is on Saturday mornings."
+      }
+    ],
+    "u003-employer": [
+      {
+        "day": 12,
+        "text": "Dan's work benefits include a monthly wellness stipend."
+      },
+      {
+        "day": 24,
+        "text": "Dan's work channels include an active book-club thread."
+      },
+      {
+        "day": 35,
+        "text": "Dan's work badge includes RFID for the parking garage."
+      },
+      {
+        "day": 40,
+        "text": "Dan's work calendar is blocked off on Friday afternoons."
+      },
+      {
+        "day": 51,
+        "text": "Dan's work laptop was swapped out during the refresh cycle."
+      },
+      {
+        "day": 60,
+        "text": "Dan's work-from-home setup has been upgraded recently."
+      },
+      {
+        "day": 73,
+        "text": "Dan's commute time has doubled since moving offices."
+      }
+    ]
+  }
+}

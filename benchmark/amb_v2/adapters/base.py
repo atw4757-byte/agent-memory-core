@@ -28,6 +28,17 @@ class DecayAdapter(Protocol):
     def metadata(self) -> dict: ...
 
 
+def split_returned_chunks(answer: str, sep: str = " | ") -> tuple[str, ...]:
+    """Heuristic split of an adapter's concatenated-context answer back into
+    its constituent chunks. Used by the harness when the adapter doesn't
+    expose an ordered-chunks accessor. Safe even if the adapter returns a
+    single blob — the result is just a 1-tuple.
+    """
+    if not answer:
+        return ()
+    return tuple(p for p in answer.split(sep) if p)
+
+
 METADATA_REQUIRED_KEYS = frozenset({"name", "version", "implements_consolidation"})
 
 

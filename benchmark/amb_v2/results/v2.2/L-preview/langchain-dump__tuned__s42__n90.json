@@ -1,0 +1,68 @@
+{
+  "adapter": "langchain-dump",
+  "version": "v1.0",
+  "mode": "tuned",
+  "seed": 42,
+  "noise_rate": 0.9,
+  "spec_version": "v2.1.0",
+  "metadata": {
+    "name": "langchain-dump",
+    "version": "v1.0",
+    "implements_consolidation": false,
+    "mode": "tuned",
+    "budget_tokens": 32000
+  },
+  "checkpoints": [
+    {
+      "day": 0,
+      "answer_accuracy": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0
+    },
+    {
+      "day": 7,
+      "answer_accuracy": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0
+    },
+    {
+      "day": 14,
+      "answer_accuracy": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0
+    },
+    {
+      "day": 30,
+      "answer_accuracy": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0
+    },
+    {
+      "day": 60,
+      "answer_accuracy": 0.0,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 0.0,
+      "quality": 0.15
+    },
+    {
+      "day": 90,
+      "answer_accuracy": 0.0,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 0.0,
+      "quality": 0.15
+    }
+  ],
+  "auc_quality": 51.75,
+  "temporal_improvement": -0.5667,
+  "completed_at": "2026-04-19T12:17:14.084546+00:00"
+}

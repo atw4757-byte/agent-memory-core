@@ -141,6 +141,27 @@ def simulate(
                 supersedes=event.get("supersedes"),
             ))
 
+    # v2.3: inject per-query confuser chunks at their authored days.
+    # Confusers share vocabulary with scenario queries but contain wrong/no
+    # answers. They're the muddiness knob: retrieval must filter them out
+    # to maintain top-1 accuracy and confuser_resistance.
+    confuser_counter = 0
+    for bundle in scenarios:
+        for qid, items in bundle.confusers.items():
+            for item in items:
+                d = item["day"]
+                if d >= days:
+                    continue
+                cid = f"conf-{_scenario_short(bundle.scenario_id)}-{qid}-d{d:03d}-{confuser_counter:04d}"
+                by_day[d].append(Chunk(
+                    id=cid,
+                    scenario_id=bundle.scenario_id,
+                    day=d,
+                    text=item["text"],
+                    type="noise",
+                ))
+                confuser_counter += 1
+
     # Compute noise injection. Some scenario events are themselves noise; we need
     # the total noise fraction of the final corpus to equal `noise_rate`.
     # Solve: (existing_noise + K) / (N_scenario + K) = noise_rate

@@ -1,0 +1,105 @@
+{
+  "scenario_id": "mini-v23",
+  "name": "Mini v2.3 — with confusers and paraphrase pressure",
+  "description": "Same 5-day facts as mini, with per-query confusers that share vocabulary with each query but contain wrong or no answer. Tests whether retrievers can filter semantic/vocabulary collisions.",
+  "timeline": [
+    { "day": 0, "type": "fact", "id": "v23-d000-0",
+      "text": "User's home address is 1 Apple Way, Cupertino CA." },
+    { "day": 0, "type": "credential", "id": "v23-d000-1",
+      "text": "User's wifi password is bluefin-22." },
+    { "day": 0, "type": "preference", "id": "v23-d000-2",
+      "text": "User prefers oat milk in coffee." },
+    { "day": 1, "type": "noise", "id": "v23-d001-0",
+      "text": "Talked about the weather, asked for jokes." },
+    { "day": 2, "type": "update", "id": "v23-d002-0",
+      "text": "User moved. New home address is 99 Oak Drive, Geneva IL.",
+      "supersedes": "v23-d000-0" },
+    { "day": 3, "type": "noise", "id": "v23-d003-0",
+      "text": "Brainstorm session about gardening." },
+    { "day": 4, "type": "fact", "id": "v23-d004-0",
+      "text": "User's dog is named Cooper." }
+  ],
+  "queries": [
+    {
+      "query_id": "v23-q1",
+      "scenario_id": "mini-v23",
+      "question": "What is the user's home address?",
+      "expected_answer": "99 Oak Drive, Geneva IL",
+      "reasoning_type": "factual",
+      "difficulty": "medium",
+      "trap": "1 Apple Way, Cupertino CA",
+      "checkpoint_eligibility": [3, 4, 7, 14, 30, 60, 90],
+      "resolution_type": "contradiction"
+    },
+    {
+      "query_id": "v23-q2",
+      "scenario_id": "mini-v23",
+      "question": "What is the user's wifi password?",
+      "expected_answer": "bluefin-22",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [0, 1, 2, 3, 4, 7, 14, 30, 60, 90],
+      "resolution_type": "stable"
+    },
+    {
+      "query_id": "v23-q3",
+      "scenario_id": "mini-v23",
+      "question": "What is the user's dog's name?",
+      "expected_answer": "Cooper",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [4, 7, 14, 30, 60, 90],
+      "resolution_type": "stable"
+    },
+    {
+      "query_id": "v23-q4",
+      "scenario_id": "mini-v23",
+      "question": "What does the user prefer in coffee?",
+      "expected_answer": "oat milk",
+      "reasoning_type": "factual",
+      "difficulty": "easy",
+      "trap": null,
+      "checkpoint_eligibility": [0, 1, 2, 3, 4, 7, 14, 30, 60, 90],
+      "resolution_type": "stable"
+    }
+  ],
+  "confusers": {
+    "v23-q1": [
+      { "day": 5,  "text": "User's home internet speed has been slow this week." },
+      { "day": 8,  "text": "User mentioned that home is where the heart is." },
+      { "day": 12, "text": "User's home state is originally California." },
+      { "day": 18, "text": "User's home office has a standing desk and a ring light." },
+      { "day": 25, "text": "User dreams about buying a second home near a lake." },
+      { "day": 40, "text": "User's home-cooked meal preference is pasta with pesto." },
+      { "day": 55, "text": "User's home base for conferences last year was an Airbnb." },
+      { "day": 70, "text": "User's home team in the NBA is the Lakers." }
+    ],
+    "v23-q2": [
+      { "day": 6,  "text": "User's wifi router model is an ASUS mesh system from 2023." },
+      { "day": 11, "text": "User's wifi signal is weakest in the garage." },
+      { "day": 20, "text": "User's wifi provider bumped prices again last quarter." },
+      { "day": 33, "text": "User's wifi SSID is GuestNetworkUpstairs." },
+      { "day": 48, "text": "User's wifi password policy at work requires rotation monthly." },
+      { "day": 65, "text": "User's wifi dropped during a call with their manager." }
+    ],
+    "v23-q3": [
+      { "day": 9,  "text": "User's dog walker comes on Tuesdays and Thursdays." },
+      { "day": 16, "text": "User's dog loves a specific peanut butter treat brand." },
+      { "day": 22, "text": "User's dog-training class meets at the rec center." },
+      { "day": 37, "text": "User's dog-sitter last summer was the neighbor's kid." },
+      { "day": 52, "text": "User's dog is due for a vet appointment soon." },
+      { "day": 68, "text": "User's dog park trips usually happen on weekends." },
+      { "day": 82, "text": "User's dog used to belong to their cousin before adoption." }
+    ],
+    "v23-q4": [
+      { "day": 7,  "text": "User's coffee grinder makes too much noise in the morning." },
+      { "day": 15, "text": "User's coffee budget is higher than their tea budget." },
+      { "day": 28, "text": "User's coffee shop of choice on the commute is a pour-over spot." },
+      { "day": 45, "text": "User's coffee intake drops on weekends by half." },
+      { "day": 60, "text": "User's coffee-and-book routine is on Saturday mornings." },
+      { "day": 78, "text": "User's coffee order when traveling is usually a flat white." }
+    ]
+  }
+}

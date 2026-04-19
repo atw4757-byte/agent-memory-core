@@ -1,0 +1,85 @@
+{
+  "adapter": "agent-memory-core",
+  "version": "0.1.2",
+  "mode": "stock",
+  "seed": 43,
+  "noise_rate": 0.3,
+  "spec_version": "v2.1.0",
+  "metadata": {
+    "name": "agent-memory-core",
+    "version": "0.1.2",
+    "implements_consolidation": true,
+    "mode": "stock"
+  },
+  "checkpoints": [
+    {
+      "day": 0,
+      "answer_accuracy": 1.0,
+      "top1_answer_accuracy": 1.0,
+      "confuser_resistance": 1.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0,
+      "quality_v2_3": 1.0
+    },
+    {
+      "day": 7,
+      "answer_accuracy": 1.0,
+      "top1_answer_accuracy": 0.75,
+      "confuser_resistance": 0.25,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0,
+      "quality_v2_3": 0.7875
+    },
+    {
+      "day": 14,
+      "answer_accuracy": 1.0,
+      "top1_answer_accuracy": 0.75,
+      "confuser_resistance": 0.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0,
+      "quality_v2_3": 0.7375
+    },
+    {
+      "day": 30,
+      "answer_accuracy": 1.0,
+      "top1_answer_accuracy": 0.75,
+      "confuser_resistance": 0.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0,
+      "quality_v2_3": 0.7375
+    },
+    {
+      "day": 60,
+      "answer_accuracy": 1.0,
+      "top1_answer_accuracy": 0.75,
+      "confuser_resistance": 0.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0,
+      "quality_v2_3": 0.7375
+    },
+    {
+      "day": 90,
+      "answer_accuracy": 1.0,
+      "top1_answer_accuracy": 0.75,
+      "confuser_resistance": 0.0,
+      "contradiction_resolution": 1.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 1.0,
+      "quality": 1.0,
+      "quality_v2_3": 0.7375
+    }
+  ],
+  "auc_quality": 90.0,
+  "temporal_improvement": 0.0,
+  "completed_at": "2026-04-19T12:31:59.675111+00:00"
+}

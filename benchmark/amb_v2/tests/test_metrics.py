@@ -12,16 +12,20 @@ from benchmark.amb_v2.metrics import (
     QueryResult,
     answer_accuracy,
     auc_quality,
+    confuser_resistance,
     contradiction_resolution,
     quality_at,
+    quality_at_v2_3,
     salience_preservation,
     stale_fact_rate,
     temporal_improvement,
+    top1_answer_accuracy,
 )
 
 
 def qr(qid="q1", scenario="x", actual="A", expected="A", aliases=None,
-       resolution="stable", chunk_type="fact", superseded_value=None):
+       resolution="stable", chunk_type="fact", superseded_value=None,
+       top1_chunk=None, returned_chunks=()):
     return QueryResult(
         query_id=qid, scenario_id=scenario,
         actual_answer=actual, expected_answer=expected,
@@ -29,6 +33,8 @@ def qr(qid="q1", scenario="x", actual="A", expected="A", aliases=None,
         resolution_type=resolution,
         chunk_type=chunk_type,
         superseded_value=superseded_value,
+        top1_chunk=top1_chunk,
+        returned_chunks=tuple(returned_chunks),
     )
 
 
@@ -202,3 +208,96 @@ def test_temporal_improvement_single_point_is_zero():
 def test_temporal_improvement_handles_unsorted():
     pts = [(90, 0.8), (0, 0.2)]
     assert temporal_improvement(pts) == pytest.approx(0.6)
+
+
+# T-21 top1_answer_accuracy (v2.3) ────────────────────────────────────
+
+def test_top1_accuracy_uses_top1_chunk_when_provided():
+    """When top1_chunk is set, score on it — not on actual_answer."""
+    rs = [qr(top1_chunk="Andy visited Roswell briefly", expected="Andy lives in Roswell",
+             actual="Andy lives in Roswell | Andy visited Roswell briefly")]
+    # any-of-top-k would match (actual contains expected), but top-1 is the confuser
+    assert answer_accuracy(rs) == 1.0
+    assert top1_answer_accuracy(rs) == 0.0
+
+
+def test_top1_accuracy_correct_when_top_has_answer():
+    rs = [qr(top1_chunk="Andy lives in Roswell", expected="Roswell")]
+    assert top1_answer_accuracy(rs) == 1.0
+
+
+def test_top1_accuracy_falls_back_to_actual_when_missing():
+    """Pre-v2.3 results without top1_chunk should match actual_answer, keeping
+    backwards compat with old result files."""
+    rs = [qr(actual="Andy lives in Roswell", expected="Roswell", top1_chunk=None)]
+    assert top1_answer_accuracy(rs) == 1.0
+
+
+def test_top1_accuracy_empty_is_zero():
+    assert top1_answer_accuracy([]) == 0.0
+
+
+# T-22 confuser_resistance (v2.3) ─────────────────────────────────────
+
+def test_confuser_resistance_clean_topk_returns_1():
+    rs = [qr(qid="q1", returned_chunks=("Andy lives in Roswell", "User's dog is Cooper"))]
+    confusers = {"q1": ("Andy visited Roswell briefly", "Andy's home state is California")}
+    assert confuser_resistance(rs, confusers) == 1.0
+
+
+def test_confuser_resistance_polluted_topk_returns_0():
+    rs = [qr(qid="q1", returned_chunks=("Andy visited Roswell briefly", "Andy lives in Roswell"))]
+    confusers = {"q1": ("Andy visited Roswell briefly",)}
+    assert confuser_resistance(rs, confusers) == 0.0
+
+
+def test_confuser_resistance_mixed_across_queries():
+    rs = [
+        qr(qid="q1", returned_chunks=("A", "B")),            # clean
+        qr(qid="q2", returned_chunks=("confuser x", "C")),   # polluted
+    ]
+    confusers = {"q1": ("confuser x",), "q2": ("confuser x",)}
+    assert confuser_resistance(rs, confusers) == 0.5
+
+
+def test_confuser_resistance_no_eligible_returns_1():
+    """No returned_chunks populated OR no confusers in map → skip; 1.0."""
+    rs = [qr(returned_chunks=())]
+    assert confuser_resistance(rs, {}) == 1.0
+    rs2 = [qr(qid="q1", returned_chunks=("foo",))]
+    assert confuser_resistance(rs2, {}) == 1.0
+
+
+def test_confuser_resistance_case_insensitive():
+    rs = [qr(qid="q1", returned_chunks=("ANDY visited roswell BRIEFLY",))]
+    confusers = {"q1": ("Andy visited Roswell briefly",)}
+    assert confuser_resistance(rs, confusers) == 0.0
+
+
+# T-23 quality_at_v2_3 composite ──────────────────────────────────────
+
+def test_quality_v2_3_weights_sum_to_one():
+    score = quality_at_v2_3(
+        top1_answer=1.0, any_answer=1.0, contradiction=1.0,
+        stale=0.0, salience=1.0, confuser_resist=1.0,
+    )
+    assert score == pytest.approx(1.0)
+
+
+def test_quality_v2_3_zero_floor():
+    score = quality_at_v2_3(
+        top1_answer=0.0, any_answer=0.0, contradiction=0.0,
+        stale=1.0, salience=0.0, confuser_resist=0.0,
+    )
+    assert score == pytest.approx(0.0)
+
+
+def test_quality_v2_3_weights_top1_above_any():
+    """Moving top1 from 0 to 1 should lift quality more than moving any from 0 to 1."""
+    base = dict(any_answer=0.0, contradiction=0.0, stale=0.5, salience=0.0,
+                confuser_resist=0.0)
+    lift_top1 = quality_at_v2_3(top1_answer=1.0, **base) - quality_at_v2_3(top1_answer=0.0, **base)
+    base2 = dict(top1_answer=0.0, contradiction=0.0, stale=0.5, salience=0.0,
+                 confuser_resist=0.0)
+    lift_any = quality_at_v2_3(any_answer=1.0, **base2) - quality_at_v2_3(any_answer=0.0, **base2)
+    assert lift_top1 > lift_any
