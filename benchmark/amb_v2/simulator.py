@@ -15,6 +15,55 @@ from benchmark.amb_v2.scenarios import ScenarioBundle
 
 SOFT_CAP_PER_DAY = 200
 
+FILLER_FACT_TEMPLATES = (
+    # v2.2 scale knob: well-formed "facts" about unrelated entities that share
+    # embedding neighborhood with scenario queries without containing any
+    # expected_answer substring. These stress retrieval pool density — the
+    # regime where a real memory primitive (filter/rerank) should win.
+    # Entities (people, projects, places, colors, drinks) are intentionally
+    # disjoint from public + known held-out scenario vocab.
+    "Marcus takes his espresso with a twist of lemon peel.",
+    "The Jupiter project finished its closed beta in mid-October.",
+    "Lena's bicycle is a teal Bianchi with chrome handlebars.",
+    "The Chronos team relocated to the third floor last quarter.",
+    "Hiroshi's favorite pastime is weekend woodworking in the garage.",
+    "The Meridian initiative picked Wednesday mornings for status syncs.",
+    "Priya keeps a fiddle-leaf fig on the left side of her desk.",
+    "The Atlas workstream runs a quarterly show-and-tell.",
+    "Diego's rescue parrot is named Oreo and speaks four words.",
+    "The Nebula program is sponsored by the infrastructure org.",
+    "Sana drives a navy crossover with roof rails and a bike rack.",
+    "The Kepler pilot covered three regions before the re-scoping.",
+    "Ravi's bookshelf is mostly biographies and nautical maps.",
+    "The Orion channel was muted after the reorg announcement.",
+    "Camila's houseplant collection includes a snake plant by the window.",
+    "The Vesta dashboard was retired in favor of the unified portal.",
+    "Theo brews cold drip coffee on Sunday afternoons.",
+    "The Calypso team renamed itself to reduce confusion with Vega.",
+    "Mei's laptop case has stickers from every conference she attended.",
+    "The Titan ritual is a Friday hand-off meeting at four PM.",
+    "Sven bakes sourdough on a schedule keyed to moon phases.",
+    "The Pegasus budget line was consolidated with Orion for Q4.",
+    "Aarav's dog is a border collie called Scout.",
+    "The Helios squad owns the public-facing reporting layer.",
+    "Ines keeps a sextant on her desk as a conversation piece.",
+    "The Draco working group meets the first Tuesday of the month.",
+    "Omar's cycling shoes are white with blue accents on the heel.",
+    "The Persephone migration was scoped to six sprint cycles.",
+    "Yuki hand-letters birthday cards for the team every year.",
+    "The Icarus review board skipped its November session for holidays.",
+    "Rafa's bonsai is a five-year-old juniper with a curved trunk.",
+    "The Aurora contract renewal negotiation dragged into February.",
+    "Noa's keyboard has blue switches and a woven braid cable.",
+    "The Sagitta playbook was updated after the last incident retro.",
+    "Pablo trains for marathons on a route through Druid Hills.",
+    "The Lyra roadmap has three milestones tied to the annual summit.",
+    "Fatima paints watercolors of coastal lighthouses on weekends.",
+    "The Carina service returned to green after the failover drill.",
+    "Lukas keeps a notebook of overheard sentences from train stations.",
+    "The Phoenix working doc lives in the shared drive's archive folder.",
+)
+
 NOISE_TEMPLATES = (
     # Lexically-loaded: share domain vocab with scenario queries (projects,
     # languages, colors, teams, schedules, credentials) without containing
@@ -54,6 +103,7 @@ def simulate(
     *,
     noise_rate: float = 0.45,
     days: int = 90,
+    filler_facts_per_day: int = 0,
 ) -> Iterator[tuple[int, list[Chunk]]]:
     """Yield (day, chunks) tuples for `days` simulated days.
 
@@ -66,6 +116,12 @@ def simulate(
     noise_rate : target fraction of total chunks that should be noise.
         Calibrated at ±5% across full 90-day runs.
     days : number of simulated days to emit (0..days-1).
+    filler_facts_per_day : v2.2 scale knob. Inject K additional well-formed
+        "facts" per simulated day drawn from FILLER_FACT_TEMPLATES. These are
+        domain-neighbor facts about unrelated entities — they compete in the
+        retrieval pool without containing any query's expected_answer, so
+        they stress embedding-space density without creating false positives.
+        Default 0 preserves v2.1 output byte-for-byte.
     """
     rng = random.Random(seed)
 
@@ -120,6 +176,21 @@ def simulate(
             id=cid, scenario_id=sid, day=d, text=text, type="noise",
         ))
         noise_counter += 1
+
+    # Inject filler facts (v2.2 scale knob). Deterministic: RNG state after
+    # noise injection is a pure function of (seed, scenarios, noise_rate, days).
+    if filler_facts_per_day > 0:
+        filler_counter = 0
+        for d in range(days):
+            for _ in range(filler_facts_per_day):
+                sid = (scenarios[rng.randrange(len(scenarios))].scenario_id
+                       if scenarios else "filler")
+                text = rng.choice(FILLER_FACT_TEMPLATES)
+                cid = f"filler-{_scenario_short(sid)}-d{d:03d}-f{filler_counter:05d}"
+                by_day[d].append(Chunk(
+                    id=cid, scenario_id=sid, day=d, text=text, type="fact",
+                ))
+                filler_counter += 1
 
     # Emit per day; warn if any day exceeds soft cap.
     for d in range(days):

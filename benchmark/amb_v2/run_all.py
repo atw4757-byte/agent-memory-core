@@ -34,6 +34,7 @@ class GridSpec:
     days: int | None = None
     held_out_key: Path | None = None
     held_out_dir: Path | None = None
+    filler_facts_per_day: int = 0
 
 
 def _result_path(out_dir: Path, adapter: str, mode: str, seed: int, noise_rate: float) -> Path:
@@ -65,6 +66,7 @@ def run_grid(spec: GridSpec) -> list[Path]:
                         adapter=adapter, scenarios=bundles, seed=seed,
                         noise_rate=nr, mode=mode,
                         checkpoints=spec.checkpoints, days=spec.days,
+                        filler_facts_per_day=spec.filler_facts_per_day,
                     )
                     out.write_text(json.dumps(result, indent=2))
     return paths
@@ -90,6 +92,9 @@ def main(argv: list[str] | None = None) -> int:
                         help="Directory with *.json.age held-out scenarios (defaults to --scenarios)")
     parser.add_argument("--quick", action="store_true",
                         help="Smoke grid: 1 adapter, 1 seed, 1 noise, stock-only, short checkpoints")
+    parser.add_argument("--filler-facts-per-day", type=int, default=0,
+                        help="v2.2 scale knob: inject K filler facts per simulated day "
+                             "to stress retrieval-pool density. Default 0 = v2.1 parity.")
     args = parser.parse_args(argv)
 
     if args.quick:
@@ -114,6 +119,7 @@ def main(argv: list[str] | None = None) -> int:
             out_dir=args.out_dir,
             held_out_key=args.held_out_key,
             held_out_dir=args.held_out_dir,
+            filler_facts_per_day=args.filler_facts_per_day,
         )
 
     paths = run_grid(spec)

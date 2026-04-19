@@ -158,6 +158,7 @@ def run_one(
     mode: Mode,
     checkpoints: tuple[int, ...] | list[int] = DEFAULT_CHECKPOINTS,
     days: int | None = None,
+    filler_facts_per_day: int = 0,
 ) -> dict[str, Any]:
     """Run one full benchmark pass for one (adapter, mode, seed, noise_rate)."""
     validate_metadata(adapter.metadata)
@@ -175,7 +176,9 @@ def run_one(
     chunk_type_idx = _build_chunk_type_index(scenarios)
 
     checkpoint_results: list[dict[str, Any]] = []
-    for day, chunks in simulate(scenarios, seed=seed, noise_rate=noise_rate, days=days):
+    for day, chunks in simulate(scenarios, seed=seed, noise_rate=noise_rate,
+                                 days=days,
+                                 filler_facts_per_day=filler_facts_per_day):
         if chunks:
             adapter.ingest(day, chunks)
         if day > 0:
