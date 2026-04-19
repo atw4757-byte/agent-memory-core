@@ -771,8 +771,12 @@ class MemoryStore:
             if sid:
                 by_scenario_id[sid] = c["id"]
 
-        updates_ids: list[str] = []
-        updates_meta: list[dict] = []
+        # Collapse to a unique {target_id: newest_superseder_id} mapping so
+        # ChromaDB never sees duplicate ids in the update batch. If multiple
+        # chunks supersede the same older chunk (double contradiction), the
+        # latest one in iteration order wins — matching retrieval's
+        # latest-value semantics.
+        resolved: dict[str, str] = {}
         missing = 0
         for c in active:
             sup = c["metadata"].get("supersedes")
@@ -784,14 +788,13 @@ class MemoryStore:
                 continue
             if target_id == c["id"]:
                 continue  # self-reference guard
-            # Idempotent: skip if already marked correctly.
-            # Need to look up target's current metadata.
-            updates_ids.append(target_id)
-            updates_meta.append({"superseded_by": c["id"]})
+            resolved[target_id] = c["id"]
 
-        if updates_ids:
-            self.update_metadata(updates_ids, updates_meta)
-        return {"superseded_marked": len(updates_ids), "missing_targets": missing}
+        if resolved:
+            ids = list(resolved.keys())
+            metas = [{"superseded_by": resolved[i]} for i in ids]
+            self.update_metadata(ids, metas)
+        return {"superseded_marked": len(resolved), "missing_targets": missing}
 
     def get_all(
         self,

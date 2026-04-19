@@ -81,6 +81,22 @@ class TestConsolidateSupersedes:
                                       "supersedes": "nonexistent-id"})
         tmp_store.consolidate()  # must not raise
 
+    def test_consolidate_dedupes_double_contradiction(self, tmp_store):
+        """Two chunks superseding the same older chunk must NOT crash on
+        ChromaDB's duplicate-id validation. Latest superseder wins."""
+        a_id = tmp_store.add("Original value.", type="fact", source="t",
+                             extra_metadata={"scenario_chunk_id": "a"})
+        b_id = tmp_store.add("First replacement.", type="fact", source="t",
+                             extra_metadata={"scenario_chunk_id": "b", "supersedes": "a"})
+        c_id = tmp_store.add("Second replacement.", type="fact", source="t",
+                             extra_metadata={"scenario_chunk_id": "c", "supersedes": "a"})
+        tmp_store.consolidate()  # must not raise
+        all_chunks = tmp_store.get_all(include_archived=True)
+        by_id = {c["id"]: c for c in all_chunks}
+        # A got marked as superseded; newest superseder (b or c) wins — both
+        # are acceptable, but it must be one of them (not crash, not missing).
+        assert by_id[a_id]["metadata"].get("superseded_by") in (b_id, c_id)
+
 
 class TestSearchExcludesSuperseded:
     def test_search_skips_superseded_by_default(self, tmp_store):
