@@ -21,6 +21,15 @@ try:
 except ImportError:
     _AVAILABLE = False
 
+# AMB v2 scenarios use chunk types the core library doesn't recognize in
+# VALID_TYPES. Without this map, add() raises ValueError and chunks vanish
+# (the "Python"/"blue" retrieval gap diagnosed in v2.0.1).
+_TYPE_MAP = {
+    "preference": "personal",
+    "update": "fact",
+    "noise": "session",
+}
+
 
 class AgentMemoryCoreAdapter:
     def __init__(self, mode: Mode = "stock") -> None:
@@ -36,31 +45,44 @@ class AgentMemoryCoreAdapter:
             _log.debug("WorkingMemory init failed: %s", e)
             self._working = None
 
+        # Fail loud if tuned mode is requested without a real consolidate().
+        # Previously this silently no-oped, making tuned == stock a hidden bug.
+        if mode == "tuned":
+            consolidator = getattr(self._store, "consolidate", None)
+            if not callable(consolidator):
+                raise NotImplementedError(
+                    "AgentMemoryCoreAdapter(mode='tuned') requires "
+                    "MemoryStore.consolidate(); none was found on "
+                    f"{type(self._store).__name__}. Upgrade agent-memory-core "
+                    "or run with mode='stock'."
+                )
+
     def __del__(self) -> None:
         if hasattr(self, "_tmp"):
             shutil.rmtree(self._tmp, ignore_errors=True)
 
     def ingest(self, day: int, chunks: list[Chunk]) -> None:
         for c in chunks:
+            mapped_type = _TYPE_MAP.get(c.type, c.type)
             try:
                 self._store.add(
                     c.text,
-                    type=c.type if c.type != "noise" else "session",
+                    type=mapped_type,
                     source=f"d{day:03d}_{c.scenario_id}",
                 )
+            except ValueError as e:
+                # Unmapped type — surface loudly so the gap is visible.
+                _log.warning("ingest dropped chunk %s (type=%s→%s): %s",
+                             c.id, c.type, mapped_type, e)
             except Exception as e:
-                _log.debug("ingest chunk %s failed: %s", c.id, e)
+                _log.warning("ingest chunk %s failed: %s", c.id, e)
 
     def consolidate(self, day: int) -> None:
         if self.mode == "stock":
             return
-        # Tuned: trigger consolidation if available
-        try:
-            consolidator = getattr(self._store, "consolidate", None)
-            if callable(consolidator):
-                consolidator()
-        except Exception as e:
-            _log.debug("consolidate day=%d failed: %s", day, e)
+        # Tuned: existence of consolidate() was asserted at __init__.
+        # Any failure here is a real bug — propagate.
+        self._store.consolidate()
 
     def query(self, question: str, scenario_id: str) -> str:
         try:
