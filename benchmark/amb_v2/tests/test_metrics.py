@@ -16,6 +16,7 @@ from benchmark.amb_v2.metrics import (
     quality_at,
     salience_preservation,
     stale_fact_rate,
+    temporal_improvement,
 )
 
 
@@ -168,3 +169,36 @@ def test_auc_handles_unsorted_input():
     """If checkpoints arrive out of order, sort by day before integrating."""
     pts = [(90, 0.0), (0, 1.0)]
     assert auc_quality(pts) == pytest.approx(45.0)
+
+
+# T-15 temporal improvement (v2.1) ────────────────────────────────────
+
+def test_temporal_improvement_flat_is_zero():
+    """Flat quality trajectory → no learning signal → 0.0."""
+    pts = [(0, 0.5), (7, 0.5), (30, 0.5), (90, 0.5)]
+    assert temporal_improvement(pts) == pytest.approx(0.0)
+
+
+def test_temporal_improvement_rising_is_positive():
+    """Quality rises from 0.2 → 0.8 across checkpoints → late-mean > early-mean."""
+    pts = [(0, 0.2), (7, 0.3), (30, 0.7), (90, 0.8)]
+    assert temporal_improvement(pts) > 0.3
+
+
+def test_temporal_improvement_falling_is_negative():
+    """Quality degrades → late-mean < early-mean."""
+    pts = [(0, 0.9), (7, 0.8), (30, 0.3), (90, 0.2)]
+    assert temporal_improvement(pts) < -0.3
+
+
+def test_temporal_improvement_empty_is_zero():
+    assert temporal_improvement([]) == 0.0
+
+
+def test_temporal_improvement_single_point_is_zero():
+    assert temporal_improvement([(0, 0.5)]) == 0.0
+
+
+def test_temporal_improvement_handles_unsorted():
+    pts = [(90, 0.8), (0, 0.2)]
+    assert temporal_improvement(pts) == pytest.approx(0.6)

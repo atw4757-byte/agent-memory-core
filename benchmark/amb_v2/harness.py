@@ -21,18 +21,20 @@ from benchmark.amb_v2.metrics import (
     quality_at,
     salience_preservation,
     stale_fact_rate,
+    temporal_improvement,
 )
 from benchmark.amb_v2.scenarios import ScenarioBundle
 from benchmark.amb_v2.simulator import simulate
 
 DEFAULT_CHECKPOINTS = (0, 7, 14, 30, 60, 90)
-SPEC_VERSION = "v2.0.0"
+SPEC_VERSION = "v2.1.0"
 
 RESULTS_SCHEMA: dict[str, Any] = {
     "type": "object",
     "required": [
         "adapter", "version", "mode", "seed", "noise_rate",
-        "spec_version", "checkpoints", "auc_quality", "metadata", "completed_at",
+        "spec_version", "checkpoints", "auc_quality", "temporal_improvement",
+        "metadata", "completed_at",
     ],
     "properties": {
         "adapter": {"type": "string"},
@@ -44,6 +46,7 @@ RESULTS_SCHEMA: dict[str, Any] = {
         "metadata": {"type": "object"},
         "completed_at": {"type": "string"},
         "auc_quality": {"type": "number"},
+        "temporal_improvement": {"type": "number"},
         "checkpoints": {
             "type": "array",
             "items": {
@@ -182,7 +185,9 @@ def run_one(
                 adapter, scenarios, day, supersede_idx, chunk_type_idx,
             ))
 
-    auc = auc_quality([(c["day"], c["quality"]) for c in checkpoint_results])
+    pts = [(c["day"], c["quality"]) for c in checkpoint_results]
+    auc = auc_quality(pts)
+    temporal = temporal_improvement(pts)
 
     return {
         "adapter": adapter.metadata["name"],
@@ -194,5 +199,6 @@ def run_one(
         "metadata": dict(adapter.metadata),
         "checkpoints": checkpoint_results,
         "auc_quality": round(auc, 4),
+        "temporal_improvement": round(temporal, 4),
         "completed_at": datetime.now(timezone.utc).isoformat(),
     }

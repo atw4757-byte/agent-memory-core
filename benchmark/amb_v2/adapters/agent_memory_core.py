@@ -64,11 +64,15 @@ class AgentMemoryCoreAdapter:
     def ingest(self, day: int, chunks: list[Chunk]) -> None:
         for c in chunks:
             mapped_type = _TYPE_MAP.get(c.type, c.type)
+            extra = {"scenario_chunk_id": c.id}
+            if c.supersedes:
+                extra["supersedes"] = c.supersedes
             try:
                 self._store.add(
                     c.text,
                     type=mapped_type,
                     source=f"d{day:03d}_{c.scenario_id}",
+                    extra_metadata=extra,
                 )
             except ValueError as e:
                 # Unmapped type — surface loudly so the gap is visible.

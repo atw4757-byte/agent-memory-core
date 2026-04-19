@@ -16,16 +16,31 @@ from benchmark.amb_v2.scenarios import ScenarioBundle
 SOFT_CAP_PER_DAY = 200
 
 NOISE_TEMPLATES = (
-    "Casual chat about the weather and weekend plans.",
-    "Asked the assistant for a joke; received and laughed.",
-    "Brainstorm session about household projects.",
-    "Discussed news headlines from this morning.",
-    "Vented about a frustrating commute.",
-    "Asked for restaurant recommendations nearby.",
-    "Requested a music playlist for the afternoon.",
-    "Talked about a recent movie or show.",
-    "Casual reflection on the day so far.",
-    "Asked the assistant to summarize a podcast episode.",
+    # Lexically-loaded: share domain vocab with scenario queries (projects,
+    # languages, colors, teams, schedules, credentials) without containing
+    # any actual answer substring. These compete in embedding space, which
+    # is what separates a retrieval system that reasons from one that does
+    # lexical matching on top-k.
+    "The project kickoff meeting was rescheduled to next Thursday afternoon.",
+    "A client asked whether our roadmap covers the legacy reporting module.",
+    "The team debated whether a different framework would simplify tooling.",
+    "Marketing shared a mood board full of muted earth tones for review.",
+    "Someone on the design team proposed rotating the color palette quarterly.",
+    "The infrastructure channel discussed migrating the staging cluster.",
+    "A new hire asked about onboarding docs for the authentication service.",
+    "The backlog grooming session moved five tickets into next sprint.",
+    "HR sent a reminder about the upcoming benefits enrollment window.",
+    "The CI pipeline flagged a flaky test that no one has claimed yet.",
+    "A stakeholder questioned whether the current vendor meets compliance.",
+    "The architecture review was postponed until the lead returns from leave.",
+    "Finance confirmed the hardware budget for the next quarter is locked.",
+    "A team member shared an article about developer productivity metrics.",
+    "The weekly engineering sync covered three unrelated status updates.",
+    "Someone suggested using a polling approach instead of webhooks.",
+    "A product manager pushed back on the proposed release cadence.",
+    "Legal wants another review pass on the vendor data-sharing clauses.",
+    "The documentation team requested examples for the public API reference.",
+    "An operations lead raised concerns about on-call rotation fairness.",
 )
 
 

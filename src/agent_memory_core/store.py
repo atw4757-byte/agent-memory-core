@@ -408,6 +408,7 @@ class MemoryStore:
         since: Optional[str] = None,
         agent: Optional[str] = None,
         include_archived: bool = False,
+        include_superseded: bool = False,
     ) -> list[MemoryResult]:
         """Semantic search across stored memories.
 
@@ -558,6 +559,10 @@ class MemoryStore:
 
             # Skip archived/consolidated chunks unless explicitly requested
             if not include_archived and metadata.get("consolidated_into"):
+                continue
+            # Skip superseded chunks — their value has been explicitly
+            # contradicted by a newer statement. v2.1 supersedes-aware path.
+            if not include_superseded and metadata.get("superseded_by"):
                 continue
 
             norm_distance = min(distance / 2.0, 1.0)
@@ -742,6 +747,51 @@ class MemoryStore:
 
         formatted.sort(key=lambda x: x["combined_score"])
         return formatted
+
+    def consolidate(self) -> dict:
+        """Deterministic supersedes-aware consolidation.
+
+        Scans all active chunks. For each chunk whose metadata contains
+        ``supersedes=<scenario_chunk_id>``, finds the older chunk whose
+        ``scenario_chunk_id`` matches that value and marks it
+        ``superseded_by=<newer_chunk_internal_id>``. Idempotent, LLM-free,
+        safe when targets are missing.
+
+        Distinct from :class:`Consolidator` which uses Ollama for lossy
+        semantic compression.
+
+        Returns
+        -------
+        dict: ``{"superseded_marked": N, "missing_targets": M}``
+        """
+        active = self.get_all(include_archived=False)
+        by_scenario_id: dict[str, str] = {}
+        for c in active:
+            sid = c["metadata"].get("scenario_chunk_id")
+            if sid:
+                by_scenario_id[sid] = c["id"]
+
+        updates_ids: list[str] = []
+        updates_meta: list[dict] = []
+        missing = 0
+        for c in active:
+            sup = c["metadata"].get("supersedes")
+            if not sup:
+                continue
+            target_id = by_scenario_id.get(sup)
+            if target_id is None:
+                missing += 1
+                continue
+            if target_id == c["id"]:
+                continue  # self-reference guard
+            # Idempotent: skip if already marked correctly.
+            # Need to look up target's current metadata.
+            updates_ids.append(target_id)
+            updates_meta.append({"superseded_by": c["id"]})
+
+        if updates_ids:
+            self.update_metadata(updates_ids, updates_meta)
+        return {"superseded_marked": len(updates_ids), "missing_targets": missing}
 
     def get_all(
         self,

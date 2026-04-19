@@ -119,3 +119,26 @@ def auc_quality(checkpoints: list[tuple[int, float]]) -> float:
     for (d0, q0), (d1, q1) in zip(pts, pts[1:]):
         area += (d1 - d0) * (q0 + q1) / 2.0
     return area
+
+
+def temporal_improvement(checkpoints: list[tuple[int, float]]) -> float:
+    """Late-half mean quality minus early-half mean quality.
+
+    Measures whether the system IMPROVES as more context accumulates.
+    A true memory system should score higher here than a stateless retrieval
+    loop. Positive = learns over time; zero = flat; negative = degrades.
+
+    Separate from AUC (total area): two systems can have identical AUC with
+    very different trajectories. Temporal improvement isolates the slope.
+
+    Returns 0.0 when fewer than 2 checkpoints provided.
+    """
+    if not checkpoints or len(checkpoints) < 2:
+        return 0.0
+    pts = sorted(checkpoints, key=lambda p: p[0])
+    mid = len(pts) // 2
+    early = [q for _, q in pts[:mid]]
+    late = [q for _, q in pts[mid:]]
+    if not early or not late:
+        return 0.0
+    return sum(late) / len(late) - sum(early) / len(early)
