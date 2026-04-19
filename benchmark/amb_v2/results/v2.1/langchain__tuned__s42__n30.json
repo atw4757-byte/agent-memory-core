@@ -1,0 +1,67 @@
+{
+  "adapter": "langchain-buffer",
+  "version": "1.2.15",
+  "mode": "tuned",
+  "seed": 42,
+  "noise_rate": 0.3,
+  "spec_version": "v2.1.0",
+  "metadata": {
+    "name": "langchain-buffer",
+    "version": "1.2.15",
+    "implements_consolidation": true,
+    "mode": "tuned"
+  },
+  "checkpoints": [
+    {
+      "day": 0,
+      "answer_accuracy": 0.1875,
+      "contradiction_resolution": 0.0,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 0.1667,
+      "quality": 0.25
+    },
+    {
+      "day": 7,
+      "answer_accuracy": 0.2647,
+      "contradiction_resolution": 0.1,
+      "stale_fact_rate": 0.3,
+      "salience_preservation": 0.1667,
+      "quality": 0.2659
+    },
+    {
+      "day": 14,
+      "answer_accuracy": 0.3529,
+      "contradiction_resolution": 0.1,
+      "stale_fact_rate": 0.3,
+      "salience_preservation": 0.1667,
+      "quality": 0.3012
+    },
+    {
+      "day": 30,
+      "answer_accuracy": 0.5588,
+      "contradiction_resolution": 0.3,
+      "stale_fact_rate": 0.2,
+      "salience_preservation": 0.6667,
+      "quality": 0.5335
+    },
+    {
+      "day": 60,
+      "answer_accuracy": 0.2647,
+      "contradiction_resolution": 0.3,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 0.3333,
+      "quality": 0.3959
+    },
+    {
+      "day": 90,
+      "answer_accuracy": 0.1765,
+      "contradiction_resolution": 0.4,
+      "stale_fact_rate": 0.0,
+      "salience_preservation": 0.0,
+      "quality": 0.3406
+    }
+  ],
+  "auc_quality": 35.4566,
+  "temporal_improvement": 0.151,
+  "completed_at": "2026-04-19T01:39:21.064194+00:00"
+}
