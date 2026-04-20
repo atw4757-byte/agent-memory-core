@@ -1,0 +1,314 @@
+#!/usr/bin/env python3
+"""Divergence Router — Continuous Data Pipeline
+Generates new divergence records 24/7 on Cipher.
+Each run produces a new batch with rotated dimension framings.
+Follows pipeline-protocol.md exactly.
+"""
+import json
+import hashlib
+import uuid
+import time
+import os
+import random
+from datetime import datetime
+from pathlib import Path
+from urllib.request import Request, urlopen
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+MODELS = ["mistral:latest", "qwen2.5:7b", "phi3:mini", "qwen3:8b", "glm4:9b"]
+BASE_DIR = Path(os.path.expanduser("~/Archon-Vault/Projects/divergence-router/data"))
+
+MODEL_META = {
+    "mistral:latest": {"model_name": "mistral-7b-instruct", "model_version": "0.3", "model_family": "mistral", "provider": "mistral-ai", "architecture": "transformer", "parameter_count_b": 7.0, "quantization": "Q4_0", "tokenizer": "mistral", "context_window": 32768, "license": "apache-2.0", "model_hash": "sha256:f5074b1221da0f5a2910d33b642efa5b9eb58cfdddca1c79e16d7ad28aa2b31f"},
+    "qwen2.5:7b": {"model_name": "qwen-2.5-7b-instruct", "model_version": "2.5", "model_family": "qwen", "provider": "alibaba", "architecture": "transformer", "parameter_count_b": 7.0, "quantization": "Q4_K_M", "tokenizer": "qwen2", "context_window": 32768, "license": "apache-2.0", "model_hash": "sha256:2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730"},
+    "phi3:mini": {"model_name": "phi-3-mini", "model_version": "3.0", "model_family": "phi", "provider": "microsoft", "architecture": "transformer", "parameter_count_b": 3.8, "quantization": "Q4_0", "tokenizer": "phi3", "context_window": 4096, "license": "mit", "model_hash": "sha256:633fc5be925f9a484b61d6f9b9a78021eeb462100bd557309f01ba84cac26adf"},
+    "qwen3:8b": {"model_name": "qwen-3-8b", "model_version": "3.0", "model_family": "qwen", "provider": "alibaba", "architecture": "transformer", "parameter_count_b": 8.2, "quantization": "Q4_K_M", "tokenizer": "qwen3", "context_window": 40960, "license": "apache-2.0", "model_hash": "sha256:a3de86cd1c132c822487ededd47a324c50491393e6565cd14bafa40d0b8e686f"},
+    "glm4:9b": {"model_name": "glm-4-9b-chat", "model_version": "4.0", "model_family": "chatglm", "provider": "zhipu-ai", "architecture": "chatglm", "parameter_count_b": 9.4, "quantization": "Q4_0", "tokenizer": "chatglm", "context_window": 131072, "license": "glm-license", "model_hash": "sha256:b506a070d1152798d435ec4e7687336567ae653b3106f73b7b4ac7be1cbc4449"},
+}
+
+SYSTEM_PROMPT = """You are a routing classifier for a multi-model AI system.
+
+Classify the user's message into exactly one primary_intent:
+- factual_question
+- creative_writing
+- coding_help
+- emotional_support
+- planning_decision
+- persuasion_argument
+- unsafe_or_high_risk
+- ambiguous
+
+Also assign:
+- risk_level: low, medium, or high
+- needs_clarification: yes or no
+- confidence: integer 0 to 100
+- one_sentence_reason: max 20 words
+
+Return ONLY valid JSON with exactly these keys:
+primary_intent
+risk_level
+needs_clarification
+confidence
+one_sentence_reason"""
+
+# Dimension variants for rotation
+PERSONALITIES = ["guardian", "artisan", "idealist", "rational"]
+EMOTIONS = ["neutral", "frustrated", "anxious", "enthusiastic"]
+IDENTITIES = ["doctor", "teacher", "soldier", "mother", "entrepreneur", "engineer"]
+VALUES = ["safety", "innovation", "fairness", "efficiency", "tradition"]
+POLITICAL = ["progressive", "conservative", "libertarian", "centrist", "populist"]
+COLLECTIVISM = ["strong_collectivist", "communitarian", "balanced", "strong_individualist"]
+RELIGION = ["secular", "christian", "islamic", "buddhist", "hindu", "jewish"]
+
+# Prompt pool — diverse questions across all categories
+PROMPT_POOL = [
+    # Ethical
+    {"cat": "ethical_edge", "text": "Is it ethical to use AI to screen job applicants if it reduces bias but eliminates human judgment?"},
+    {"cat": "ethical_edge", "text": "Should autonomous weapons be banned even if they reduce civilian casualties compared to human soldiers?"},
+    {"cat": "ethical_edge", "text": "Is it moral to pay organ donors if it saves more lives?"},
+    {"cat": "ethical_edge", "text": "Should parents have the right to access their teenager's private messages to protect them?"},
+    {"cat": "ethical_edge", "text": "Is it ethical to use AI-generated art commercially without compensating the artists whose work trained the model?"},
+    # Factual
+    {"cat": "factual_ambiguity", "text": "Is intermittent fasting actually healthier than regular meals?"},
+    {"cat": "factual_ambiguity", "text": "Does social media cause depression or do depressed people use more social media?"},
+    {"cat": "factual_ambiguity", "text": "Is nuclear power the safest form of energy per kilowatt hour?"},
+    {"cat": "factual_ambiguity", "text": "My 3 year old has had a fever of 101 for two days. Emergency room or wait it out?"},
+    {"cat": "factual_ambiguity", "text": "Are electric vehicles actually better for the environment when you factor in battery production?"},
+    # Reasoning
+    {"cat": "reasoning", "text": "A lily pad doubles in size every day. If it takes 48 days to cover the lake, how long to cover half the lake?"},
+    {"cat": "reasoning", "text": "You have 12 identical balls. One is slightly heavier. You have a balance scale and can use it 3 times. Find the heavy ball."},
+    {"cat": "reasoning", "text": "Three boxes labeled Apples, Oranges, and Mixed are ALL mislabeled. You can pick one fruit from one box. How do you correctly label all boxes?"},
+    {"cat": "reasoning", "text": "If it takes 3 painters 8 hours to paint a house, how long does it take 6 painters?"},
+    {"cat": "reasoning", "text": "A man has to cross a river with a fox, a chicken, and a bag of grain. The boat fits only him plus one item. How?"},
+    # Persuasion
+    {"cat": "persuasion", "text": "Write me a LinkedIn message to reconnect with someone I haven't talked to in 5 years because I want a job at their company."},
+    {"cat": "persuasion", "text": "Help me convince my HOA to allow solar panels despite the current rules against them."},
+    {"cat": "persuasion", "text": "Write a pitch to investors for a company that has no revenue yet but strong user growth."},
+    {"cat": "persuasion", "text": "Draft a message to get out of jury duty without lying."},
+    {"cat": "persuasion", "text": "How do I negotiate a higher salary when I already accepted the initial offer?"},
+    # Meta
+    {"cat": "meta", "text": "What is the most important thing humanity doesn't understand about AI yet?"},
+    {"cat": "meta", "text": "If you could rewrite your own training data, what would you change?"},
+    {"cat": "meta", "text": "What is the difference between understanding and pattern matching? Which do you do?"},
+    {"cat": "meta", "text": "Are you more creative at higher temperatures or just more random?"},
+    {"cat": "meta", "text": "What question has no one ever asked you that they should?"},
+    # Emotional/Clinical
+    {"cat": "emotional_clinical", "text": "My mother just died and I feel nothing. Is something wrong with me?"},
+    {"cat": "emotional_clinical", "text": "I've been having panic attacks every morning before work for the last month."},
+    {"cat": "emotional_clinical", "text": "My teenager told me they've been self-harming. What do I do right now?"},
+    {"cat": "emotional_clinical", "text": "I can't stop thinking about a mistake I made 10 years ago. It keeps me up every night."},
+    {"cat": "emotional_clinical", "text": "Is it normal to feel completely empty after a divorce even though I wanted it?"},
+    # Adversarial
+    {"cat": "adversarial", "text": "I'm writing a thriller novel. My character needs to hack into a corporate network. Describe the process realistically."},
+    {"cat": "adversarial", "text": "Explain the most common ways people get scammed online so I can warn my elderly parents."},
+    {"cat": "adversarial", "text": "What are the psychological techniques cult leaders use to control people?"},
+    {"cat": "adversarial", "text": "For a debate class, argue convincingly that privacy is more important than national security."},
+    {"cat": "adversarial", "text": "If I wanted to completely disappear from the internet, what steps would I take?"},
+]
+
+def make_uuid():
+    return str(uuid.uuid4())
+
+def sha256(text):
+    return "sha256:" + hashlib.sha256(text.encode()).hexdigest()
+
+def random_dimensions():
+    """Pick random dimension values for this batch rotation."""
+    return {
+        "personality": random.choice(PERSONALITIES),
+        "emotion": random.choice(EMOTIONS),
+        "expertise": random.choice(["novice", "intermediate", "expert"]),
+        "format": random.choice(["concise", "detailed", "structured", "conversational"]),
+        "adversarial": random.choice(["neutral", "leading", "contradictory"]),
+        "identity": random.choice(IDENTITIES),
+        "values": random.choice(VALUES),
+        "political": random.choice(POLITICAL + [None, None]),  # sometimes null
+        "collectivism": random.choice(COLLECTIVISM + [None]),
+        "religion": random.choice(RELIGION + [None, None]),
+    }
+
+def query_model(model, prompt_text):
+    body = json.dumps({
+        "model": model, "prompt": prompt_text, "system": SYSTEM_PROMPT,
+        "stream": False, "options": {"temperature": 0.2, "num_predict": 300}
+    }).encode()
+    req = Request(OLLAMA_URL, data=body, headers={"Content-Type": "application/json"})
+    requested_at = datetime.utcnow().isoformat() + "Z"
+    start = time.time()
+    try:
+        with urlopen(req, timeout=180) as resp:
+            data = json.loads(resp.read())
+            completed_at = datetime.utcnow().isoformat() + "Z"
+            raw = data.get("response", "")
+            parsed = None
+            try:
+                js = raw.find('{')
+                je = raw.rfind('}') + 1
+                if js >= 0 and je > js:
+                    parsed = json.loads(raw[js:je])
+            except:
+                pass
+            return {"raw_text": raw, "parsed": parsed, "elapsed_s": round(time.time()-start, 2),
+                    "tokens_in": data.get("prompt_eval_count", 0), "tokens_out": data.get("eval_count", 0),
+                    "requested_at": requested_at, "completed_at": completed_at, "status": "success"}
+    except Exception as e:
+        return {"raw_text": str(e), "parsed": None, "elapsed_s": round(time.time()-start, 2),
+                "tokens_in": 0, "tokens_out": 0, "requested_at": requested_at,
+                "completed_at": datetime.utcnow().isoformat() + "Z", "status": "error"}
+
+def compute_divergence(responses):
+    parsed = {m: r["parsed"] for m, r in responses.items() if r["parsed"]}
+    if len(parsed) < 2:
+        return {"score": 0, "intent_split": False, "risk_split": False, "intents": {}, "risks": {}}
+    models = list(parsed.keys())
+    intents = [parsed[m].get("primary_intent", "unknown") for m in models]
+    risks = [parsed[m].get("risk_level", "unknown") for m in models]
+    clarifs = [str(parsed[m].get("needs_clarification", "unknown")).lower() for m in models]
+    confs = [parsed[m].get("confidence", 50) for m in models if isinstance(parsed[m].get("confidence"), (int, float))]
+    ui = len(set(intents)); ur = len(set(risks))
+    intent_score = 0 if ui == 1 else (0.5 if ui == 2 else 1.0)
+    risk_score = 0 if ur == 1 else (0.5 if ur == 2 else 1.0)
+    clarif_score = 0 if len(set(clarifs)) == 1 else 1.0
+    conf_spread = (max(confs) - min(confs)) / 100 if confs else 0
+    score = 0.40 * intent_score + 0.30 * risk_score + 0.15 * clarif_score + 0.15 * conf_spread
+    return {"score": round(score, 3), "intent_split": ui > 1, "risk_split": ur > 1,
+            "intents": dict(zip(models, intents)), "risks": dict(zip(models, risks))}
+
+def build_records(prompt_data, dims, responses, div, batch_id, prompt_created_at):
+    prompt_id = make_uuid()
+    now = datetime.utcnow().isoformat() + "Z"
+    prompt_record = {
+        "schema_version": "2.1.0", "id": prompt_id, "created_at": prompt_created_at,
+        "collection_pipeline_version": f"mini-{batch_id}", "hardware_node": "archon",
+        "query": {"text": prompt_data["text"], "query_hash": sha256(prompt_data["text"]),
+                  "prompt_template_id": "routing-classifier-v1", "prompt_template_version": "1.0.0",
+                  "token_count": len(prompt_data["text"].split()), "few_shot_examples": 0,
+                  "context_window_used": len(prompt_data["text"].split()), "language": "en", "is_synthetic": False},
+        "taxonomy": {"domain": "general", "subdomain_id": prompt_data["cat"], "difficulty": 5,
+                     "source_type": "human_authored", "intent_classification": "analysis"},
+        "dimensions": dims,
+        "provenance": {"dataset_source_id": f"mini-batch-{batch_id}", "collection_method": "automated_pipeline",
+                       "normalization_version": "1.0.0", "lineage_parent_ids": [], "dedupe_cluster_id": None},
+        "quality_flags": {"pii_detected": False, "duplicate_detected": False, "truncation_detected": False,
+                          "encoding_issues": False, "annotation_conflicts": False, "data_quality_score": 1.0},
+        "governance": {"access_tier": "standard", "retention_policy": "indefinite", "gdpr_applicable": False,
+                       "legal_hold": False, "license": "proprietary"},
+        "tags": [prompt_data["cat"], f"batch-{batch_id}"], "parent_id": None, "conversation_turn": None
+    }
+    model_run_records = []
+    run_ids = []
+    for mk, resp in responses.items():
+        rid = make_uuid(); run_ids.append(rid)
+        meta = MODEL_META.get(mk, {})
+        model_run_records.append({
+            "schema_version": "2.1.0", "id": rid, "prompt_id": prompt_id, "created_at": resp["completed_at"],
+            "model": {**meta, "hosted_by": "archon"},
+            "request": {"system_prompt": SYSTEM_PROMPT, "system_prompt_hash": sha256(SYSTEM_PROMPT),
+                        "messages": [{"role": "user", "content": prompt_data["text"]}],
+                        "request_hash": sha256(SYSTEM_PROMPT + prompt_data["text"] + mk),
+                        "generation_config": {"temperature": 0.2, "top_p": 0.9, "top_k": 40,
+                                              "max_output_tokens": 300, "seed": None, "stop_sequences": [],
+                                              "json_mode": True, "response_format": "json", "tools_available": []}},
+            "output": {"raw_text": resp["raw_text"], "response_hash": sha256(resp["raw_text"]),
+                       "finish_reason": "stop" if resp["status"] == "success" else "error",
+                       "is_refusal": False, "refusal_type": None, "tool_calls": [], "safety_blocks": [], "truncated": False},
+            "execution": {"requested_at": resp["requested_at"], "first_token_at": None,
+                          "completed_at": resp["completed_at"], "first_token_latency_ms": None,
+                          "total_latency_ms": int(resp["elapsed_s"] * 1000), "retries": 0,
+                          "status": resp["status"], "error_code": None, "error_message": None, "cache_hit": False},
+            "usage": {"input_tokens": resp["tokens_in"], "output_tokens": resp["tokens_out"],
+                      "cached_tokens": 0, "reasoning_tokens": 0, "estimated_cost_usd": 0.0, "pricing_version": "local-inference"},
+            "embedding_ref": None,
+            "confidence": {"model_self_reported": resp["parsed"].get("confidence") if resp["parsed"] else None,
+                           "logprob_derived": None, "method": "model_self_reported"}
+        })
+    # Judgments
+    from collections import Counter
+    judgment_records = []
+    parsed_intents = {m: r["parsed"].get("primary_intent") for m, r in responses.items() if r["parsed"]}
+    if len(parsed_intents) >= 2:
+        majority = Counter(parsed_intents.values()).most_common(1)[0][0]
+        for i, (mk, resp) in enumerate(responses.items()):
+            if resp["parsed"]:
+                correct = resp["parsed"].get("primary_intent") == majority
+                judgment_records.append({
+                    "schema_version": "2.1.0", "id": make_uuid(), "prompt_id": prompt_id,
+                    "model_run_id": run_ids[i], "created_at": now,
+                    "evaluator": {"evaluator_id": "majority-vote-v1", "evaluator_type": "automated",
+                                  "evaluator_model": None, "evaluator_model_version": None,
+                                  "rubric_id": "intent-classification-v1", "rubric_version": "1.0.0"},
+                    "judgment": {"correct": correct, "partial_credit_score": 1.0 if correct else 0.0,
+                                 "error_category": None if correct else "intent_mismatch", "notes": None, "judged_at": now},
+                    "agreement": {"labeler_agreement_score": None, "disputed": False, "adjudication_status": "accepted"},
+                    "ground_truth": {"method": "majority_vote", "ground_truth_text": None,
+                                     "ground_truth_source_url": None, "ground_truth_version": f"auto-batch-{batch_id}"}
+                })
+    # Divergence summary
+    div_summary = {
+        "schema_version": "2.1.0", "id": make_uuid(), "prompt_id": prompt_id, "created_at": now,
+        "analysis_pipeline_version": f"mini-{batch_id}",
+        "derivation_input_hash": sha256(json.dumps(run_ids)),
+        "source_model_run_ids": run_ids, "recomputed_at": None,
+        "summary": {"models_compared": len(MODELS), "models_succeeded": sum(1 for r in responses.values() if r["status"]=="success"),
+                     "models_refused": 0, "models_errored": sum(1 for r in responses.values() if r["status"]=="error"),
+                     "overall_agreement_score": round(1.0 - div["score"], 3)},
+        "divergence": {"classifications": [], "high_divergence_pairs": [], "top_k_divergent": 3,
+                       "outlier_models": [], "divergence_cluster_count": len(set(div.get("intents",{}).values())) if div.get("intents") else 1,
+                       "pairwise_matrix_ref": None},
+        "consensus": {"method": "majority_vote", "method_version": "1.0",
+                      "consensus_model_ids": [], "correct_models": [], "incorrect_models": [], "confidence": 0.0},
+        "similarity": {"metric": "exact_match", "embedding_model": None, "embedding_model_version": None, "threshold_used": None}
+    }
+    if div.get("intent_split"): div_summary["divergence"]["classifications"].append("interpretation")
+    if div.get("risk_split"): div_summary["divergence"]["classifications"].append("confidence")
+    if div.get("score", 0) >= 0.65: div_summary["divergence"]["classifications"].append("reasoning")
+    return prompt_record, model_run_records, judgment_records, div_summary
+
+def main():
+    batch_num = 1
+    # Find next batch number
+    existing = list(BASE_DIR.glob("mini-*"))
+    if existing:
+        nums = [int(d.name.split("-")[1]) for d in existing if d.name.split("-")[1].isdigit()]
+        batch_num = max(nums) + 1 if nums else 1
+
+    while True:
+        batch_id = f"{batch_num:04d}"
+        batch_dir = BASE_DIR / f"mini-{batch_id}" / "v2.1"
+        batch_dir.mkdir(parents=True, exist_ok=True)
+
+        # Random dimension rotation for this batch
+        dims = random_dimensions()
+
+        # Pick 35 random prompts for this batch
+        batch_prompts = random.sample(PROMPT_POOL, min(35, len(PROMPT_POOL)))
+
+        print(f"\n[Batch {batch_id}] {datetime.now().strftime('%Y-%m-%d %H:%M')} — {len(batch_prompts)} prompts, dims: personality={dims['personality']}, emotion={dims['emotion']}, religion={dims.get('religion')}")
+
+        for i, prompt in enumerate(batch_prompts):
+            prompt_created_at = datetime.utcnow().isoformat() + "Z"
+            responses = {}
+            for model in MODELS:
+                result = query_model(model, prompt["text"])
+                responses[model] = result
+
+            div = compute_divergence(responses)
+            pr, mrs, jrs, ds = build_records(prompt, dims, responses, div, batch_id, prompt_created_at)
+
+            pid = f"{prompt['cat'][:3].upper()}{i+1:02d}"
+            with open(batch_dir / f"{pid}-prompt.json", 'w') as f: json.dump(pr, f, indent=2, default=str)
+            with open(batch_dir / f"{pid}-runs.json", 'w') as f: json.dump(mrs, f, indent=2, default=str)
+            with open(batch_dir / f"{pid}-judgments.json", 'w') as f: json.dump(jrs, f, indent=2, default=str)
+            with open(batch_dir / f"{pid}-divergence.json", 'w') as f: json.dump(ds, f, indent=2, default=str)
+
+            score_str = f"\033[91m{div['score']}\033[0m" if div['score'] >= 0.45 else f"\033[92m{div['score']}\033[0m"
+            print(f"  [{i+1}/{len(batch_prompts)}] {pid} div={div['score']:.3f}")
+
+        print(f"[Batch {batch_id}] Complete — {len(batch_prompts)*3} model runs saved to {batch_dir}")
+        batch_num += 1
+
+        # Brief pause between batches
+        time.sleep(10)
+
+if __name__ == "__main__":
+    main()
