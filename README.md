@@ -1,15 +1,23 @@
 # agent-memory-core
 
-**Reasoning has no horizon without memory.**
+**Every memory system degrades. Ours endures.**
 
-Frontier models keep getting better at thinking. They are not getting better at remembering. Every long-horizon agent hits the same wall — memory that decays, contradicts itself, and buries the signal. This is the memory layer that survives the horizon.
+Agents remember what users tell them — until a user changes their mind. *"My dog's name is Max"* today, *"actually it's Milo"* tomorrow. Both sit in memory. At query time, the retriever returns whichever scores higher, and the agent confidently contradicts itself. The **Agentic Memory Benchmark v2.3** injects this class of contradictory fact daily across a simulated 90-day horizon and measures which systems resolve the contradiction — and which drown in it.
 
-Your agent remembers a credential today. Will it remember in six months — after 10,000 session notes, three API rotations, and a dozen policy changes? Most memory systems silently degrade. This one is designed to heal itself.
+![AMB v2.3 — every memory system degrades except ours](docs/images/amb-v23-degradation.png)
 
+> **At 250-query scale, 3-seed mean, over 90 simulated days:**
+> - **agent-memory-core (with consolidation): 99.2% top-1** — flat from day 7 to day 90
+> - **Same retriever, no consolidation: 49.2%** — collapses after 13 days of accumulated contradictions
+> - **LangChain 32k-token buffer (top-1): 0.0%** — answer exists in context, but top-ranked chunk is noise
+> - **Naive word-overlap: 0.0%** — never resolves a single contradiction
+
+Full results, seeds, and reproducible harness: [`benchmark/amb_v2/results/v2.3/large/STATUS.md`](benchmark/amb_v2/results/v2.3/large/STATUS.md). Preregistered: [`benchmark/amb_v2/PREREGISTERED.md`](benchmark/amb_v2/PREREGISTERED.md).
+
+- **Supersede-aware consolidation.** When a new fact contradicts an old one, the old fact is archived with a link to what replaced it — not left to compete at retrieval time.
+- **Ranked top-1 retrieval.** The chunk the LLM actually attends to is earned, not handed out by recency.
 - **Credentials never decay.** Type-aware salience keeps high-value facts retrievable after any volume of noise.
-- **Contradictions resolve toward newer truth.** When facts conflict, consolidation picks the current one — not the 50/50 coin flip you get from naive vector search.
-- **Nightly self-healing.** Episodic chunks compress into stable semantic facts. The index gets more precise, not noisier.
-- **Replay any recall.** Trace every retrieval event back to its source chunks — so you can answer "why did it remember that?"
+- **Replay any recall.** Trace every retrieval event back to its source chunks — answer *"why did it remember that?"*
 - **Local-first.** Runs entirely on ChromaDB + Ollama. Your memory never leaves your machine unless you opt in.
 
 Apache 2.0. `pip install agent-memory-core`. Python ≥ 3.10.
@@ -78,39 +86,37 @@ See [`docs/INTEGRATIONS.md`](docs/INTEGRATIONS.md) for the full adapter referenc
 
 ---
 
-## Where it matters
+## The Benchmark — AMB v2.3
 
-Every memory system scores ~9/10 on hello-world lookups. The real test is the hard cases — temporal reasoning, credential recall after a rotation, multi-hop chains, lessons from past mistakes. That's where naive systems silently return the wrong version of a changed fact.
+The **Agentic Memory Benchmark v2.3** is the longitudinal, preregistered test that separates systems that *remember* from systems that merely *store*. Contradictory facts are injected every day for 90 simulated days; the primary metric is **top-1 accuracy** — whether the chunk the LLM actually attends to contains the answer.
 
-![Performance by Reasoning Type](docs/images/reasoning-types.png)
+### v2.3 large-scale results (250 queries × 2,300 confusers · 3-seed mean)
 
-On the hard cases, `agent-memory-core` outperforms naive retrieval on **answer accuracy** (69% vs. 63%), **contradiction resolution** (94% vs. 94% but with explicit resolution logs), and **temporal reasoning** (100% vs. 100% — both ceiling, but naive only hits it when the stale fact is absent). On surface composite scores everything looks close. Break it down by reasoning type and the gaps show up where they matter: production failure modes.
+| System | Mode | Day 7 | Day 14 | Day 30 | Day 60 | Day 90 |
+|---|---|---:|---:|---:|---:|---:|
+| **agent-memory-core** | tuned (with consolidation) | **99.3%** | **99.2%** | **99.2%** | **99.2%** | **99.2%** |
+| agent-memory-core | stock (retrieval only) | 70.2% | 49.2% | 49.2% | 49.2% | 49.2% |
+| LangChain 32k buffer | any-in-context | 100% | 100% | 100% | 100% | 56% |
+| LangChain 32k buffer | top-1 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| Naive word-overlap | — | 5.0% | 0.0% | 0.0% | 0.0% | 0.8% |
 
-→ Longitudinal benchmark (90-day simulated decay) is in development. See [ROADMAP.md](ROADMAP.md).
+Standard deviation ≤ 0.01 on every cell. Seeds: 42, 43, 44. Full per-seed breakdown and raw JSON: [`benchmark/amb_v2/results/v2.3/large/STATUS.md`](benchmark/amb_v2/results/v2.3/large/STATUS.md).
 
----
+**The LangChain split is the v2.3 thesis.** The answer exists in the 32k-token buffer right up to day 60 — but the top-ranked chunk (what the LLM attends to) is the most recent addition, which is usually a confuser. *Context length ≠ memory without ranking.*
 
-## The Benchmark — AMB v1
+**AMB is an open leaderboard.** Mem0, MemGPT, Letta, pgvector pipelines, custom builds — submit against the preregistered harness. See [`benchmark/LEADERBOARD.md`](benchmark/LEADERBOARD.md). Mem0 adapter is on the roadmap; any framework can be contributed as a PR.
 
-`agent-memory-core` ships with the **Agentic Memory Benchmark**: 200 queries, 10 real-world scenarios, 5 reasoning types, adversarial traps designed to expose exactly where naive systems fail.
+### Reproduce
 
-| System | Composite | Answer Acc | Temporal | Contradiction |
-|---|---|---|---|---|
-| **agent-memory-core** | **9.01** | **69%** | 100% | 94% |
-| Naive ChromaDB | 8.86 | 63% | 100% | 94% |
-| LangChain Window (k=10) | 8.67 | 65% | 100% | 92% |
+```bash
+git clone https://github.com/atw4757-byte/agent-memory-core
+cd agent-memory-core/benchmark/amb_v2
+make bench                    # runs the full v2.3 grid (~20 min on M-series)
+```
 
-The **Answer Accuracy** column is where retrieval quality shows up in agent behavior — a 6-point absolute gap (~10% relative) on the hardest sub-task.
+Seeds, scenarios, confusers, and adapter code are all in the repo. Preregistered protocol: [`PREREGISTERED.md`](benchmark/amb_v2/PREREGISTERED.md).
 
-**AMB is becoming an institution.** We're inviting every memory system — Mem0, MemGPT, Letta, pgvector pipelines, custom builds — to submit scores. See [`benchmark/LEADERBOARD.md`](benchmark/LEADERBOARD.md).
-
-### AMB v2 — alpha (2026-04-18)
-
-The v2 harness is pre-registered and sensitivity-swept. Every adapter runs in both stock (no consolidation) and tuned (consolidation permitted) modes — no combined ranking. Composite formula (`0.40·answer + 0.30·contradiction + 0.15·(1−stale) + 0.15·salience`) is frozen and pinned at the impl-file level.
-
-The **v2.0-alpha run is a null result** — the test scenario is too small to separate adapters under synthetic noise, which is itself a methodology finding. Full details: [`benchmark/amb_v2/README.md`](benchmark/amb_v2/README.md), [`benchmark/amb_v2/PREREGISTERED.md`](benchmark/amb_v2/PREREGISTERED.md), [`benchmark/amb_v2/results/alpha-v2.0/REPORT.md`](benchmark/amb_v2/results/alpha-v2.0/REPORT.md).
-
-v2.0.1 adds held-out scenarios + LlamaIndex/Mem0 adapters; v2.1 adds a real-data validation track.
+See [**Why not just use a bigger context window?**](docs/WHY_NOT_CONTEXT_WINDOW.md) for the cost/quality math.
 
 ---
 
@@ -243,7 +249,8 @@ pip install "agent-memory-core[all]"              # everything
 
 ## Roadmap
 
-- **Q2 2026:** Longitudinal benchmark (AMB v2, 90-day simulated decay). Public leaderboard launch.
+- **Q2 2026 — shipped:** AMB v2.3 longitudinal benchmark (90-day simulated decay, daily contradiction injection, preregistered grid). Public leaderboard live.
+- **Q2 2026 — in flight:** Mem0 + MemGPT + Letta adapters submitted to the leaderboard. Hosted dashboard at [divergencerouter.com/amc/](https://divergencerouter.com/amc/).
 - **Q3 2026:** Pro tier (memory health dashboard, eval runs, replay debugger). See [ROADMAP.md](ROADMAP.md) and [PRICING.md](PRICING.md).
 - **Q4 2026:** Multilingual benchmark suite. Enterprise private-VPC deploy.
 
