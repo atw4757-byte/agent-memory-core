@@ -28,7 +28,7 @@ last_verified: 2026-04-21
 
 ## Post body
 
-> Frontier labs are racing to build agents on top of context windows. We ran the obvious experiment — what happens to agent memory over a 90-day horizon with two waves of contradictory facts injected?
+> Frontier labs are racing to build agents on top of context windows. We ran the obvious experiment — what happens to agent memory over a 90-day horizon when confusers start sharing vocabulary with the query?
 >
 > - **agent-memory-core (ours, with supersede-aware consolidation): 99.2% top-1 accuracy**
 > - **Same retriever, no consolidation: 49.2%** (drops once at day 14, stays there)
@@ -43,7 +43,7 @@ last_verified: 2026-04-21
 >
 > 1. **Supersede-aware consolidation.** When a new fact contradicts an old one, the old fact is archived with a link to what replaced it. Not left to compete at retrieval time.
 > 2. **Ranked top-1 retrieval.** Buffer memory returns chunks in recency order, so an LLM attending to "position 1" gets whatever arrived last — often a confuser. AMC returns a ranked top-1 that actually earns the slot.
-> 3. **Preregistered adversarial benchmark (AMB v2.3).** Contradiction-injection at day 0 and day 14, 3 seeds, 4 corpus scales (4/20/75/250 queries), full metrics: top-1 accuracy, answer-accuracy, confuser resistance, contradiction resolution, stale-fact rate, salience preservation.
+> 3. **Preregistered adversarial benchmark (AMB v2.3).** Per-query *confusers* — vocabulary-overlapping distractors that force the retriever to actually rank, not just lexically match. Four corpus scales (mini/small/medium/large: 4/20/75/250 queries, with 27/156/660/2,300 confusers respectively). 3 seeds at mini/medium/large. Composite `quality_v2_3` metric weights top-1 accuracy, any-answer accuracy, confuser resistance, contradiction resolution, stale-fact rate, and salience preservation.
 >
 > `pip install agent-memory-core` — Apache 2.0. Benchmark harness + results + simulator included.
 >
@@ -62,9 +62,7 @@ last_verified: 2026-04-21
 >
 > **"Why not just use a bigger context window?"** That's the comparison in the chart. LangChain-style 32k dump scores 0% top-1 because buffer memory has no ranking — the LLM defaults to the most-prominent chunk, which is noise after confusers land. "Just use more context" is what the industry defaults to and it's what the benchmark falsifies.
 >
-> **"Why should I trust the numbers?"** Everything is preregistered. Seeds published (42/43/44). Scenarios, queries, confusers, and adapter code are all in the repo. Rerun with `python -m benchmark.amb_v2.run_all` and you'll get the same numbers.
->
-> We have not solved agent memory in general. We've solved one specific, measurable failure mode that every agent framework ships broken. If you care about the other failure modes (cross-session continuity, cross-modal memory, reasoning-chain memory, multi-agent shared memory), the honest answer is those are next.
+> **"Why should I trust the numbers?"** Everything is preregistered. Seeds published (42/43/44). Scenarios, queries, confusers, and adapter code are all in the repo. See [`REPRODUCE.md`](https://github.com/atw4757-byte/agent-memory-core/blob/main/REPRODUCE.md) for copy-paste commands per scale — the large-v23 grid (the one behind the 99.2% / 0% chart) runs in ~20 min on a laptop.
 
 ---
 
@@ -83,7 +81,7 @@ Three lines + bracket annotation. Matches the claim.
 - [x] Public API unchanged from v0.1.2
 - [x] PREREGISTERED.md exists at benchmark/amb_v2/PREREGISTERED.md
 - [ ] Verify `pip install agent-memory-core==0.1.3` actually installs on a fresh Python 3.11 env (PyPI publish needed)
-- [ ] `python -m benchmark.amb_v2.run_all` reproduces the chart numbers (3-seed grid) on a clean clone
+- [ ] `REPRODUCE.md` large-v23 command reproduces chart numbers (amc-tuned top1@90 = 0.992, langchain-dump = 0.000, naive = 0.000) on a clean clone
 - [ ] https://divergencerouter.com/amc/ loads on mobile (Safari iOS) with the chart visible
 - [ ] https://github.com/atw4757-byte/agent-memory-core README matches the Show HN claims
 - [ ] HN account has enough karma to avoid auto-flag (check with `archon-hn status`)
@@ -100,7 +98,7 @@ Three lines + bracket annotation. Matches the claim.
 > `docs/INTEGRATIONS.md` has the LangChain + LlamaIndex + raw-API adapters. 5-line integration for the common case. Happy to help with specifics if you drop a snippet.
 
 **Academic ("what's the theoretical contribution?"):**
-> The contribution is the adversarial benchmark design — contradiction injection at two waves, with explicit confusers selected per-query — and the empirical falsification of "bigger context = memory." The consolidation algorithm itself is straightforward supersede-aware archival. Paper-shaped write-up is next.
+> The contribution is the adversarial benchmark design — per-query confusers that force the retriever to rank under vocabulary overlap — and the empirical falsification of "bigger context = memory." The consolidation algorithm itself is straightforward supersede-aware archival. Preregistration, seeds, scenarios, and full results are in the repo for anyone who wants to rerun or extend.
 
 **Competitor ("doesn't [tool X] already do this?"):**
 > AMC is what falls out when you take the v2.3 benchmark seriously. If tool X scores 99%+ top-1 under the same preregistered setup, that's great — please submit to the leaderboard. That's the whole point of preregistering.
