@@ -1,21 +1,4 @@
-"""
-agent_memory_core.graph — Entity relationship graph over memory files.
-
-Extracted from archon-memory-graph. Builds a JSON graph where each node
-is a memory file with extracted entities and topics. Edges connect nodes
-that share entities or topics (co-occurs, extends, contradicts).
-
-Graph search uses keyword matching + 2-hop graph neighbor expansion.
-
-LLM backends:
-  - Local Ollama (mistral:latest) — preferred, zero cost
-  - Gemini Flash — fallback if Ollama is unavailable
-
-The graph file is a portable JSON artifact used by:
-  - MemoryStore: graph connectivity boosts salience scores
-  - Consolidator: entity-based clustering strategy (Strategy 3)
-  - ForgettingPolicy: stale node detection
-"""
+"""Entity relationship graph over memory files. Supports Ollama and Gemini extraction."""
 
 from __future__ import annotations
 
@@ -29,9 +12,7 @@ from typing import Any, Optional
 from .types import GraphNode
 
 
-# ---------------------------------------------------------------------------
 # LLM helpers
-# ---------------------------------------------------------------------------
 
 def _call_ollama_json(
     prompt: str,
@@ -98,9 +79,7 @@ def _call_gemini_json(
         return None
 
 
-# ---------------------------------------------------------------------------
 # Node extraction
-# ---------------------------------------------------------------------------
 
 def _file_id(filepath: Path) -> str:
     return hashlib.md5(str(filepath).encode()).hexdigest()[:12]
@@ -152,9 +131,7 @@ def _extract_node(filepath: Path) -> dict:
     }
 
 
-# ---------------------------------------------------------------------------
 # Relationship detection
-# ---------------------------------------------------------------------------
 
 def _to_str(x: Any) -> str:
     if isinstance(x, dict):
@@ -225,9 +202,7 @@ def _find_relationships(nodes: list[dict]) -> list[dict]:
     return relationships
 
 
-# ---------------------------------------------------------------------------
 # MemoryGraph
-# ---------------------------------------------------------------------------
 
 class MemoryGraph:
     """Entity relationship graph over a set of memory files.
@@ -263,9 +238,7 @@ class MemoryGraph:
         self._gemini_key = gemini_api_key
         self._graph: Optional[dict] = None
 
-    # ------------------------------------------------------------------
     # LLM enrichment
-    # ------------------------------------------------------------------
 
     def _enrich_node(self, node: dict) -> dict:
         """Use local LLM (with Gemini fallback) to extract entities and topics."""
@@ -286,9 +259,7 @@ class MemoryGraph:
             node["topics"] = result.get("topics", [])
         return node
 
-    # ------------------------------------------------------------------
     # Build / load
-    # ------------------------------------------------------------------
 
     def build(self, source_paths: list[str | Path], verbose: bool = True) -> dict:
         """Scan ``source_paths`` for markdown files, extract nodes, find relationships.
@@ -382,9 +353,7 @@ class MemoryGraph:
         except Exception:
             return None
 
-    # ------------------------------------------------------------------
     # Search
-    # ------------------------------------------------------------------
 
     def search(self, query: str, top_n: int = 5) -> dict:
         """Hybrid keyword + 2-hop graph neighbor search.
@@ -438,9 +407,7 @@ class MemoryGraph:
             "neighbors": neighbor_nodes,
         }
 
-    # ------------------------------------------------------------------
     # Stats & maintenance
-    # ------------------------------------------------------------------
 
     def stats(self) -> dict:
         """Return summary statistics about the graph."""

@@ -1,29 +1,4 @@
-"""
-agent_memory_core.eval — Memory retrieval quality evaluation harness.
-
-Extracted from archon-memory-eval. Run a query suite against a MemoryStore
-instance and measure recall, precision, and answer completeness.
-
-Scoring formula (composite out of 10):
-  composite = (0.4 * recall_pct + 0.3 * precision_pct + 0.3 * answer_pct) / 10
-
-Metrics:
-  Recall@N  — at least one result contains any expected fact substring
-  Precision@N — fraction of results containing an expected fact
-  Answer    — ALL expected facts found across all results combined
-
-Usage:
-    from agent_memory_core import MemoryStore, MemoryEval
-    store = MemoryStore()
-    ev = MemoryEval(store)
-
-    # Use the built-in query suite or bring your own:
-    ev.add_query("Where is the API key?", expected_facts=["keychain"], type="credential")
-
-    report = ev.run(n=5, version="v0.1")
-    print(f"Composite: {report['composite']}/10")
-    print(f"Failures: {report['failures']}")
-"""
+"""Memory retrieval eval harness: recall, precision, answer completeness."""
 
 from __future__ import annotations
 
@@ -37,9 +12,7 @@ from .store import MemoryStore
 from .types import EvalResult
 
 
-# ---------------------------------------------------------------------------
 # Default query suite (30 stratified queries from archon-memory-eval)
-# ---------------------------------------------------------------------------
 
 DEFAULT_EVAL_QUERIES: list[dict] = [
     # CREDENTIALS (5) — must never fail
@@ -86,9 +59,7 @@ DEFAULT_EVAL_QUERIES: list[dict] = [
 ]
 
 
-# ---------------------------------------------------------------------------
 # MemoryEval
-# ---------------------------------------------------------------------------
 
 class MemoryEval:
     """Retrieval quality evaluation harness.
@@ -120,9 +91,7 @@ class MemoryEval:
         self._history_path.parent.mkdir(parents=True, exist_ok=True)
         self._queries: list[dict] = list(queries) if queries is not None else list(DEFAULT_EVAL_QUERIES)
 
-    # ------------------------------------------------------------------
     # Query management
-    # ------------------------------------------------------------------
 
     def add_query(
         self,
@@ -141,9 +110,7 @@ class MemoryEval:
         """Remove all queries (use before adding a fully custom suite)."""
         self._queries.clear()
 
-    # ------------------------------------------------------------------
     # Scoring
-    # ------------------------------------------------------------------
 
     @staticmethod
     def score_query(query_def: dict, results: list) -> EvalResult:
@@ -198,9 +165,7 @@ class MemoryEval:
             results_count=len(results),
         )
 
-    # ------------------------------------------------------------------
     # Run
-    # ------------------------------------------------------------------
 
     def run(
         self,
@@ -281,9 +246,7 @@ class MemoryEval:
 
         return entry
 
-    # ------------------------------------------------------------------
     # History
-    # ------------------------------------------------------------------
 
     def _append_history(self, entry: dict) -> None:
         history = []

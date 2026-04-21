@@ -1,23 +1,4 @@
-"""
-agent_memory_core.consolidation — Nightly lossy memory compression pipeline.
-
-Extracted from archon-memory-consolidate. Clusters episodic memories by:
-  1. Same source file + same type (strongest signal)
-  2. Same type + keyword Jaccard overlap across sources
-  3. Shared entities from a MemoryGraph
-
-For clusters meeting the minimum size threshold, a local LLM (via Ollama)
-compresses them into 1-3 permanent semantic facts. Original chunks are
-archived (not deleted) by setting a ``consolidated_into`` metadata flag.
-
-After compression, the consolidated text is decomposed into atomic facts
-and stored in the ``archon-memory-facts`` (or equivalent) collection for
-fine-grained retrieval.
-
-Dependencies:
-  - chromadb (via MemoryStore)
-  - Ollama running locally with mistral:latest or qwen2.5:7b
-"""
+"""Nightly lossy memory compression: clusters episodes into permanent facts via Ollama."""
 
 from __future__ import annotations
 
@@ -33,9 +14,7 @@ from .types import TYPE_TO_BANK, VALID_TYPES
 from .store import MemoryStore
 
 
-# ---------------------------------------------------------------------------
 # Constants
-# ---------------------------------------------------------------------------
 
 CONSOLIDATABLE_TYPES = frozenset([
     "observation",
@@ -64,9 +43,7 @@ DEFAULT_OLLAMA_URL = "http://localhost:11434/api/generate"
 PREFERRED_MODELS = ["mistral:latest", "qwen2.5:7b"]
 
 
-# ---------------------------------------------------------------------------
 # Keyword fingerprinting
-# ---------------------------------------------------------------------------
 
 _STOPWORDS = frozenset([
     "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
@@ -94,9 +71,7 @@ def _jaccard(a: frozenset, b: frozenset) -> float:
     return len(a & b) / len(a | b)
 
 
-# ---------------------------------------------------------------------------
 # Clustering
-# ---------------------------------------------------------------------------
 
 def cluster_chunks(
     chunks: list[dict],
@@ -209,9 +184,7 @@ def cluster_chunks(
     return clusters
 
 
-# ---------------------------------------------------------------------------
 # Ollama helpers
-# ---------------------------------------------------------------------------
 
 def _ollama_available(model: str, ollama_url: str) -> bool:
     tags_url = ollama_url.replace("/api/generate", "/api/tags")
@@ -326,9 +299,7 @@ def _decompose_to_facts(
     return facts
 
 
-# ---------------------------------------------------------------------------
 # Consolidator
-# ---------------------------------------------------------------------------
 
 class Consolidator:
     """Nightly lossy memory compression pipeline.

@@ -1,20 +1,4 @@
-"""
-agent_memory_core.store — ChromaDB-backed memory store.
-
-Core capabilities:
-  - Persistent ChromaDB storage with cosine similarity
-  - Salience scoring (type prior + access count + graph connectivity)
-  - Adaptive retrieval: query-intent detection adjusts similarity/recency/salience weights
-  - Cross-encoder re-ranking (optional — install with [reranker] extra)
-  - MMR (Maximal Marginal Relevance) for result diversity
-  - Active forgetting: archived/consolidated chunks excluded by default
-  - Atomic fact layer: augments chunk results with fine-grained facts
-  - Agent namespacing: private memories per agent, shared memories visible to all
-
-Dependencies:
-  - chromadb (required)
-  - sentence-transformers (optional, for cross-encoder re-ranking)
-"""
+"""ChromaDB-backed memory store with adaptive retrieval and salience scoring."""
 
 from __future__ import annotations
 
@@ -36,9 +20,7 @@ from .types import (
     compute_salience,
 )
 
-# ---------------------------------------------------------------------------
 # Optional cross-encoder re-ranker
-# ---------------------------------------------------------------------------
 
 try:
     import io
@@ -52,9 +34,7 @@ except Exception:
     _RERANKER = None
 
 
-# ---------------------------------------------------------------------------
 # Query intent detection
-# ---------------------------------------------------------------------------
 
 _CREDENTIAL_WORDS = frozenset(["key", "password", "token", "api", "secret", "credential", "auth", "oauth"])
 _RECENCY_WORDS    = frozenset(["current", "now", "today", "status", "latest", "recent", "right now"])
@@ -114,9 +94,7 @@ def _detect_query_weights(query: str) -> tuple[float, float, float]:
     return 0.5, 0.2, 0.3
 
 
-# ---------------------------------------------------------------------------
 # MMR helpers
-# ---------------------------------------------------------------------------
 
 def _text_bigram_vec(text: str) -> dict[str, int]:
     vec: dict[str, int] = {}
@@ -163,9 +141,7 @@ def _mmr_rerank(candidates: list[dict], n: int, lambda_: float = 0.7) -> list[di
     return [candidates[i] for i in selected]
 
 
-# ---------------------------------------------------------------------------
 # Chunk ID helpers
-# ---------------------------------------------------------------------------
 
 def _make_chunk_id(source: str, section_heading: str) -> str:
     return f"{source}::{section_heading}"
@@ -176,9 +152,7 @@ def _make_add_chunk_id(source: str, text: str, today: str) -> str:
     return _make_chunk_id(source, f"added-{today}-{h}")
 
 
-# ---------------------------------------------------------------------------
 # MemoryStore
-# ---------------------------------------------------------------------------
 
 class MemoryStore:
     """ChromaDB-backed semantic memory store with salience-weighted retrieval.
@@ -224,9 +198,7 @@ class MemoryStore:
         # Lazy-loaded graph connectivity cache: {source_file: connection_count}
         self._graph_connectivity: Optional[dict[str, int]] = None
 
-    # ------------------------------------------------------------------
     # ChromaDB initialisation
-    # ------------------------------------------------------------------
 
     def _get_collection(self) -> Any:
         if self._collection is not None:
@@ -258,9 +230,7 @@ class MemoryStore:
             pass
         return None
 
-    # ------------------------------------------------------------------
     # Graph connectivity (salience boost)
-    # ------------------------------------------------------------------
 
     def _load_graph_connectivity(self) -> dict[str, int]:
         if self._graph_connectivity is not None:
@@ -282,9 +252,7 @@ class MemoryStore:
             pass
         return self._graph_connectivity
 
-    # ------------------------------------------------------------------
     # Hindsight integration
-    # ------------------------------------------------------------------
 
     def _hindsight_available(self) -> bool:
         if not self._hindsight_url:
@@ -317,9 +285,7 @@ class MemoryStore:
         except Exception:
             return False
 
-    # ------------------------------------------------------------------
     # Core add / search / forget / status
-    # ------------------------------------------------------------------
 
     def add(
         self,
@@ -429,32 +395,14 @@ class MemoryStore:
             Each result includes a ``retrieval_mode`` field: "lightweight",
             "standard", or "full", indicating which scoring policy was applied.
 
-        Notes
-        -----
-        Retrieval mode is selected automatically based on corpus size:
-
-        - **lightweight** (<100 chunks): pure normalized vector distance.
-          No salience, no recency weighting, no keyword boost, no cross-encoder.
-          Salience/keyword signals have no variance to exploit on tiny corpora —
-          raw cosine similarity wins. Consolidated summaries are penalised (+0.05)
-          to prefer raw source chunks.
-
-        - **standard** (100-4999 chunks): light salience + recency weighting
-          (sim 0.7 / rec 0.15 / sal 0.15), keyword boost on, cross-encoder
-          enabled only when corpus > 200, no CE relevance gate.
-
-        - **full** (5000+ chunks): everything on. Query-intent-adaptive weights
-          (sim 0.5 / rec 0.2 / sal 0.3 baseline), keyword boost, cross-encoder
-          re-ranking, CE relevance gate.
+        See docs/retrieval.md for the adaptive policy rationale.
         """
         collection = self._get_collection()
 
-        # ------------------------------------------------------------------
         # Adaptive retrieval policy — chosen by corpus size.
         # On small corpora salience/reranking/keyword-boost all hurt because
         # there is not enough signal variance. Pure vector wins on tiny sets;
         # complexity is added only once the corpus is large enough to benefit.
-        # ------------------------------------------------------------------
         corpus_size = collection.count()
 
         if corpus_size < 100:

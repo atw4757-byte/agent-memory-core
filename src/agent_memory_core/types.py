@@ -1,9 +1,4 @@
-"""
-agent_memory_core.types — Shared dataclasses and type aliases.
-
-All modules import from here to avoid circular dependencies and keep
-the public API surface clean.
-"""
+"""Shared dataclasses and type aliases."""
 
 from __future__ import annotations
 
@@ -13,9 +8,7 @@ from datetime import datetime
 from typing import Any, Optional
 
 
-# ---------------------------------------------------------------------------
 # Valid chunk types (mirrors archon-memory's TYPE_TO_BANK mapping)
-# ---------------------------------------------------------------------------
 
 VALID_TYPES = frozenset([
     "fact",
@@ -85,9 +78,7 @@ DECAY_RATES: dict[str, float] = {
 }
 
 
-# ---------------------------------------------------------------------------
 # MemoryResult — returned by MemoryStore.search()
-# ---------------------------------------------------------------------------
 
 @dataclass
 class MemoryResult:
@@ -116,9 +107,7 @@ class MemoryResult:
         )
 
 
-# ---------------------------------------------------------------------------
 # WorkingMemoryBuffer — holds the in-memory state of the working buffer
-# ---------------------------------------------------------------------------
 
 @dataclass
 class WorkingMemoryBuffer:
@@ -150,9 +139,7 @@ class WorkingMemoryBuffer:
         )
 
 
-# ---------------------------------------------------------------------------
 # GraphNode — one node in the MemoryGraph
-# ---------------------------------------------------------------------------
 
 @dataclass
 class GraphNode:
@@ -171,9 +158,7 @@ class GraphNode:
     relationships: list[dict] = field(default_factory=list)
 
 
-# ---------------------------------------------------------------------------
 # EvalResult — one query's result in the eval harness
-# ---------------------------------------------------------------------------
 
 @dataclass
 class EvalResult:
@@ -192,9 +177,7 @@ class EvalResult:
         return 0.4 * (1.0 if self.recall else 0.0) + 0.3 * self.precision + 0.3 * (1.0 if self.answer else 0.0)
 
 
-# ---------------------------------------------------------------------------
 # Helpers
-# ---------------------------------------------------------------------------
 
 def compute_recency(date_str: str, chunk_type: str) -> float:
     """Return a 0-1 recency score. 1.0 = today, decays per type."""

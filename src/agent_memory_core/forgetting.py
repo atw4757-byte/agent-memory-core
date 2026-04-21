@@ -1,16 +1,4 @@
-"""
-agent_memory_core.forgetting — Active forgetting and archive management.
-
-Extracted from archon-memory-gardener. Provides:
-  - Stale memory detection (files/chunks not modified in N days)
-  - Duplicate title detection across memory files
-  - Contradiction surfacing from the MemoryGraph
-  - ChromaDB + Hindsight health checks
-  - Health scoring with configurable penalties
-
-This module does NOT automatically delete anything. It surfaces candidates
-for human review or drives downstream consolidation/archiving decisions.
-"""
+"""Active forgetting: stale detection, health scoring, contradiction surfacing."""
 
 from __future__ import annotations
 
@@ -23,9 +11,7 @@ from typing import Optional
 from .store import MemoryStore
 
 
-# ---------------------------------------------------------------------------
 # Default health scoring weights
-# ---------------------------------------------------------------------------
 
 _DEFAULT_PENALTIES = {
     "stale_over_20":    15,   # deduct 15 pts if > 20 stale files
@@ -64,9 +50,7 @@ class ForgettingPolicy:
         self._memory_dirs = [Path(d) for d in memory_dirs] if memory_dirs else []
         self._hindsight_url = hindsight_url
 
-    # ------------------------------------------------------------------
     # Stale file detection
-    # ------------------------------------------------------------------
 
     def find_stale_files(self) -> list[dict]:
         """Return markdown files not modified within the stale threshold.
@@ -85,9 +69,7 @@ class ForgettingPolicy:
                     stale.append({"file": str(f), "name": f.stem, "age_days": age})
         return sorted(stale, key=lambda x: -x["age_days"])
 
-    # ------------------------------------------------------------------
     # Stale chunk detection
-    # ------------------------------------------------------------------
 
     def find_stale_chunks(self, types: Optional[list[str]] = None) -> list[dict]:
         """Return ChromaDB chunks older than the stale threshold.
@@ -131,9 +113,7 @@ class ForgettingPolicy:
 
         return sorted(stale, key=lambda x: -x["age_days"])
 
-    # ------------------------------------------------------------------
     # Duplicate detection (file-based)
-    # ------------------------------------------------------------------
 
     def find_duplicate_files(self) -> dict[str, list[str]]:
         """Find markdown files with identical frontmatter 'name' fields.
@@ -160,9 +140,7 @@ class ForgettingPolicy:
                     continue
         return {k: v for k, v in files.items() if len(v) > 1}
 
-    # ------------------------------------------------------------------
     # Hindsight health
-    # ------------------------------------------------------------------
 
     def check_hindsight(self) -> dict[str, str]:
         """Probe each Hindsight bank. Returns {bank_name: 'healthy' | 'unreachable'}."""
@@ -185,9 +163,7 @@ class ForgettingPolicy:
                 results[bank] = "unreachable"
         return results
 
-    # ------------------------------------------------------------------
     # Archive management
-    # ------------------------------------------------------------------
 
     def archive_chunks(self, chunk_ids: list[str], reason: str = "manual") -> int:
         """Mark chunks as archived by setting ``consolidated_into`` metadata.
@@ -223,9 +199,7 @@ class ForgettingPolicy:
         """Remove all chunks whose source_file matches. Delegates to MemoryStore.forget."""
         return self._store.forget(source=source_file)
 
-    # ------------------------------------------------------------------
     # Health report
-    # ------------------------------------------------------------------
 
     def health_report(
         self,

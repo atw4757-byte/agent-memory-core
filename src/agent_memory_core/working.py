@@ -1,23 +1,4 @@
-"""
-agent_memory_core.working — Short-term working memory buffer.
-
-Extracted from archon-working-memory. Maintains a JSON buffer with:
-  - current_goal: the active task
-  - active_context: up to max_context_slots items (FIFO, oldest drops)
-  - blockers: impediments to the current goal
-  - next_actions: queued follow-up steps
-
-The buffer persists to disk atomically. It is designed to be read at
-session start so working state survives process restarts.
-
-Typical use:
-    wm = WorkingMemory()
-    wm.set_goal("Build the divergence dataset")
-    wm.add_context("RTX 4090 ordered, ETA April 15")
-    wm.add_action("Run preflight check before first data run")
-    print(wm.get())
-    wm.flush(store)   # serialize to long-term MemoryStore, then clear
-"""
+"""Short-term working memory buffer: goal, context, blockers, next actions."""
 
 from __future__ import annotations
 
@@ -62,9 +43,7 @@ class WorkingMemory:
         self._max_context = max_context_slots
         self._max_list = max_list_items
 
-    # ------------------------------------------------------------------
     # Disk I/O
-    # ------------------------------------------------------------------
 
     def _load(self) -> dict:
         """Load buffer from disk. Returns empty buffer on missing file or parse error."""
@@ -99,9 +78,7 @@ class WorkingMemory:
             "updated_at": "",
         }
 
-    # ------------------------------------------------------------------
     # Public API
-    # ------------------------------------------------------------------
 
     def get(self) -> WorkingMemoryBuffer:
         """Return the current buffer as a ``WorkingMemoryBuffer`` dataclass."""
