@@ -1,12 +1,12 @@
 """
-Quickstart — agent-memory-core in 3 lines.
+Quickstart — archon-memory-core in 3 lines.
 
 Run:
     pip install archon-memory-core
     python examples/quickstart.py
 """
 
-from agent_memory_core import MemoryStore
+from archon_memory_core import MemoryStore
 
 store = MemoryStore()
 store.add("The API key is stored in the keychain", type="credential")

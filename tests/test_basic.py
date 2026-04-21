@@ -1,5 +1,5 @@
 """
-Basic tests for agent-memory-core.
+Basic tests for archon-memory-core.
 
 Run:
     pip install -e ".[dev]"
@@ -22,7 +22,7 @@ import pytest
 @pytest.fixture
 def tmp_store(tmp_path):
     """A MemoryStore backed by a temporary directory."""
-    from agent_memory_core import MemoryStore
+    from archon_memory_core import MemoryStore
     return MemoryStore(
         db_path=tmp_path / "vectordb",
         collection_name="test-memory",
@@ -34,7 +34,7 @@ def tmp_store(tmp_path):
 @pytest.fixture
 def tmp_working(tmp_path):
     """A WorkingMemory backed by a temporary file."""
-    from agent_memory_core import WorkingMemory
+    from archon_memory_core import WorkingMemory
     return WorkingMemory(buffer_path=tmp_path / "working-memory.json")
 
 
@@ -44,29 +44,29 @@ def tmp_working(tmp_path):
 
 class TestTypes:
     def test_valid_types_nonempty(self):
-        from agent_memory_core import VALID_TYPES
+        from archon_memory_core import VALID_TYPES
         assert len(VALID_TYPES) >= 12
 
     def test_compute_recency_today(self):
         from datetime import date
-        from agent_memory_core.types import compute_recency
+        from archon_memory_core.types import compute_recency
         today = date.today().isoformat()
         score = compute_recency(today, "fact")
         assert score > 0.99, "Today's memory should have recency near 1.0"
 
     def test_compute_recency_credentials_never_decay(self):
-        from agent_memory_core.types import compute_recency
+        from archon_memory_core.types import compute_recency
         old_score = compute_recency("2020-01-01", "credential")
         assert old_score == pytest.approx(1.0), "Credentials must not decay"
 
     def test_compute_salience_credential_highest(self):
-        from agent_memory_core.types import compute_salience, TYPE_SALIENCE_PRIORS
+        from archon_memory_core.types import compute_salience, TYPE_SALIENCE_PRIORS
         cred_prior = TYPE_SALIENCE_PRIORS["credential"]
         dream_prior = TYPE_SALIENCE_PRIORS["dream"]
         assert cred_prior > dream_prior
 
     def test_memory_result_repr(self):
-        from agent_memory_core.types import MemoryResult
+        from archon_memory_core.types import MemoryResult
         r = MemoryResult(
             id="test::id", text="hello world", type="fact", source="test",
             date="2026-04-09", distance=0.1, recency_score=0.9,
@@ -76,7 +76,7 @@ class TestTypes:
         assert "0.300" in repr(r)
 
     def test_working_memory_buffer_roundtrip(self):
-        from agent_memory_core.types import WorkingMemoryBuffer
+        from archon_memory_core.types import WorkingMemoryBuffer
         buf = WorkingMemoryBuffer(
             current_goal="test goal",
             active_context=["item1", "item2"],
@@ -116,7 +116,7 @@ class TestMemoryStore:
         assert results == []
 
     def test_result_is_memory_result(self, tmp_store):
-        from agent_memory_core import MemoryResult
+        from archon_memory_core import MemoryResult
         tmp_store.add("Python 3.12 is required", type="technical", source="test")
         results = tmp_store.search("Python version")
         assert all(isinstance(r, MemoryResult) for r in results)
@@ -220,7 +220,7 @@ class TestWorkingMemory:
 
     def test_context_fifo_drop(self):
         """Oldest context item is dropped when max_context_slots is exceeded."""
-        from agent_memory_core import WorkingMemory
+        from archon_memory_core import WorkingMemory
         with tempfile.TemporaryDirectory() as tmp:
             wm = WorkingMemory(buffer_path=Path(tmp) / "wm.json", max_context_slots=3)
             wm.add_context("first")
@@ -286,7 +286,7 @@ class TestConsolidationClustering:
         }
 
     def test_source_type_clustering(self):
-        from agent_memory_core.consolidation import cluster_chunks
+        from archon_memory_core.consolidation import cluster_chunks
         chunks = [
             self._make_chunk("a1", "The API failed with 404", "pipeline.md", "observation"),
             self._make_chunk("a2", "The API failed again with 404 error", "pipeline.md", "observation"),
@@ -298,7 +298,7 @@ class TestConsolidationClustering:
         assert len(source_clusters[0]["chunks"]) == 2
 
     def test_keyword_clustering(self):
-        from agent_memory_core.consolidation import cluster_chunks
+        from archon_memory_core.consolidation import cluster_chunks
         chunks = [
             self._make_chunk("x1", "divergence routing model inference latency benchmark", "a.md", "session"),
             self._make_chunk("x2", "divergence routing model evaluation performance benchmark", "b.md", "session"),
@@ -313,7 +313,7 @@ class TestConsolidationClustering:
             assert "x1" in member_ids or "x2" in member_ids
 
     def test_no_clusters_when_all_unique(self):
-        from agent_memory_core.consolidation import cluster_chunks
+        from archon_memory_core.consolidation import cluster_chunks
         chunks = [
             self._make_chunk("u1", "apple orchard harvest season fruit", "a.md", "fact"),
             self._make_chunk("u2", "mathematics algebra calculus derivatives integral", "b.md", "session"),
@@ -331,7 +331,7 @@ class TestConsolidationClustering:
 
 class TestMemoryEval:
     def test_score_query_recall_hit(self, tmp_store):
-        from agent_memory_core import MemoryEval, MemoryResult
+        from archon_memory_core import MemoryEval, MemoryResult
         ev = MemoryEval(tmp_store)
         # Fake a result that contains the expected fact
         fake_result = MemoryResult(
@@ -347,7 +347,7 @@ class TestMemoryEval:
         assert result.answer is True
 
     def test_score_query_recall_miss(self, tmp_store):
-        from agent_memory_core import MemoryEval, MemoryResult
+        from archon_memory_core import MemoryEval, MemoryResult
         ev = MemoryEval(tmp_store)
         fake_result = MemoryResult(
             id="r1", text="Nothing useful here at all",
@@ -361,7 +361,7 @@ class TestMemoryEval:
         assert result.precision == 0.0
 
     def test_score_query_empty_results(self, tmp_store):
-        from agent_memory_core import MemoryEval
+        from archon_memory_core import MemoryEval
         ev = MemoryEval(tmp_store)
         q = {"query": "test", "expected_facts": ["something"], "type": "fact"}
         result = ev.score_query(q, [])
@@ -371,13 +371,13 @@ class TestMemoryEval:
         assert result.results_count == 0
 
     def test_custom_queries(self, tmp_store):
-        from agent_memory_core import MemoryEval
+        from archon_memory_core import MemoryEval
         ev = MemoryEval(tmp_store, queries=[])
         ev.add_query("test query", expected_facts=["fact1"], type="fact")
         assert len(ev._queries) == 1
 
     def test_history_persistence(self, tmp_path, tmp_store):
-        from agent_memory_core import MemoryEval
+        from archon_memory_core import MemoryEval
         ev = MemoryEval(
             tmp_store,
             history_path=tmp_path / "eval-history.json",
@@ -391,7 +391,7 @@ class TestMemoryEval:
         assert history[0]["version"] == "test-v1"
 
     def test_score_delta_insufficient_history(self, tmp_path, tmp_store):
-        from agent_memory_core import MemoryEval
+        from archon_memory_core import MemoryEval
         ev = MemoryEval(tmp_store, history_path=tmp_path / "eh.json", queries=[])
         assert ev.score_delta() is None
 
@@ -402,37 +402,37 @@ class TestMemoryEval:
 
 class TestMemoryGraph:
     def test_load_nonexistent_returns_none(self, tmp_path):
-        from agent_memory_core import MemoryGraph
+        from archon_memory_core import MemoryGraph
         g = MemoryGraph(graph_path=tmp_path / "missing.json")
         assert g.load() is None
 
     def test_stats_no_graph(self, tmp_path):
-        from agent_memory_core import MemoryGraph
+        from archon_memory_core import MemoryGraph
         g = MemoryGraph(graph_path=tmp_path / "missing.json")
         stats = g.stats()
         assert stats["built"] is False
 
     def test_contradictions_no_graph(self, tmp_path):
-        from agent_memory_core import MemoryGraph
+        from archon_memory_core import MemoryGraph
         g = MemoryGraph(graph_path=tmp_path / "missing.json")
         assert g.contradictions() == []
 
     def test_search_no_graph(self, tmp_path):
-        from agent_memory_core import MemoryGraph
+        from archon_memory_core import MemoryGraph
         g = MemoryGraph(graph_path=tmp_path / "missing.json")
         result = g.search("anything")
         assert result["direct"] == []
         assert result["neighbors"] == []
 
     def test_entity_map_no_graph(self, tmp_path):
-        from agent_memory_core import MemoryGraph
+        from archon_memory_core import MemoryGraph
         g = MemoryGraph(graph_path=tmp_path / "missing.json")
         assert g.entity_map() == {}
 
     def test_load_existing_graph(self, tmp_path):
         """Graph can be loaded from a pre-existing JSON file."""
         import json
-        from agent_memory_core import MemoryGraph
+        from archon_memory_core import MemoryGraph
         fake_graph = {
             "version": "1.0",
             "built_at": "2026-04-09T00:00:00",
@@ -495,7 +495,7 @@ class TestMemoryGraph:
 
 class TestForgettingPolicy:
     def test_find_stale_chunks(self, tmp_store):
-        from agent_memory_core import ForgettingPolicy
+        from archon_memory_core import ForgettingPolicy
         # Add a chunk with an old date
         tmp_store.add("very old observation", type="observation", source="test",
                       extra_metadata={"date": "2020-01-01"})
@@ -505,7 +505,7 @@ class TestForgettingPolicy:
         assert stale[0]["age_days"] > 30
 
     def test_credentials_never_stale(self, tmp_store):
-        from agent_memory_core import ForgettingPolicy
+        from archon_memory_core import ForgettingPolicy
         tmp_store.add("old credential", type="credential", source="test",
                       extra_metadata={"date": "2020-01-01"})
         fp = ForgettingPolicy(tmp_store, stale_threshold_days=30)
@@ -513,7 +513,7 @@ class TestForgettingPolicy:
         assert all(c["type"] != "credential" for c in stale)
 
     def test_archive_chunks(self, tmp_store):
-        from agent_memory_core import ForgettingPolicy
+        from archon_memory_core import ForgettingPolicy
         cid = tmp_store.add("to archive", type="observation", source="test")
         fp = ForgettingPolicy(tmp_store)
         count = fp.archive_chunks([cid], reason="test")
@@ -523,7 +523,7 @@ class TestForgettingPolicy:
         assert all(r.id != cid for r in results)
 
     def test_hard_delete(self, tmp_store):
-        from agent_memory_core import ForgettingPolicy
+        from archon_memory_core import ForgettingPolicy
         cid = tmp_store.add("to delete", type="observation", source="test")
         fp = ForgettingPolicy(tmp_store)
         count = fp.hard_delete([cid])
@@ -531,7 +531,7 @@ class TestForgettingPolicy:
         assert tmp_store.status()["total_chunks"] == 0
 
     def test_health_report_structure(self, tmp_store):
-        from agent_memory_core import ForgettingPolicy
+        from archon_memory_core import ForgettingPolicy
         fp = ForgettingPolicy(tmp_store, hindsight_url=None)
         report = fp.health_report()
         assert "score" in report
@@ -543,7 +543,7 @@ class TestForgettingPolicy:
         assert 0 <= report["score"] <= 100
 
     def test_forget_source(self, tmp_store):
-        from agent_memory_core import ForgettingPolicy
+        from archon_memory_core import ForgettingPolicy
         tmp_store.add("from source x", type="fact", source="source-x")
         tmp_store.add("also from source x", type="fact", source="source-x")
         fp = ForgettingPolicy(tmp_store)

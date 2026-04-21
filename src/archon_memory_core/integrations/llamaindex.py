@@ -1,10 +1,10 @@
-"""LlamaIndex adapter for agent-memory-core.
+"""LlamaIndex adapter for archon-memory-core.
 
 Exposes a `BaseMemory`-compatible class that uses `MemoryStore` underneath.
 Drop it into any LlamaIndex agent that accepts a memory object.
 
     from llama_index.core.agent import ReActAgent
-    from agent_memory_core.integrations.llamaindex import AgentMemoryStore
+    from archon_memory_core.integrations.llamaindex import AgentMemoryStore
 
     memory = AgentMemoryStore.from_defaults()
     agent = ReActAgent.from_tools(tools, llm=llm, memory=memory, ...)
@@ -41,7 +41,7 @@ except ImportError:  # pragma: no cover — optional dependency
 
 if _LLAMAINDEX_AVAILABLE:
     class AgentMemoryStore(BaseMemory):  # type: ignore[misc]
-        """LlamaIndex BaseMemory backed by agent-memory-core.
+        """LlamaIndex BaseMemory backed by archon-memory-core.
 
         Stores turns as `session` chunks. On `get`, retrieves the top-k most
         relevant chunks for the latest input and returns them as ChatMessages.
@@ -79,7 +79,7 @@ if _LLAMAINDEX_AVAILABLE:
             if not _LLAMAINDEX_AVAILABLE:
                 raise ImportError(
                     "llama-index-core is not installed. Install with: "
-                    'pip install "agent-memory-core[llamaindex]"'
+                    'pip install "archon-memory-core[llamaindex]"'
                 )
             return cls(
                 store=store if store is not None else MemoryStore(),
@@ -91,7 +91,7 @@ if _LLAMAINDEX_AVAILABLE:
             if not _LLAMAINDEX_AVAILABLE:
                 raise ImportError(
                     "llama-index-core is not installed. Install with: "
-                    'pip install "agent-memory-core[llamaindex]"'
+                    'pip install "archon-memory-core[llamaindex]"'
                 )
             if "store" not in data or data["store"] is None:
                 data["store"] = MemoryStore()
@@ -157,5 +157,5 @@ else:
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             raise ImportError(
                 "llama-index-core is not installed. Install with: "
-                'pip install "agent-memory-core[llamaindex]"'
+                'pip install "archon-memory-core[llamaindex]"'
             )

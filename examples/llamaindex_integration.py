@@ -1,5 +1,5 @@
 """
-LlamaIndex integration example — use agent-memory-core as a custom memory store
+LlamaIndex integration example — use archon-memory-core as a custom memory store
 inside a LlamaIndex ReActAgent.
 
 This wraps MemoryStore in a LlamaIndex-compatible ChatMemoryBuffer interface.
@@ -86,7 +86,7 @@ def main() -> None:
         print("  pip install llama-index-core llama-index-llms-anthropic")
         return
 
-    from agent_memory_core import MemoryStore
+    from archon_memory_core import MemoryStore
 
     store = MemoryStore()
     memory = ArchonMemoryBuffer(store, retrieval_n=5)

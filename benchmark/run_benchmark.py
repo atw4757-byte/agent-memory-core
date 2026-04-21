@@ -8,7 +8,7 @@ JSON report.
 
 Usage
 -----
-# Run against agent-memory-core (default)
+# Run against archon-memory-core (default)
     python benchmark/run_benchmark.py
 
 # Run against a custom adapter
@@ -38,7 +38,7 @@ protocol:
         def reset(self) -> None:
             # Clear all state between scenarios.
 
-The default adapter wraps agent-memory-core's MemoryStore with a simple
+The default adapter wraps archon-memory-core's MemoryStore with a simple
 add-on-user-turn + search-on-query pattern, producing an answer by
 concatenating top-5 retrieved chunks.
 """
@@ -90,11 +90,11 @@ class MemorySystemAdapter(Protocol):
 
 
 # ---------------------------------------------------------------------------
-# Default adapter: agent-memory-core
+# Default adapter: archon-memory-core
 # ---------------------------------------------------------------------------
 
 class AgentMemoryCoreAdapter:
-    """Wraps agent-memory-core MemoryStore for benchmarking.
+    """Wraps archon-memory-core MemoryStore for benchmarking.
 
     Ingestion: adds each user turn as a 'session' chunk.
     Query:     searches top-5 chunks, concatenates their text as the answer.
@@ -102,10 +102,10 @@ class AgentMemoryCoreAdapter:
 
     def __init__(self, db_path: str | None = None) -> None:
         try:
-            from agent_memory_core import MemoryStore
+            from archon_memory_core import MemoryStore
         except ImportError as e:
             raise ImportError(
-                "agent-memory-core is not installed. "
+                "archon-memory-core is not installed. "
                 "Run: pip install -e . from the project root."
             ) from e
 
@@ -137,7 +137,7 @@ class AgentMemoryCoreAdapter:
         except Exception:
             pass
         self._tmp = tempfile.mkdtemp(prefix="amb_")
-        from agent_memory_core import MemoryStore
+        from archon_memory_core import MemoryStore
         self._store = MemoryStore(db_path=self._tmp)
 
 
@@ -408,7 +408,7 @@ def main() -> None:
         "--adapter",
         default=None,
         help="Dotted path to custom adapter class (e.g. 'mymod.MyAdapter'). "
-             "Default: agent-memory-core AgentMemoryCoreAdapter.",
+             "Default: archon-memory-core AgentMemoryCoreAdapter.",
     )
     parser.add_argument(
         "--scenario",

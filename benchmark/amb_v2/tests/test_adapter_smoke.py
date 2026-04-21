@@ -25,9 +25,9 @@ FIXTURES = Path(__file__).parent / "fixtures"
 def _adapter_factories():
     factories = [("naive", NaiveAppendOnlyAdapter)]
     try:
-        from benchmark.amb_v2.adapters import agent_memory_core as amc_mod
+        from benchmark.amb_v2.adapters import archon_memory_core as amc_mod
         if amc_mod._AVAILABLE:
-            factories.append(("agent-memory-core", amc_mod.AgentMemoryCoreAdapter))
+            factories.append(("archon-memory-core", amc_mod.AgentMemoryCoreAdapter))
     except ImportError:
         pass
     try:

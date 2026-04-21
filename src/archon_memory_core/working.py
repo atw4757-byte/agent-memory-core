@@ -21,7 +21,7 @@ class WorkingMemory:
     ----------
     buffer_path:
         Path to the JSON buffer file. Defaults to
-        ``~/.agent-memory-core/working-memory.json``.
+        ``~/.archon-memory-core/working-memory.json``.
     max_context_slots:
         Maximum items in ``active_context``. Oldest item drops when exceeded.
         Mirrors the Miller's Law 7±2 heuristic. Default: 7.
@@ -38,7 +38,7 @@ class WorkingMemory:
         self._path = (
             Path(buffer_path)
             if buffer_path
-            else Path.home() / ".agent-memory-core" / "working-memory.json"
+            else Path.home() / ".archon-memory-core" / "working-memory.json"
         )
         self._max_context = max_context_slots
         self._max_list = max_list_items

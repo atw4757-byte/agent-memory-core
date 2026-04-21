@@ -211,7 +211,7 @@ class MemoryGraph:
     ----------
     graph_path:
         Where to persist the graph JSON.
-        Defaults to ``~/.agent-memory-core/memory_graph.json``.
+        Defaults to ``~/.archon-memory-core/memory_graph.json``.
     ollama_url:
         Ollama generate endpoint for entity extraction.
     ollama_model:
@@ -230,7 +230,7 @@ class MemoryGraph:
         self._graph_path = (
             Path(graph_path)
             if graph_path
-            else Path.home() / ".agent-memory-core" / "memory_graph.json"
+            else Path.home() / ".archon-memory-core" / "memory_graph.json"
         )
         self._graph_path.parent.mkdir(parents=True, exist_ok=True)
         self._ollama_url = ollama_url

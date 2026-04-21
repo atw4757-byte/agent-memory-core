@@ -1,4 +1,4 @@
-# CI — agent-memory-core
+# CI — archon-memory-core
 # Runs on push to main and on all pull requests.
 # Installs with all optional extras and runs the existing test suite.
 

@@ -25,9 +25,9 @@ from benchmark.amb_v2.scenarios import load_public_scenarios, load_held_out
 ADAPTER_REGISTRY: dict[str, Any] = {"naive": NaiveAppendOnlyAdapter}
 
 try:
-    from benchmark.amb_v2.adapters import agent_memory_core as _amc
+    from benchmark.amb_v2.adapters import archon_memory_core as _amc
     if _amc._AVAILABLE:
-        ADAPTER_REGISTRY["agent-memory-core"] = _amc.AgentMemoryCoreAdapter
+        ADAPTER_REGISTRY["archon-memory-core"] = _amc.AgentMemoryCoreAdapter
 except ImportError:
     pass
 

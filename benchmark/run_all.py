@@ -4,7 +4,7 @@ benchmark/run_all.py — Run AMB against all competitor adapters and print a com
 
 Adapters run:
   1. full_context         — Upper bound: stores and returns ALL turns (oracle ceiling)
-  2. agent_memory_core    — Our full system with salience, reranking, working memory
+  2. archon_memory_core    — Our full system with salience, reranking, working memory
   3. naive_vector         — Plain ChromaDB, no salience, no reranking (baseline)
   4. langchain_window     — LangChain ConversationBufferWindowMemory k=10
 
@@ -52,8 +52,8 @@ ADAPTERS = [
         "FullContextAdapter",
     ),
     (
-        "agent-memory-core (full)",
-        "benchmark.adapters.agent_memory_core_adapter",
+        "archon-memory-core (full)",
+        "benchmark.adapters.archon_memory_core_adapter",
         "AgentMemoryCoreFullAdapter",
     ),
     (
@@ -142,14 +142,14 @@ def print_comparison_table(results: list[dict]) -> None:
 
     # Delta table: show gain/loss vs naive baseline
     baseline = next((r for r in results if "Naive" in r.get("name", "") and not r.get("skipped")), None)
-    our_system = next((r for r in results if "agent-memory-core" in r.get("name", "") and not r.get("skipped")), None)
+    our_system = next((r for r in results if "archon-memory-core" in r.get("name", "") and not r.get("skipped")), None)
 
     if baseline and our_system:
         b_comp = baseline["overall"].get("composite", 0)
         our_comp = our_system["overall"].get("composite", 0)
         delta = our_comp - b_comp
         sign = "+" if delta >= 0 else ""
-        print(f"  agent-memory-core vs naive baseline: {sign}{delta:.2f} pts composite")
+        print(f"  archon-memory-core vs naive baseline: {sign}{delta:.2f} pts composite")
 
     oracle = next((r for r in results if "oracle" in r.get("name", "").lower() and not r.get("skipped")), None)
     if oracle and our_system:
@@ -157,7 +157,7 @@ def print_comparison_table(results: list[dict]) -> None:
         our_comp = our_system["overall"].get("composite", 0)
         gap = o_comp - our_comp
         pct = (our_comp / o_comp * 100) if o_comp > 0 else 0
-        print(f"  agent-memory-core vs oracle ceiling:  {our_comp:.2f}/{o_comp:.2f} ({pct:.0f}% of ceiling)")
+        print(f"  archon-memory-core vs oracle ceiling:  {our_comp:.2f}/{o_comp:.2f} ({pct:.0f}% of ceiling)")
 
     print()
 

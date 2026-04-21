@@ -161,7 +161,7 @@ class MemoryStore:
     ----------
     db_path:
         Directory where ChromaDB persists its data.
-        Defaults to ``~/.agent-memory-core/vectordb``.
+        Defaults to ``~/.archon-memory-core/vectordb``.
     collection_name:
         ChromaDB collection name. Override to isolate multiple stores.
     facts_collection_name:
@@ -182,7 +182,7 @@ class MemoryStore:
         graph_path: Optional[str | Path] = None,
         hindsight_url: Optional[str] = None,
     ) -> None:
-        self._db_path = Path(db_path) if db_path else Path.home() / ".agent-memory-core" / "vectordb"
+        self._db_path = Path(db_path) if db_path else Path.home() / ".archon-memory-core" / "vectordb"
         self._collection_name = collection_name
         self._facts_collection_name = facts_collection_name
         self._graph_path = Path(graph_path) if graph_path else None

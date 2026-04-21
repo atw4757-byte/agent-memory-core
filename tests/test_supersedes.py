@@ -15,7 +15,7 @@ import pytest
 
 @pytest.fixture
 def tmp_store(tmp_path):
-    from agent_memory_core import MemoryStore
+    from archon_memory_core import MemoryStore
     return MemoryStore(
         db_path=tmp_path / "vectordb",
         collection_name="test-supersedes",

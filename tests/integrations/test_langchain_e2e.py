@@ -18,8 +18,8 @@ langchain_core = pytest.importorskip(
 
 
 from langchain_core.messages import HumanMessage, AIMessage  # noqa: E402
-from agent_memory_core.store import MemoryStore  # noqa: E402
-from agent_memory_core.integrations.langchain import AgentMemoryStore  # noqa: E402
+from archon_memory_core.store import MemoryStore  # noqa: E402
+from archon_memory_core.integrations.langchain import AgentMemoryStore  # noqa: E402
 
 
 @pytest.fixture()

@@ -70,7 +70,7 @@ class MemoryEval:
         The MemoryStore to query.
     history_path:
         Where to persist eval history as a JSON array.
-        Defaults to ``~/.agent-memory-core/eval-history.json``.
+        Defaults to ``~/.archon-memory-core/eval-history.json``.
     queries:
         Initial query list. Defaults to ``DEFAULT_EVAL_QUERIES``.
         Each query dict needs: query (str), expected_facts (list[str]), type (str).
@@ -86,7 +86,7 @@ class MemoryEval:
         self._history_path = (
             Path(history_path)
             if history_path
-            else Path.home() / ".agent-memory-core" / "eval-history.json"
+            else Path.home() / ".archon-memory-core" / "eval-history.json"
         )
         self._history_path.parent.mkdir(parents=True, exist_ok=True)
         self._queries: list[dict] = list(queries) if queries is not None else list(DEFAULT_EVAL_QUERIES)

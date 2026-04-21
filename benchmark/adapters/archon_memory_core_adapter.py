@@ -1,5 +1,5 @@
 """
-benchmark/adapters/agent_memory_core_adapter.py — Full agent-memory-core system.
+benchmark/adapters/archon_memory_core_adapter.py — Full archon-memory-core system.
 
 Uses all available features:
   - Salience scoring (type prior + access count + graph connectivity)
@@ -8,7 +8,7 @@ Uses all available features:
   - MMR diversity
   - Working memory for active session context
 
-Dependencies: agent-memory-core (required), chromadb (required)
+Dependencies: archon-memory-core (required), chromadb (required)
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from pathlib import Path
 
 
 class AgentMemoryCoreFullAdapter:
-    """agent-memory-core with all features enabled.
+    """archon-memory-core with all features enabled.
 
     Ingestion: user turns go in as 'session' type; assistant turns as 'session'
     too (capturing full conversation context). Working memory tracks the most
@@ -30,10 +30,10 @@ class AgentMemoryCoreFullAdapter:
 
     def __init__(self) -> None:
         try:
-            from agent_memory_core import MemoryStore, WorkingMemory
+            from archon_memory_core import MemoryStore, WorkingMemory
         except ImportError as e:
             raise ImportError(
-                "agent-memory-core is required. Run: pip install -e . from project root."
+                "archon-memory-core is required. Run: pip install -e . from project root."
             ) from e
 
         self._MemoryStore = MemoryStore

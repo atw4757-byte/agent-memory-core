@@ -1,4 +1,4 @@
-"""agent-memory-core adapter — wraps MemoryStore + WorkingMemory.
+"""archon-memory-core adapter — wraps MemoryStore + WorkingMemory.
 
 Stock mode: consolidate() is a no-op.
 Tuned mode: consolidate() runs the v1 consolidator nightly.
@@ -16,7 +16,7 @@ from benchmark.amb_v2.chunks import Chunk
 _log = logging.getLogger(__name__)
 
 try:
-    from agent_memory_core import MemoryStore, WorkingMemory
+    from archon_memory_core import MemoryStore, WorkingMemory
     _AVAILABLE = True
 except ImportError:
     _AVAILABLE = False
@@ -34,7 +34,7 @@ _TYPE_MAP = {
 class AgentMemoryCoreAdapter:
     def __init__(self, mode: Mode = "stock") -> None:
         if not _AVAILABLE:
-            raise ImportError("agent-memory-core is not installed; run pip install -e .")
+            raise ImportError("archon-memory-core is not installed; run pip install -e .")
         self.mode: Mode = mode
         self._tmp = tempfile.mkdtemp(prefix="amb_v2_amc_")
         self._store = MemoryStore(db_path=self._tmp)
@@ -53,7 +53,7 @@ class AgentMemoryCoreAdapter:
                 raise NotImplementedError(
                     "AgentMemoryCoreAdapter(mode='tuned') requires "
                     "MemoryStore.consolidate(); none was found on "
-                    f"{type(self._store).__name__}. Upgrade agent-memory-core "
+                    f"{type(self._store).__name__}. Upgrade archon-memory-core "
                     "or run with mode='stock'."
                 )
 
@@ -102,11 +102,11 @@ class AgentMemoryCoreAdapter:
     @property
     def metadata(self) -> dict:
         try:
-            from agent_memory_core import __version__ as v
+            from archon_memory_core import __version__ as v
         except ImportError:
             v = "unknown"
         return {
-            "name": "agent-memory-core",
+            "name": "archon-memory-core",
             "version": v,
             "implements_consolidation": True,
             "mode": self.mode,

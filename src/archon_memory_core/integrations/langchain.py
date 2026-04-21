@@ -1,11 +1,11 @@
-"""LangChain adapter for agent-memory-core.
+"""LangChain adapter for archon-memory-core.
 
 Exposes a `BaseChatMessageHistory`-compatible class (langchain_core >=0.3)
 that uses `MemoryStore` underneath.  Drop it into any LangChain chain via
 `RunnableWithMessageHistory` or use it directly with legacy ConversationChain.
 
     from langchain_core.runnables.history import RunnableWithMessageHistory
-    from agent_memory_core.integrations.langchain import AgentMemoryStore
+    from archon_memory_core.integrations.langchain import AgentMemoryStore
 
     def get_session_history(session_id: str) -> AgentMemoryStore:
         return AgentMemoryStore(agent=session_id)
@@ -41,7 +41,7 @@ except ImportError:  # pragma: no cover — optional dependency
 
 
 class AgentMemoryStore(BaseChatMessageHistory):  # type: ignore[misc]
-    """LangChain BaseChatMessageHistory backed by agent-memory-core.
+    """LangChain BaseChatMessageHistory backed by archon-memory-core.
 
     Stores each message as a `session` chunk. `messages` retrieves them in
     insertion order (oldest first) by replaying all chunks tagged with this
@@ -69,7 +69,7 @@ class AgentMemoryStore(BaseChatMessageHistory):  # type: ignore[misc]
         if not _LANGCHAIN_AVAILABLE:
             raise ImportError(
                 "langchain-core is not installed. Install with: "
-                'pip install "agent-memory-core[langchain]"'
+                'pip install "archon-memory-core[langchain]"'
             )
         super().__init__(**kwargs)
         self.store = store if store is not None else MemoryStore()
