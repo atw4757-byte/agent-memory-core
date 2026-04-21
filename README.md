@@ -20,7 +20,7 @@ Full results, seeds, and reproducible harness: [`benchmark/amb_v2/results/v2.3/l
 - **Replay any recall.** Trace every retrieval event back to its source chunks — answer *"why did it remember that?"*
 - **Local-first.** Runs entirely on ChromaDB + Ollama. Your memory never leaves your machine unless you opt in.
 
-Apache 2.0. `pip install agent-memory-core`. Python ≥ 3.10.
+Apache 2.0. `pip install archon-memory-core`. Python ≥ 3.10. (Import as `from agent_memory_core import …` — module name unchanged.)
 
 ---
 
@@ -37,7 +37,7 @@ See [**Why not just use a bigger context window?**](docs/WHY_NOT_CONTEXT_WINDOW.
 ## Quickstart
 
 ```bash
-pip install agent-memory-core
+pip install archon-memory-core
 ```
 
 ```python
@@ -234,13 +234,15 @@ VALID_TYPES = {
 ## Installation
 
 ```bash
-pip install agent-memory-core                     # core
-pip install "agent-memory-core[reranker]"         # + cross-encoder
-pip install "agent-memory-core[graph]"            # + entity graph
-pip install "agent-memory-core[langchain]"        # + LangChain adapter
-pip install "agent-memory-core[llamaindex]"       # + LlamaIndex adapter
-pip install "agent-memory-core[all]"              # everything
+pip install archon-memory-core                     # core
+pip install "archon-memory-core[reranker]"         # + cross-encoder
+pip install "archon-memory-core[graph]"            # + entity graph
+pip install "archon-memory-core[langchain]"        # + LangChain adapter
+pip install "archon-memory-core[llamaindex]"       # + LlamaIndex adapter
+pip install "archon-memory-core[all]"              # everything
 ```
+
+The PyPI project is named `archon-memory-core` (the short name was claimed before we launched). The Python module stays `agent_memory_core`, so existing code doesn't change — just the `pip install` line.
 
 **Requirements:** Python ≥ 3.10, chromadb ≥ 0.5.0.
 **Optional:** Ollama with `mistral:latest` or `qwen2.5:7b` for consolidation.

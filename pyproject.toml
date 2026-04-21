@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agent-memory-core"
+name = "archon-memory-core"
 version = "0.1.3"
 description = "Agent memory that actually works: drops into any Python agent in 3 lines."
 readme = "README.md"

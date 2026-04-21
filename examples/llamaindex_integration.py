@@ -7,7 +7,7 @@ The agent writes observations and tool results to MemoryStore, and retrieves
 relevant context at the start of each query.
 
 Requirements:
-    pip install agent-memory-core llama-index-core llama-index-llms-anthropic
+    pip install archon-memory-core llama-index-core llama-index-llms-anthropic
 
 Usage:
     python examples/llamaindex_integration.py

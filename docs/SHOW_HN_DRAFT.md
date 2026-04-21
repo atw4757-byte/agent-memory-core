@@ -45,7 +45,7 @@ last_verified: 2026-04-21
 > 2. **Ranked top-1 retrieval.** Buffer memory returns chunks in recency order, so an LLM attending to "position 1" gets whatever arrived last — often a confuser. AMC returns a ranked top-1 that actually earns the slot.
 > 3. **Preregistered adversarial benchmark (AMB v2.3).** Per-query *confusers* — vocabulary-overlapping distractors that force the retriever to actually rank, not just lexically match. Four corpus scales (mini/small/medium/large: 4/20/75/250 queries, with 27/156/660/2,300 confusers respectively). 3 seeds at mini/medium/large. Composite `quality_v2_3` metric weights top-1 accuracy, any-answer accuracy, confuser resistance, contradiction resolution, stale-fact rate, and salience preservation.
 >
-> `pip install agent-memory-core` — Apache 2.0. Benchmark harness + results + simulator included.
+> `pip install archon-memory-core` — Apache 2.0. Benchmark harness + results + simulator included. (Import as `from agent_memory_core import …` — the PyPI short name was taken, module name is unchanged.)
 >
 > Happy to answer questions about methodology, the adversarial setup, or why the LangChain 32k dump scores 0% on top-1 even when the answer is verifiably in the buffer.
 >
@@ -80,7 +80,7 @@ Three lines + bracket annotation. Matches the claim.
 - [x] 50/50 tests pass on v0.1.3
 - [x] Public API unchanged from v0.1.2
 - [x] PREREGISTERED.md exists at benchmark/amb_v2/PREREGISTERED.md
-- [ ] Verify `pip install agent-memory-core==0.1.3` actually installs on a fresh Python 3.11 env (PyPI publish needed)
+- [ ] Verify `pip install archon-memory-core==0.1.3` actually installs on a fresh Python 3.11 env (PyPI publish needed)
 - [ ] `REPRODUCE.md` large-v23 command reproduces chart numbers (amc-tuned top1@90 = 0.992, langchain-dump = 0.000, naive = 0.000) on a clean clone
 - [ ] https://divergencerouter.com/amc/ loads on mobile (Safari iOS) with the chart visible
 - [ ] https://github.com/atw4757-byte/agent-memory-core README matches the Show HN claims

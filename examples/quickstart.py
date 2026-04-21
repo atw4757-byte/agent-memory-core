@@ -2,7 +2,7 @@
 Quickstart — agent-memory-core in 3 lines.
 
 Run:
-    pip install agent-memory-core
+    pip install archon-memory-core
     python examples/quickstart.py
 """
 
