@@ -31,7 +31,6 @@ python -m benchmark.amb_v2.run_all \
   --modes stock,tuned \
   --seeds 42,43,44 \
   --noise-rates 0.45 \
-  --days 90 \
   --checkpoints 0,7,14,30,60,90
 ```
 
@@ -48,9 +47,13 @@ python -m benchmark.amb_v2.run_all \
   --modes stock,tuned \
   --seeds 42,43,44 \
   --noise-rates 0.45 \
-  --days 90 \
   --checkpoints 0,7,14,30,60,90
 ```
+
+> Do **not** pass `--days 90`. The harness derives simulation length
+> from `max(checkpoints) + 1` by default; passing `--days 90` truncates
+> to `range(90)` = days 0..89, silently dropping the day-90 checkpoint.
+> Omit the flag and let it default.
 
 Expected at day 90, averaged over seeds 42/43/44:
 
