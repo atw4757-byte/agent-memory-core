@@ -211,10 +211,10 @@ print(f"Score: {report['composite']}/10")
 ### Agent Namespacing
 
 ```python
-store.add("Project uses Python 3.12", type="technical")              # shared
-store.add("Internal scratchpad", type="session", agent="cipher")     # agent-private
+store.add("Project uses Python 3.12", type="technical")                # shared
+store.add("Internal scratchpad", type="session", agent="researcher")   # agent-private
 
-results = store.search("Python version", agent="cipher")  # sees shared + cipher
+results = store.search("Python version", agent="researcher")  # sees shared + researcher
 ```
 
 ### Valid Chunk Types
