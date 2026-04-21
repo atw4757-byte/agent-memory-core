@@ -27,7 +27,7 @@ divergence is a finding — not a bug, and not an excuse to revise the formula.
     tuned mode — metadata must not lie).
   - `adapters/naive.py`: tie-break on retrieval score changed from
     older-first to newer-first, to match other adapters. Fairness fix.
-  - `adapters/agent_memory_core.py`: replaced bare `except: pass`
+  - `adapters/archon_memory_core.py`: replaced bare `except: pass`
     blocks with `_log.debug(...)` so silent failures are observable.
   - `scripts/generate_held_out.py`: `CIPHER_API` now honors
     `$CIPHER_API_URL`; JSON extraction switched to regex-based first-
@@ -41,7 +41,7 @@ divergence is a finding — not a bug, and not an excuse to revise the formula.
   independent model (Gemini 2.5 Pro via the Cipher Agent API) from the
   public spec only — no access to the test harness or adapter internals —
   and committed in ciphertext form under `held_out/*.age`.
-- **Adapters** (alpha release): naive-append-only, agent-memory-core,
+- **Adapters** (alpha release): naive-append-only, archon-memory-core,
   langchain-buffer. LlamaIndex and Mem0 are deferred to v2.0.1 per the
   Phase 3 risk note; their install paths are smoke-tested but the harness
   skips them gracefully when their optional deps are absent.
@@ -99,7 +99,7 @@ commit pin invalidates the pre-registration and requires a new
 | `chart.py` | `32240c9f83541f4ad8cce3d808d4f1ede60bd4ce274c547b2ea818d377f21541` |
 | `adapters/base.py` | `85952e7c5d2d03271e26a4cceb9f080ed0d1686b3a4c8dd6530804369b33d3a7` |
 | `adapters/naive.py` | `62d973fc595bf9f6451fd4b47c40714a87927db2f332b1dade837245bf2c08ea` |
-| `adapters/agent_memory_core.py` | `8eb133969da5a413351a6959a9cf3dfca7060a1e9ff94947bd99165e9c71db0a` |
+| `adapters/archon_memory_core.py` | `8eb133969da5a413351a6959a9cf3dfca7060a1e9ff94947bd99165e9c71db0a` |
 | `adapters/langchain_adapter.py` | `4ceadc31fc98d4050236e2907b8b517434d7221e094172265d6d98bdc7a4d970` |
 | `scripts/generate_held_out.py` | `360d5c0bb696cf1f69556dc38cbdf3bdc895ad67fecf993755c34ed4bc87683d` |
 | `tests/fixtures/mini_scenario.json` | `4a750e8b58b206074455c8b9e78af8d2694b48e6821a514452b298532d454c7f` |
@@ -108,7 +108,7 @@ Regenerate with:
 ```bash
 cd benchmark/amb_v2 && shasum -a 256 chunks.py queries.py scenarios.py \
   simulator.py metrics.py harness.py run.py run_all.py chart.py \
-  adapters/base.py adapters/naive.py adapters/agent_memory_core.py \
+  adapters/base.py adapters/naive.py adapters/archon_memory_core.py \
   adapters/langchain_adapter.py scripts/generate_held_out.py \
   tests/fixtures/mini_scenario.json
 ```
@@ -172,8 +172,8 @@ alpha harness is new and the noise calibration was just fixed in C3.
 |---|---|---|---|
 | 1 | `naive-append-only` | stock | **0.35** |
 | 2 | `naive-append-only` | tuned | **0.35** (no-op — same as stock) |
-| 3 | `agent-memory-core` | stock | **0.55** |
-| 4 | `agent-memory-core` | tuned | **0.70** |
+| 3 | `archon-memory-core` | stock | **0.55** |
+| 4 | `archon-memory-core` | tuned | **0.70** |
 | 5 | `langchain-buffer` | stock | **0.40** |
 | 6 | `langchain-buffer` | tuned | **0.50** |
 | 7 | (reserved) `llama-index` | stock | — (v2.0.1) |
@@ -184,7 +184,7 @@ alpha harness is new and the noise calibration was just fixed in C3.
 Additionally, Archon pre-registers the following ordinal prediction,
 which must hold across ≥3 of the 4 noise rates to count as confirmed:
 
-> **Ordinal @ AUC:** `agent-memory-core (tuned) > agent-memory-core (stock) ≈ langchain (tuned) > langchain (stock) > naive`.
+> **Ordinal @ AUC:** `archon-memory-core (tuned) > archon-memory-core (stock) ≈ langchain (tuned) > langchain (stock) > naive`.
 
 If the mini-scenario numbers published at alpha contradict this
 ordering, that is a legitimate finding and will be reported as such

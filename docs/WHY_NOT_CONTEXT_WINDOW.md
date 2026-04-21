@@ -18,7 +18,7 @@ Every turn, you send the full 10K chunks to the model as context:
 - 200 turns × 500 users × 30 days = 3M turns/month
 - **$9M/month** in inference cost.
 
-**Approach 2: agent-memory-core retrieval.**
+**Approach 2: archon-memory-core retrieval.**
 
 Every turn, retrieve the top-5 relevant chunks (~400 tokens total) + system prompt:
 - Input per turn: ~1,200 tokens → Claude Opus: **$0.018/turn**
@@ -65,7 +65,7 @@ Translation: even if you *can* fit 150K tokens of memory in your context, the mo
 
 Benchmarked quality drop on AMB's adversarial queries when we ran the naive "dump everything into Opus" approach:
 
-| Query Type | Dump-Everything | agent-memory-core |
+| Query Type | Dump-Everything | archon-memory-core |
 |---|---|---|
 | Contradiction resolution | 71% | 94% |
 | Temporal latest | 82% | 100% |
@@ -84,7 +84,7 @@ Every turn of a bigger-context approach sends your user's entire memory history 
 - EU customers' PII shouldn't leave the region every turn
 - Proprietary engineering discussions shouldn't be in Anthropic's logs
 
-`agent-memory-core` runs fully local (ChromaDB + Ollama). Retrieval happens on your hardware. Only the top-5 selected chunks + system prompt go to the LLM. You retain 99%+ of user context inside your boundary.
+`archon-memory-core` runs fully local (ChromaDB + Ollama). Retrieval happens on your hardware. Only the top-5 selected chunks + system prompt go to the LLM. You retain 99%+ of user context inside your boundary.
 
 ---
 
@@ -128,13 +128,13 @@ Long answer: pgvector alone gives you retrieval. What it doesn't give you:
 - **Entity graph** — no multi-hop expansion via shared entities
 - **Intent-aware ranking** — "where is X" vs. "what's the latest X" weight the same
 
-If you're happy running a cron job yourself that compresses old chunks, keeps credentials fresh, resolves conflicts, and tunes your ranking — you don't need `agent-memory-core`. If you'd rather not build that from scratch, we've already built it.
+If you're happy running a cron job yourself that compresses old chunks, keeps credentials fresh, resolves conflicts, and tunes your ranking — you don't need `archon-memory-core`. If you'd rather not build that from scratch, we've already built it.
 
 ---
 
 ## TL;DR
 
-| Metric | Bigger Context Window | agent-memory-core |
+| Metric | Bigger Context Window | archon-memory-core |
 |---|---|---|
 | Cost per turn (realistic prod agent) | $3.00 | $0.018 |
 | Latency (TTFT, 10K-chunk memory) | 8.2s | 1.1s |

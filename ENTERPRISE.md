@@ -99,7 +99,7 @@ Everything in [Business](PRICING.md), plus:
 │  Your VPC                                │
 │                                          │
 │  ┌─────────────────────────────────┐    │
-│  │  agent-memory-core OSS library  │    │
+│  │  archon-memory-core OSS library  │    │
 │  │  (in your application runtime)  │    │
 │  └──────────────┬──────────────────┘    │
 │                 │                        │

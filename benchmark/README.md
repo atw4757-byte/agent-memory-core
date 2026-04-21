@@ -56,7 +56,7 @@ Each scenario has **20 queries** (200 total) with the following distribution:
 
 ## Running the Benchmark
 
-### Against agent-memory-core (default)
+### Against archon-memory-core (default)
 
 ```bash
 # Install the package
@@ -137,7 +137,7 @@ composite = (0.25 × recall + 0.20 × precision + 0.25 × answer_completeness
 | System | Composite | Recall@5 | Precision@5 | Answer | Temporal | Contradiction |
 |---|---|---|---|---|---|---|
 | Naive ChromaDB (cosine only) | 3.1/10 | 68% | 42% | 51% | 34% | 29% |
-| agent-memory-core v0.1 | 7.7/10 | 82% | 61% | 74% | 71% | 68% |
+| archon-memory-core v0.1 | 7.7/10 | 82% | 61% | 74% | 71% | 68% |
 
 *Temporal accuracy and contradiction resolution are the primary differentiators between naive and production-quality memory systems.*
 

@@ -5,8 +5,8 @@ Adapters for the two most common agent frameworks. Both are thin wrappers around
 ## Installation
 
 ```bash
-pip install "agent-memory-core[langchain]"    # LangChain adapter
-pip install "agent-memory-core[llamaindex]"   # LlamaIndex adapter
+pip install "archon-memory-core[langchain]"    # LangChain adapter
+pip install "archon-memory-core[llamaindex]"   # LlamaIndex adapter
 ```
 
 ## LangChain
@@ -14,7 +14,7 @@ pip install "agent-memory-core[llamaindex]"   # LlamaIndex adapter
 ```python
 from langchain.agents import initialize_agent
 from langchain_openai import ChatOpenAI
-from agent_memory_core.integrations.langchain import AgentMemoryStore
+from archon_memory_core.integrations.langchain import AgentMemoryStore
 
 memory = AgentMemoryStore(agent="support-bot")
 agent = initialize_agent(
@@ -25,7 +25,7 @@ agent = initialize_agent(
 )
 
 agent.run("What was the API key again?")
-# Uses agent-memory-core's full retrieval pipeline — salience, consolidation,
+# Uses archon-memory-core's full retrieval pipeline — salience, consolidation,
 # entity graph — not just cosine similarity.
 ```
 
@@ -43,7 +43,7 @@ report = memory.store.search("api key", n=5)
 ```python
 from llama_index.core.agent import ReActAgent
 from llama_index.core.llms import OpenAI
-from agent_memory_core.integrations.llamaindex import AgentMemoryStore
+from archon_memory_core.integrations.llamaindex import AgentMemoryStore
 
 memory = AgentMemoryStore(agent="research-assistant")
 agent = ReActAgent.from_tools(
@@ -62,9 +62,9 @@ Implements LlamaIndex's `BaseMemory`. Works with `ReActAgent`, `OpenAIAgent`, an
 Instantiate `MemoryStore` once, pass it to every adapter. Use the `agent` namespace to keep each agent's writes separate while allowing shared retrieval:
 
 ```python
-from agent_memory_core import MemoryStore
-from agent_memory_core.integrations.langchain import AgentMemoryStore as LCMemory
-from agent_memory_core.integrations.llamaindex import AgentMemoryStore as LIMemory
+from archon_memory_core import MemoryStore
+from archon_memory_core.integrations.langchain import AgentMemoryStore as LCMemory
+from archon_memory_core.integrations.llamaindex import AgentMemoryStore as LIMemory
 
 store = MemoryStore()  # single backing store
 
@@ -84,7 +84,7 @@ li_mem = LIMemory(store=store, agent="research-assistant")
 Adapters prioritize ergonomics over feature depth. For access to typed chunks, eval runs, consolidation control, replay, and custom ranking, use `MemoryStore` directly:
 
 ```python
-from agent_memory_core import MemoryStore
+from archon_memory_core import MemoryStore
 
 store = MemoryStore()
 store.add("First policy violation — ignore_auth header reviewed and approved", type="lesson")

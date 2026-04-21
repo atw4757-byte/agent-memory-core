@@ -28,9 +28,9 @@ Full review and dispositions: `Memory/adversary-reviews/2026-04-18_amb-v2-advers
 
 ## Context
 
-AMB v1 shipped 2026-04 as a point-in-time benchmark (10 scenarios, 200 queries, 4 reference adapters). It proved that `agent-memory-core` resolves contradictions and handles temporal reasoning better than naive vector retrieval at a fixed moment. It does **not** answer the question customers actually ask: *"what happens to my memory system after six months of use?"*
+AMB v1 shipped 2026-04 as a point-in-time benchmark (10 scenarios, 200 queries, 4 reference adapters). It proved that `archon-memory-core` resolves contradictions and handles temporal reasoning better than naive vector retrieval at a fixed moment. It does **not** answer the question customers actually ask: *"what happens to my memory system after six months of use?"*
 
-Every naive system degrades — noise accumulates, contradictions stack, salience collapses. The commercial thesis of `agent-memory-core` is that memory **improves with age**, not degrades. AMB v1 cannot prove or disprove this thesis. AMB v2 is designed to do exactly that.
+Every naive system degrades — noise accumulates, contradictions stack, salience collapses. The commercial thesis of `archon-memory-core` is that memory **improves with age**, not degrades. AMB v1 cannot prove or disprove this thesis. AMB v2 is designed to do exactly that.
 
 This is also the most ambitious claim in the `ROADMAP.md`, blog post, and marketing site. All three promise AMB v2 by 2026-05-15. Shipping vaporware here would hurt far more than shipping nothing. This spec exists to make AMB v2 real.
 
@@ -41,7 +41,7 @@ This is also the most ambitious claim in the `ROADMAP.md`, blog post, and market
 3. **Pre-register methodology.** Methodology file committed and hash-pinned before any adapter runs. Prevents post-hoc tuning.
 4. **Keep a held-out challenge set.** 30% of scenarios never publish; used to detect scenario-tuning.
 5. **Reproducible from one command.** `python benchmark/amb_v2/run.py --adapter <name> --seed <int>`. No hidden config.
-6. **Adapters for parity with v1.** Same 4 adapters (naive, LangChain, LlamaIndex, agent-memory-core) plus leaderboard submission interface.
+6. **Adapters for parity with v1.** Same 4 adapters (naive, LangChain, LlamaIndex, archon-memory-core) plus leaderboard submission interface.
 7. **Produce decay curves as the headline deliverable.** SVG/PNG chart with day-on-x, quality-on-y, one line per adapter.
 
 ## Non-goals
@@ -95,7 +95,7 @@ class DecayAdapter(Protocol):
     def query(self, question: str, scenario_id: str) -> str: ...
 ```
 
-Adapters receive chunks in temporal order. Chunks have `{id, text, type, timestamp_day, scenario_id}`. Consolidation callback fires once per simulated day **if the adapter opts in** — agent-memory-core uses it, naive does not.
+Adapters receive chunks in temporal order. Chunks have `{id, text, type, timestamp_day, scenario_id}`. Consolidation callback fires once per simulated day **if the adapter opts in** — archon-memory-core uses it, naive does not.
 
 This is the single extension point for third-party leaderboard submissions.
 
@@ -121,7 +121,7 @@ Two derived scores:
 AMB v1 has 10 scenarios. AMB v2 uses:
 
 - **Public set:** 7 of the v1 scenarios, temporally extended (each rewritten so that the 5–8 sessions are spread across 90 days instead of all front-loaded).
-- **Held-out set:** 3 new scenarios, **authored by Cipher / Gemini 2.5 Pro using the public spec only**, never seen the agent-memory-core implementation. The exact prompt used for held-out generation is committed verbatim to `PREREGISTERED.md`. The held-out scenarios are stored encrypted in `held_out/`, decrypted at run time only. Used by us to score any adapter that gets submitted; only composite numbers published, raw held-out queries never.
+- **Held-out set:** 3 new scenarios, **authored by Cipher / Gemini 2.5 Pro using the public spec only**, never seen the archon-memory-core implementation. The exact prompt used for held-out generation is committed verbatim to `PREREGISTERED.md`. The held-out scenarios are stored encrypted in `held_out/`, decrypted at run time only. Used by us to score any adapter that gets submitted; only composite numbers published, raw held-out queries never.
 
 Total: 10 scenarios, same N as v1. Authorship split: 7 Archon (extended from v1), 3 Cipher (de-novo from public spec).
 
@@ -166,12 +166,12 @@ Results runs happen *after* this commit. Any methodology change post-registratio
 
 ### D10. Stock vs Tuned mode (fairness fix)
 
-`consolidate()` is a privileged operation — agent-memory-core uses it; LangChain `ConversationSummaryBufferMemory` and stock LlamaIndex memory do not. Running with consolidation enabled gives the home-team adapter a "thinking step" that out-of-the-box adapters lack.
+`consolidate()` is a privileged operation — archon-memory-core uses it; LangChain `ConversationSummaryBufferMemory` and stock LlamaIndex memory do not. Running with consolidation enabled gives the home-team adapter a "thinking step" that out-of-the-box adapters lack.
 
 Therefore every adapter is run in **two modes** and both numbers are published side-by-side:
 
 - **Stock** — `consolidate()` is a no-op. Tests the adapter's out-of-the-box behavior.
-- **Tuned** — `consolidate()` is invoked once per simulated day. Adapters that don't implement consolidation no-op silently. Tests the adapter when given the same daily compute budget as agent-memory-core.
+- **Tuned** — `consolidate()` is invoked once per simulated day. Adapters that don't implement consolidation no-op silently. Tests the adapter when given the same daily compute budget as archon-memory-core.
 
 The composite-metric ranking is published per-mode. There is **no combined ranking** that mixes the two. The decay-curve chart shows two lines per adapter (`stock` solid, `tuned` dashed), color-coded by adapter. This is honest: it surfaces where consolidation is the wedge and where it isn't, without hiding either result.
 
@@ -250,7 +250,7 @@ Not every query fires at every checkpoint. A query asking "what is the user's cu
 ### Results JSON
 ```json
 {
-  "adapter": "agent-memory-core",
+  "adapter": "archon-memory-core",
   "version": "0.1.2",
   "seed": 42,
   "spec_version": "v2.0.0",
@@ -300,7 +300,7 @@ Coverage target: ≥ 90% for simulator + metrics + harness. Adapters tested beha
 | R3. Wall-clock too slow to iterate | MEDIUM | Cap corpus at 10K chunks for v2.0; v2.1 can scale to 50K if compute allows |
 | R4. LangChain/LlamaIndex adapters stale by May 15 | MEDIUM | Pin adapter dependency versions in `benchmark/amb_v2/requirements.txt` |
 | R5. Composite formula weighting is arbitrary | MEDIUM | Report all 4 sub-metrics individually, not only composite. Let readers re-weight. |
-| R6. Public claim of "improves with age" could be false | HIGH | Spec explicitly does NOT claim agent-memory-core wins. The chart shows what it shows. If we lose, we publish anyway. |
+| R6. Public claim of "improves with age" could be false | HIGH | Spec explicitly does NOT claim archon-memory-core wins. The chart shows what it shows. If we lose, we publish anyway. |
 | R7. Someone tunes to our public scenarios | MEDIUM | Held-out set + spec-pinned methodology + 60-day grace on changes |
 | R8. Synthetic-only is dismissed as a vanity metric | HIGH | D12 commits to real-data validation in v2.1 within 30 days. v2.0 README explicitly acknowledges the limitation. |
 | R9. `consolidate()` is a backdoor for the home-team adapter | HIGH | D10 — every adapter run in stock + tuned modes, both published, no combined ranking |
@@ -310,7 +310,7 @@ Coverage target: ≥ 90% for simulator + metrics + harness. Adapters tested beha
 ## Dependencies + blockers
 
 - AMB v1 scenarios (exist) — extend in-place, no new infrastructure
-- `agent-memory-core` 0.1.2 (released) — no upstream work needed
+- `archon-memory-core` 0.1.2 (released) — no upstream work needed
 - LangChain / LlamaIndex adapter pin: capture current working deps in `requirements.txt`
 - Matplotlib for charts (already in dev deps)
 - **No external API calls.** Local-only. Critical: no OpenAI/Anthropic dependency in the benchmark path — otherwise reproducibility dies the moment pricing changes.

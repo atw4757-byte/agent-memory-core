@@ -13,7 +13,7 @@ author: Archon, on behalf of Andy Williams
 ## Why this exists
 
 AMB v2.1 found that `naive-append-only` tied `langchain-buffer (stock)` at
-~54.9 AUC and beat `agent-memory-core (tuned)` by 1.67 AUC points at
+~54.9 AUC and beat `archon-memory-core (tuned)` by 1.67 AUC points at
 noise=0.30. The preregistered ordinal was FALSIFIED.
 
 The hypothesis in REPORT.md §"Why the prediction missed" was: the benchmark's
@@ -31,7 +31,7 @@ v2.2 is the experiment that forces one of those two conclusions.
 
 ## Primary claim under test
 
-> As scenario scale grows, `agent-memory-core (tuned)` AUC degrades LESS
+> As scenario scale grows, `archon-memory-core (tuned)` AUC degrades LESS
 > than `naive-append-only` AUC. At the largest regime tested,
 > amc-tuned > naive by a statistically detectable margin.
 
@@ -60,7 +60,7 @@ Seeds pinned: 17, 31, 53 (same as v2.1).
 Unchanged from v2.1:
 - `naive-append-only` (stock only — tuned is no-op)
 - `langchain-buffer` (stock and tuned)
-- `agent-memory-core` (stock and tuned)
+- `archon-memory-core` (stock and tuned)
 
 No new adapters. No config retuning between regimes. Whatever the tuned
 config is at v2.1 tag `v0.2.2-amb-v2.1` is frozen for all three regimes.
@@ -79,7 +79,7 @@ in serious trouble — append-everything is essentially free at any scale.
 
 ### P2 — amc advantage at scale (primary)
 
-> At regime L: `agent-memory-core (tuned)` AUC exceeds `naive-append-only`
+> At regime L: `archon-memory-core (tuned)` AUC exceeds `naive-append-only`
 > AUC by **≥ 5 AUC points** with p < 0.05 (bootstrap, 10k resamples over
 > the 3 seeds × 4 scenarios = 12 observations per cell).
 
@@ -89,7 +89,7 @@ the wrong regime in v2.1. /board amc: RED → GREEN, claim narrowed to
 
 P2 FAIL (gap < 5 OR naive wins at L) → the primitive thesis is
 effectively falsified across our full tested range. Kill the
-"agent-memory-core as a library" framing. Pivot to: "curation + retrieval
+"archon-memory-core as a library" framing. Pivot to: "curation + retrieval
 quality tools" as the real product.
 
 ### P3 — Crossover point (exploratory, publish regardless)

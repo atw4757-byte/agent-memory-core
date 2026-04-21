@@ -1,10 +1,10 @@
-# Contributing to agent-memory-core
+# Contributing to archon-memory-core
 
 ## Development install
 
 ```bash
-git clone https://github.com/Divergence-Router/agent-memory-core.git
-cd agent-memory-core
+git clone https://github.com/Divergence-Router/archon-memory-core.git
+cd archon-memory-core
 pip install -e ".[reranker,graph,dev]"
 ```
 
@@ -21,7 +21,7 @@ All tests are offline — no API keys or running services required.
 The Agentic Memory Benchmark (AMB) covers 10 scenarios and 200 queries.
 
 ```bash
-# Run against agent-memory-core (default adapter)
+# Run against archon-memory-core (default adapter)
 python benchmark/run_benchmark.py
 
 # Run a single scenario

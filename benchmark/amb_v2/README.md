@@ -17,7 +17,7 @@ and pre-published predictions.
 
 ## Status
 
-- **v2.0-alpha** (2026-04-18): 3 adapters (naive, agent-memory-core,
+- **v2.0-alpha** (2026-04-18): 3 adapters (naive, archon-memory-core,
   langchain-buffer) on the `mini` test scenario.
   - [Results report](results/alpha-v2.0/REPORT.md) — **null result**;
     mini is too small to differentiate adapters.
@@ -41,7 +41,7 @@ python -m benchmark.amb_v2.run_all --quick \
 python -m benchmark.amb_v2.run_all \
     --scenarios benchmark/amb_v2/scenarios \
     --out-dir benchmark/amb_v2/results/alpha-v2.0 \
-    --adapters naive,agent-memory-core,langchain \
+    --adapters naive,archon-memory-core,langchain \
     --modes stock,tuned \
     --seeds 42,43,44 \
     --noise-rates 0.20,0.30,0.45,0.60
@@ -89,7 +89,7 @@ benchmark/amb_v2/
 ├── run.py                  # single-run CLI
 ├── run_all.py              # grid sweep
 ├── chart.py                # decay curves + sensitivity grid
-├── adapters/               # naive, agent-memory-core, langchain
+├── adapters/               # naive, archon-memory-core, langchain
 ├── scripts/                # held-out generation driver
 ├── scenarios/              # public scenarios
 ├── held_out/               # *.age ciphertext only

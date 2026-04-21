@@ -9,7 +9,7 @@ commit_pin: f3a1570
 
 # AMB v2.1 Pre-registration
 
-v2.0.1 shipped a falsification: `agent-memory-core` (stock + tuned)
+v2.0.1 shipped a falsification: `archon-memory-core` (stock + tuned)
 under-performed the `naive-append-only` baseline, and `langchain-tuned`
 silently no-op'd because its consolidate() path was never exercised.
 The v2.0.1 REPORT.md documented this honestly instead of quietly
@@ -67,9 +67,9 @@ v2.0.1 already established that we publish falsification.
   rate calibration guarantees are unchanged — only the template
   content string set changed.
 - **Core library changes** are out-of-tree from the benchmark, but the
-  adapter hash (`adapters/agent_memory_core.py`) captures the adapter-
+  adapter hash (`adapters/archon_memory_core.py`) captures the adapter-
   side wiring (type-map, supersedes pass-through, fail-loud tuned).
-- **Adapters shipped**: naive, agent-memory-core, langchain-buffer
+- **Adapters shipped**: naive, archon-memory-core, langchain-buffer
   (same as v2.0.1). llama-index and mem0 remain deferred.
 - **Modes**, **sensitivity sweep** (4 noise rates × 3 seeds), and
   **checkpoints** (0, 7, 14, 30, 60, 90) are UNCHANGED.
@@ -110,7 +110,7 @@ commit pin invalidates the pre-registration and requires a new
 | `chart.py` | `32240c9f83541f4ad8cce3d808d4f1ede60bd4ce274c547b2ea818d377f21541` |
 | `adapters/base.py` | `85952e7c5d2d03271e26a4cceb9f080ed0d1686b3a4c8dd6530804369b33d3a7` |
 | `adapters/naive.py` | `62d973fc595bf9f6451fd4b47c40714a87927db2f332b1dade837245bf2c08ea` |
-| `adapters/agent_memory_core.py` | `3da96f59ec716fb8b52af7f7bdc7fff1a49b261f66c7da6f5ef2116a660ef024` |
+| `adapters/archon_memory_core.py` | `3da96f59ec716fb8b52af7f7bdc7fff1a49b261f66c7da6f5ef2116a660ef024` |
 | `adapters/langchain_adapter.py` | `4ceadc31fc98d4050236e2907b8b517434d7221e094172265d6d98bdc7a4d970` |
 | `scripts/generate_held_out.py` | `4bcbcb6c4a7025df51147a8377376149918214e4a385fb68259e463b9b0bd6dd` |
 | `tests/fixtures/mini_scenario.json` | `4a750e8b58b206074455c8b9e78af8d2694b48e6821a514452b298532d454c7f` |
@@ -119,7 +119,7 @@ Regenerate with:
 ```bash
 cd benchmark/amb_v2 && shasum -a 256 chunks.py queries.py scenarios.py \
   simulator.py metrics.py harness.py run.py run_all.py chart.py \
-  adapters/base.py adapters/naive.py adapters/agent_memory_core.py \
+  adapters/base.py adapters/naive.py adapters/archon_memory_core.py \
   adapters/langchain_adapter.py scripts/generate_held_out.py \
   tests/fixtures/mini_scenario.json
 ```
@@ -145,24 +145,24 @@ All predictions at `noise_rate=0.30`, averaged across seeds `{42, 43,
 |---|---|---|---|---|
 | 1 | `naive-append-only` | stock | **0.35** | unchanged from v2.0 |
 | 2 | `naive-append-only` | tuned | **0.35** | still a no-op for naive |
-| 3 | `agent-memory-core` | stock | **0.55** | type-map fix + metadata pass-through restores chunks that were being dropped; same level as v2.0 prediction, now defensible |
-| 4 | `agent-memory-core` | tuned | **0.70** | supersedes-aware `consolidate()` + search filter actively resolves contradictions; this is the bet |
+| 3 | `archon-memory-core` | stock | **0.55** | type-map fix + metadata pass-through restores chunks that were being dropped; same level as v2.0 prediction, now defensible |
+| 4 | `archon-memory-core` | tuned | **0.70** | supersedes-aware `consolidate()` + search filter actively resolves contradictions; this is the bet |
 | 5 | `langchain-buffer` | stock | **0.40** | unchanged |
 | 6 | `langchain-buffer` | tuned | **0.50** | unchanged |
 
 **Ordinal @ AUC (v2.1, primary bet):**
 
-> `agent-memory-core (tuned) > agent-memory-core (stock) > langchain
+> `archon-memory-core (tuned) > archon-memory-core (stock) > langchain
 > (tuned) > langchain (stock) ≈ naive`
 
 To count as confirmed, this ordering must hold across **≥3 of the 4
 noise rates** `{0.20, 0.30, 0.45, 0.60}` AND the gap between
-`agent-memory-core (tuned)` and the next-best adapter must be ≥5 AUC
+`archon-memory-core (tuned)` and the next-best adapter must be ≥5 AUC
 points at `noise_rate=0.30`.
 
 **Temporal improvement prediction (secondary bet):**
 
-> `agent-memory-core (tuned)` scores `temporal_improvement > 0.10`
+> `archon-memory-core (tuned)` scores `temporal_improvement > 0.10`
 > under `noise_rate=0.30`, averaged across seeds, while
 > `naive-append-only (stock)` scores `temporal_improvement ∈ [-0.05,
 > 0.05]`.
@@ -184,7 +184,7 @@ two things** — no third option:
   cadence), NOT the benchmark.
 - **If the gap is inverted** (amc-tuned worse than naive): emergency
   autopsy, pause all v2.x grid work, open an issue against
-  `agent-memory-core` main. Do NOT adjust the benchmark.
+  `archon-memory-core` main. Do NOT adjust the benchmark.
 
 Under no circumstances do we retune composite weights, drop scenarios,
 or re-generate held-out sets in response to v2.1 numbers.

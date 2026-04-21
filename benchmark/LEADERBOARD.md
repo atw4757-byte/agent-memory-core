@@ -36,7 +36,7 @@ See [README.md](README.md) for the methodology.
 Your system must expose a Python adapter matching the `BenchmarkAdapter` protocol:
 
 ```python
-from agent_memory_core.benchmark import BenchmarkAdapter
+from archon_memory_core.benchmark import BenchmarkAdapter
 
 class MySystemAdapter(BenchmarkAdapter):
     def reset(self) -> None: ...
@@ -47,7 +47,7 @@ class MySystemAdapter(BenchmarkAdapter):
 
 Submit via GitHub PR:
 
-1. Fork `atw4757-byte/agent-memory-core`
+1. Fork `atw4757-byte/archon-memory-core`
 2. Add your adapter to `benchmark/adapters/{your_system}.py`
 3. Run locally: `python benchmark/run_benchmark.py --adapter {your_system}`
 4. Commit the result JSON: `benchmark/results/{your_system}-{YYYY-MM-DD}.json`
@@ -136,7 +136,7 @@ We reserve the right to:
 
 | Rank | System | Version | Composite | Answer | Temporal | Contradiction | Date |
 |---|---|---|---|---|---|---|---|
-| 🥇 | **agent-memory-core** | 0.1.2 | **9.01** | 0.69 | 1.00 | 0.94 | 2026-04-16 |
+| 🥇 | **archon-memory-core** | 0.1.2 | **9.01** | 0.69 | 1.00 | 0.94 | 2026-04-16 |
 | 🥈 | Naive ChromaDB | 0.5.3 | 8.86 | 0.63 | 1.00 | 0.94 | 2026-04-16 |
 | 🥉 | LangChain Window (k=10) | 0.3.14 | 8.67 | 0.65 | 1.00 | 0.92 | 2026-04-16 |
 | — | *Oracle (full context)* | *ceiling* | *9.46* | *0.84* | *1.00* | *0.96* | *2026-04-16* |
@@ -149,7 +149,7 @@ If you maintain one of these, email `benchmark@divergencerouter.com` and we'll h
 
 ## Integrity Commitment
 
-- The benchmark authority (agent-memory-core maintainers) competes on the leaderboard like any other system.
+- The benchmark authority (archon-memory-core maintainers) competes on the leaderboard like any other system.
 - Our own scores are run on the same neutral hardware as everyone else's, with the same harness, by the same CI.
 - If anyone beats us on the leaderboard, we congratulate them in a blog post. Competition is the point.
 - We will never modify scenario data to favor our system. Changes to AMB (additions, corrections, versioning) are announced publicly and require a 60-day grace period before retroactive rescoring.
@@ -161,4 +161,4 @@ If you maintain one of these, email `benchmark@divergencerouter.com` and we'll h
 
 - **Submissions, questions:** `benchmark@divergencerouter.com`
 - **Press / partnership:** `press@divergencerouter.com`
-- **Issues, corrections:** [open a GitHub issue](https://github.com/atw4757-byte/agent-memory-core/issues/new)
+- **Issues, corrections:** [open a GitHub issue](https://github.com/atw4757-byte/archon-memory-core/issues/new)

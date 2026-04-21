@@ -11,8 +11,8 @@ output `*.json` files — we want to know.
 ## Setup (one-time)
 
 ```bash
-git clone https://github.com/atw4757-byte/agent-memory-core
-cd agent-memory-core
+git clone https://github.com/atw4757-byte/archon-memory-core
+cd archon-memory-core
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -e . -r benchmark/amb_v2/requirements.txt
 ```
@@ -27,7 +27,7 @@ Mini is too small to differentiate adapters cleanly (see PREREGISTERED.md
 python -m benchmark.amb_v2.run_all \
   --scenarios benchmark/amb_v2/scenarios-v23/mini \
   --out-dir /tmp/amb-mini \
-  --adapters agent-memory-core,naive,langchain-dump \
+  --adapters archon-memory-core,naive,langchain-dump \
   --modes stock,tuned \
   --seeds 42,43,44 \
   --noise-rates 0.45 \
@@ -43,7 +43,7 @@ confusers × 3 seeds × 3 adapters × 2 modes.
 python -m benchmark.amb_v2.run_all \
   --scenarios benchmark/amb_v2/scenarios-v23/large \
   --out-dir /tmp/amb-large \
-  --adapters agent-memory-core,naive,langchain-dump \
+  --adapters archon-memory-core,naive,langchain-dump \
   --modes stock,tuned \
   --seeds 42,43,44 \
   --noise-rates 0.45 \
@@ -59,8 +59,8 @@ Expected at day 90, averaged over seeds 42/43/44:
 
 | Adapter              | Mode  | top-1 @90 |
 | -------------------- | ----- | --------- |
-| agent-memory-core    | tuned | 0.992     |
-| agent-memory-core    | stock | 0.492     |
+| archon-memory-core    | tuned | 0.992     |
+| archon-memory-core    | stock | 0.492     |
 | langchain-dump       | tuned | 0.000     |
 | langchain-dump       | stock | 0.000     |
 | naive-append-only    | tuned | 0.000     |
@@ -110,7 +110,7 @@ Three public adapters ship with the benchmark:
 
 | Adapter              | Module                                       |
 | -------------------- | -------------------------------------------- |
-| agent-memory-core    | `benchmark.amb_v2.adapters.amc`              |
+| archon-memory-core    | `benchmark.amb_v2.adapters.amc`              |
 | naive-append-only    | `benchmark.amb_v2.adapters.naive`            |
 | langchain-dump       | `benchmark.amb_v2.adapters.langchain_dump`   |
 

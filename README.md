@@ -1,4 +1,4 @@
-# agent-memory-core
+# archon-memory-core
 
 **Every memory system degrades. Ours endures.**
 
@@ -7,7 +7,7 @@ Agents remember what users tell them — until a user changes their mind. *"My d
 ![AMB v2.3 — every memory system degrades except ours](docs/images/amb-v23-degradation.png)
 
 > **At 250-query scale, 3-seed mean, over 90 simulated days:**
-> - **agent-memory-core (with consolidation): 99.2% top-1** — flat from day 7 to day 90
+> - **archon-memory-core (with consolidation): 99.2% top-1** — flat from day 7 to day 90
 > - **Same retriever, no consolidation: 49.2%** — collapses after 13 days of accumulated contradictions
 > - **LangChain 32k-token buffer (top-1): 0.0%** — answer exists in context, but top-ranked chunk is noise
 > - **Naive word-overlap: 0.0%** — never resolves a single contradiction
@@ -20,7 +20,7 @@ Full results, seeds, and reproducible harness: [`benchmark/amb_v2/results/v2.3/l
 - **Replay any recall.** Trace every retrieval event back to its source chunks — answer *"why did it remember that?"*
 - **Local-first.** Runs entirely on ChromaDB + Ollama. Your memory never leaves your machine unless you opt in.
 
-Apache 2.0. `pip install archon-memory-core`. Python ≥ 3.10. (Import as `from agent_memory_core import …` — module name unchanged.)
+Apache 2.0. `pip install archon-memory-core`. Python ≥ 3.10.
 
 ---
 
@@ -28,7 +28,7 @@ Apache 2.0. `pip install archon-memory-core`. Python ≥ 3.10. (Import as `from 
 
 Every production agent hits the same wall. The naive approach — dump everything into a vector store, retrieve by cosine — works on day one. By month three you're drowning in stale context, duplicated noise, and contradictory facts that silently return the wrong answer.
 
-LangChain's buffer expires by design. Mem0 stores contradictions without resolving them. MemGPT's consolidation only runs on GPT-4. `agent-memory-core` is the answer to the question none of them asked: *what if memory got **better** the longer you used it?*
+LangChain's buffer expires by design. Mem0 stores contradictions without resolving them. MemGPT's consolidation only runs on GPT-4. `archon-memory-core` is the answer to the question none of them asked: *what if memory got **better** the longer you used it?*
 
 See [**Why not just use a bigger context window?**](docs/WHY_NOT_CONTEXT_WINDOW.md) for the cost/quality math against the most common alternative.
 
@@ -41,7 +41,7 @@ pip install archon-memory-core
 ```
 
 ```python
-from agent_memory_core import MemoryStore
+from archon_memory_core import MemoryStore
 
 store = MemoryStore()
 store.add("The production API key lives in the keychain", type="credential")
@@ -55,7 +55,7 @@ print(results[0].text)
 ### Async-first (recommended for agents)
 
 ```python
-from agent_memory_core import AsyncMemoryStore
+from archon_memory_core import AsyncMemoryStore
 
 store = AsyncMemoryStore()
 await store.add("User prefers terse responses", type="personal")
@@ -66,7 +66,7 @@ results = await store.search("user communication preferences")
 
 ```python
 from langchain.agents import AgentExecutor
-from agent_memory_core.integrations.langchain import AgentMemoryStore
+from archon_memory_core.integrations.langchain import AgentMemoryStore
 
 memory = AgentMemoryStore()
 agent = AgentExecutor(..., memory=memory)
@@ -76,7 +76,7 @@ agent = AgentExecutor(..., memory=memory)
 
 ```python
 from llama_index.core.agent import ReActAgent
-from agent_memory_core.integrations.llamaindex import AgentMemoryStore
+from archon_memory_core.integrations.llamaindex import AgentMemoryStore
 
 memory = AgentMemoryStore()
 agent = ReActAgent.from_tools(..., memory=memory)
@@ -94,8 +94,8 @@ The **Agentic Memory Benchmark v2.3** is the longitudinal, preregistered test th
 
 | System | Mode | Day 7 | Day 14 | Day 30 | Day 60 | Day 90 |
 |---|---|---:|---:|---:|---:|---:|
-| **agent-memory-core** | tuned (with consolidation) | **99.3%** | **99.2%** | **99.2%** | **99.2%** | **99.2%** |
-| agent-memory-core | stock (retrieval only) | 70.2% | 49.2% | 49.2% | 49.2% | 49.2% |
+| **archon-memory-core** | tuned (with consolidation) | **99.3%** | **99.2%** | **99.2%** | **99.2%** | **99.2%** |
+| archon-memory-core | stock (retrieval only) | 70.2% | 49.2% | 49.2% | 49.2% | 49.2% |
 | LangChain 32k buffer | any-in-context | 100% | 100% | 100% | 100% | 56% |
 | LangChain 32k buffer | top-1 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
 | Naive word-overlap | — | 5.0% | 0.0% | 0.0% | 0.0% | 0.8% |
@@ -109,8 +109,8 @@ Standard deviation ≤ 0.01 on every cell. Seeds: 42, 43, 44. Full per-seed brea
 ### Reproduce
 
 ```bash
-git clone https://github.com/atw4757-byte/agent-memory-core
-cd agent-memory-core/benchmark/amb_v2
+git clone https://github.com/atw4757-byte/archon-memory-core
+cd archon-memory-core/benchmark/amb_v2
 make bench                    # runs the full v2.3 grid (~20 min on M-series)
 ```
 
@@ -152,7 +152,7 @@ ForgettingPolicy — salience decay + stale detection + health scoring
 
 ## How it compares
 
-| Feature | agent-memory-core | LangChain | Naive Vector | Mem0 | MemGPT |
+| Feature | archon-memory-core | LangChain | Naive Vector | Mem0 | MemGPT |
 |---|---|---|---|---|---|
 | Nightly consolidation | Local LLM | — | — | Partial | GPT-4 only |
 | Active forgetting | Yes | — | — | — | — |
@@ -166,7 +166,7 @@ ForgettingPolicy — salience decay + stale detection + health scoring
 | Runs fully local | Ollama + ChromaDB | Partial | Yes | — | — |
 | License | Apache 2.0 | MIT | — | MIT | Apache 2.0 |
 
-Own a system on this list and disagree? [Submit a correction](https://github.com/atw4757-byte/agent-memory-core/issues/new).
+Own a system on this list and disagree? [Submit a correction](https://github.com/atw4757-byte/archon-memory-core/issues/new).
 
 ---
 
@@ -175,7 +175,7 @@ Own a system on this list and disagree? [Submit a correction](https://github.com
 ### Working Memory
 
 ```python
-from agent_memory_core import WorkingMemory, MemoryStore
+from archon_memory_core import WorkingMemory, MemoryStore
 
 store = MemoryStore()
 wm = WorkingMemory(max_slots=7)
@@ -186,7 +186,7 @@ wm.flush(store)  # end-of-session persistence
 ### Consolidation (requires Ollama)
 
 ```python
-from agent_memory_core import Consolidator
+from archon_memory_core import Consolidator
 
 consolidator = Consolidator(store, min_cluster=3)
 report = consolidator.run(dry_run=True)
@@ -199,7 +199,7 @@ print(f"Archived {report['archived']} chunks into {report['consolidated']} facts
 ### Eval Against Your Data
 
 ```python
-from agent_memory_core import MemoryEval
+from archon_memory_core import MemoryEval
 
 ev = MemoryEval(store)
 ev.add_query("Where is the API key?", expected_facts=["keychain"], type="credential")
@@ -241,8 +241,6 @@ pip install "archon-memory-core[langchain]"        # + LangChain adapter
 pip install "archon-memory-core[llamaindex]"       # + LlamaIndex adapter
 pip install "archon-memory-core[all]"              # everything
 ```
-
-The PyPI project is named `archon-memory-core` (the short name was claimed before we launched). The Python module stays `agent_memory_core`, so existing code doesn't change — just the `pip install` line.
 
 **Requirements:** Python ≥ 3.10, chromadb ≥ 0.5.0.
 **Optional:** Ollama with `mistral:latest` or `qwen2.5:7b` for consolidation.

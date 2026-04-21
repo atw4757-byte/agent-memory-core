@@ -117,9 +117,9 @@ Acceptance: All Layer 1 + Layer 2 tests green; coverage ≥90% on `simulator.py`
 - **Impl:** Test infrastructure only.
 - **Acceptance:** Test exists and is parametrized.
 
-### T-17 — agent-memory-core adapter (stock + tuned)
-- **Test:** Add `agent_memory_core` to T-16 parametrize.
-- **Impl:** `adapters/agent_memory_core.py` — wraps existing v1 adapter; `consolidate()` no-ops in stock, calls v1 consolidator in tuned.
+### T-17 — archon-memory-core adapter (stock + tuned)
+- **Test:** Add `archon_memory_core` to T-16 parametrize.
+- **Impl:** `adapters/archon_memory_core.py` — wraps existing v1 adapter; `consolidate()` no-ops in stock, calls v1 consolidator in tuned.
 - **Acceptance:** Smoke test green for both modes.
 
 ### T-18 — langchain adapter
@@ -148,7 +148,7 @@ Acceptance: All Layer 1 + Layer 2 tests green; coverage ≥90% on `simulator.py`
 - **Acceptance:** Test green; sample output passes schema.
 
 ### T-23 — Adapter requirements pinning
-- **Deliverable:** `benchmark/amb_v2/requirements.txt` — pinned versions for langchain, llama-index, mem0, agent-memory-core (self-reference).
+- **Deliverable:** `benchmark/amb_v2/requirements.txt` — pinned versions for langchain, llama-index, mem0, archon-memory-core (self-reference).
 - **Acceptance:** `pip install -r requirements.txt` in fresh venv succeeds; smoke tests still green.
 
 ### **C4 commit** — "amb-v2: 4 adapters + harness (T-15..T-23)"
@@ -177,7 +177,7 @@ Acceptance: All adapter smoke + harness tests green; requirements installable.
 - **Acceptance:** Test green; any drift fails loudly.
 
 ### T-28 — End-to-end mini test
-- **Test:** `tests/test_e2e_mini.py::test_full_pipeline_on_mini` — runs harness on mini scenario through 1 adapter (agent-memory-core), validates schema, generates chart, asserts non-zero quality.
+- **Test:** `tests/test_e2e_mini.py::test_full_pipeline_on_mini` — runs harness on mini scenario through 1 adapter (archon-memory-core), validates schema, generates chart, asserts non-zero quality.
 - **Acceptance:** Runs in <30s; all assertions pass.
 
 ### T-29 — Cipher held-out generation driver
@@ -210,7 +210,7 @@ Acceptance: `python -m benchmark.amb_v2.run_all --quick` (mini scenario, 1 seed,
 - **Commit C6** — "amb-v2: Phase 5 review fixes"
 
 ### T-33 — Full alpha run on Bosgame
-- **Driver:** `python -m benchmark.amb_v2.run_all --noise-rates 0.20,0.30,0.45,0.60 --modes stock,tuned --adapters agent-memory-core,langchain,llamaindex,mem0 --seeds 42`
+- **Driver:** `python -m benchmark.amb_v2.run_all --noise-rates 0.20,0.30,0.45,0.60 --modes stock,tuned --adapters archon-memory-core,langchain,llamaindex,mem0 --seeds 42`
 - **Wall-clock budget:** ≤ 8 hours.
 - **Output:** `benchmark/amb_v2/results/headline-v2.0/*.json` (32 result files) + 4 charts.
 

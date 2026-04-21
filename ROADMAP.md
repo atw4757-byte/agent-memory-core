@@ -1,6 +1,6 @@
 # Roadmap
 
-Public roadmap for `agent-memory-core`. Updated monthly. The OSS library is the core; everything else is scaffolding around it.
+Public roadmap for `archon-memory-core`. Updated monthly. The OSS library is the core; everything else is scaffolding around it.
 
 **Last updated:** 2026-04-18
 
@@ -9,8 +9,8 @@ Public roadmap for `agent-memory-core`. Updated monthly. The OSS library is the 
 ## Now (Q2 2026)
 
 ### OSS / Core
-- **LangChain adapter** — `agent_memory_core.integrations.langchain` → ships with v0.2
-- **LlamaIndex adapter** — `agent_memory_core.integrations.llamaindex` → ships with v0.2
+- **LangChain adapter** — `archon_memory_core.integrations.langchain` → ships with v0.2
+- **LlamaIndex adapter** — `archon_memory_core.integrations.llamaindex` → ships with v0.2
 - **Async-first API** — `AsyncMemoryStore` with full parity → v0.2
 - **Longitudinal benchmark (AMB v2)** — 90-day simulated decay across 10K-chunk ingest → **alpha released 2026-04-18** (null result on mini scenario; v2.0.1 with held-out scenarios in-flight). GA June.
 - **Demo video** — 60-second failure → replay → fix walkthrough
@@ -97,6 +97,6 @@ See [PRICING.md](PRICING.md) for the full tier structure. [ENTERPRISE.md](ENTERP
 
 ## How to Influence the Roadmap
 
-- **OSS users:** [open an issue](https://github.com/atw4757-byte/agent-memory-core/issues/new) or upvote existing ones. Top-upvoted items get prioritized.
+- **OSS users:** [open an issue](https://github.com/atw4757-byte/archon-memory-core/issues/new) or upvote existing ones. Top-upvoted items get prioritized.
 - **Paid customers:** submit feature requests to `support@divergencerouter.com`. Enterprise customers get quarterly roadmap reviews with their TAM.
 - **Researchers:** contribute benchmark scenarios or reasoning types. Accepted scenarios are credited in the AMB paper.

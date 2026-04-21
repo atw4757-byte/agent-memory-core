@@ -35,7 +35,7 @@ benchmark/amb_v2/
 ├── adapters/
 │   ├── __init__.py
 │   ├── base.py               # DecayAdapter Protocol (D3)
-│   ├── agent_memory_core.py  # Our adapter (wraps existing v1 adapter)
+│   ├── archon_memory_core.py  # Our adapter (wraps existing v1 adapter)
 │   ├── langchain.py          # ConversationSummaryBufferMemory wrapper
 │   ├── llamaindex.py         # ChatMemoryBuffer + simple semantic recall
 │   └── mem0.py               # Mem0 wrapper (NEW for v2 — wasn't in v1)
@@ -201,8 +201,8 @@ class DecayAdapter(Protocol):
 
 **Tests:** `test_adapter_base.py` — every adapter satisfies the Protocol; `mode="stock"` is a no-op for consolidate; metadata schema valid.
 
-### `adapters/agent_memory_core.py` (~100 LOC)
-Wraps the existing v1 adapter (`benchmark/adapters/agent_memory_core_adapter.py`). In `tuned` mode, calls into the existing consolidation API. In `stock` mode, skips consolidation but otherwise functions normally.
+### `adapters/archon_memory_core.py` (~100 LOC)
+Wraps the existing v1 adapter (`benchmark/adapters/archon_memory_core_adapter.py`). In `tuned` mode, calls into the existing consolidation API. In `stock` mode, skips consolidation but otherwise functions normally.
 
 ### `adapters/langchain.py` (~80 LOC)
 Wraps `ConversationSummaryBufferMemory` from langchain_community. `tuned` mode triggers `prune()` once per day. `stock` mode uses default behavior. `implements_consolidation: false`.
@@ -234,7 +234,7 @@ def run_one(
 CLI entry. Invokes `run_one` once with parsed args. Writes results JSON.
 ```
 python -m benchmark.amb_v2.run \
-    --adapter agent-memory-core --seed 42 \
+    --adapter archon-memory-core --seed 42 \
     --noise-rate 0.30 --mode tuned
 ```
 
@@ -303,7 +303,7 @@ Hand-written doc, frozen pre-run. Contains:
 
 Drive Cipher via a deterministic prompt, captured verbatim into `PREREGISTERED.md`. Approximate shape:
 
-> **System:** You are an external benchmark author. You have read the public AMB v2 spec at `<URL>` and the public scenarios at `<URL>`. You have NOT seen the agent-memory-core source code. Generate a scenario in the same JSON format as the public scenarios, with these constraints: 90-day timeline, 5–8 sessions, includes at least 3 contradictions (updates), at least 2 long-tail credential queries, and at least 1 trajectory query. Adversarially target memory failure modes you would expect a stock LangChain or LlamaIndex system to fail at while a thoughtful long-term memory system would handle.
+> **System:** You are an external benchmark author. You have read the public AMB v2 spec at `<URL>` and the public scenarios at `<URL>`. You have NOT seen the archon-memory-core source code. Generate a scenario in the same JSON format as the public scenarios, with these constraints: 90-day timeline, 5–8 sessions, includes at least 3 contradictions (updates), at least 2 long-tail credential queries, and at least 1 trajectory query. Adversarially target memory failure modes you would expect a stock LangChain or LlamaIndex system to fail at while a thoughtful long-term memory system would handle.
 
 Run 3 times with 3 different scenario themes (e.g. "small business owner", "long-running research project", "elderly parent caregiving"). Save outputs, encrypt with `age`, commit ciphertext + decrypt-key into `~/.archon/amb-heldout.key`.
 

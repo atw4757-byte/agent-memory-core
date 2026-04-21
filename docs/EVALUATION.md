@@ -1,6 +1,6 @@
 # Evaluation Design — AMB v1
 
-The evaluation methodology for `agent-memory-core`, the Agentic Memory Benchmark (AMB) v1, and how to reproduce or challenge our numbers.
+The evaluation methodology for `archon-memory-core`, the Agentic Memory Benchmark (AMB) v1, and how to reproduce or challenge our numbers.
 
 This document exists because the benchmark numbers in the README deserve scrutiny. Skepticism about memory-system benchmarks is correct by default — most of them optimise for the thing they measure, not for what agents actually need in production. This page walks through the design choices, the known weaknesses, and the reproducibility path, so anyone can audit the work rather than take our word for it.
 
@@ -161,13 +161,13 @@ The most recent full-suite run (`benchmark/results/comparison.json`, generated 2
 | Adapter | Composite | Recall@5 | Precision@5 | Answer | Temporal | Contradiction |
 |---|---|---|---|---|---|---|
 | FullContext (oracle ceiling) | 9.46 | 0.97 | 0.97 | 0.84 | 1.00 | — |
-| agent-memory-core v0.1 | 7.7 | 0.82 | 0.61 | 0.74 | 0.71 | 0.68 |
+| archon-memory-core v0.1 | 7.7 | 0.82 | 0.61 | 0.74 | 0.71 | 0.68 |
 | LangChain Window (k=10) | 8.67 (on overlapping queries) | — | — | — | — | — |
 | Naive ChromaDB (cosine only) | 3.1 | 0.68 | 0.42 | 0.51 | 0.34 | 0.29 |
 
 The FullContext adapter is the **ceiling** — what a system would score if it had perfect retrieval. Everything else is measured against that ceiling.
 
-The interesting reading is not that agent-memory-core beats naive by ~4.6 composite points. It is that **naive ChromaDB scores 0.29 on contradiction resolution**. Nearly 3 out of 4 times the value changed, it still returned the stale one. That is the production risk pattern no one else is pricing in.
+The interesting reading is not that archon-memory-core beats naive by ~4.6 composite points. It is that **naive ChromaDB scores 0.29 on contradiction resolution**. Nearly 3 out of 4 times the value changed, it still returned the stale one. That is the production risk pattern no one else is pricing in.
 
 ---
 
@@ -208,18 +208,18 @@ Answer completeness is currently measured by substring containment of expected f
 Every number in the README and in §5 above is reproducible from the public repo.
 
 ```bash
-git clone https://github.com/atw4757-byte/agent-memory-core
-cd agent-memory-core
+git clone https://github.com/atw4757-byte/archon-memory-core
+cd archon-memory-core
 pip install -e ".[dev]"
 
 # Run the full suite against all 4 reference adapters
 python benchmark/run_all.py
 
 # Or a single adapter
-python benchmark/run_benchmark.py --adapter agent_memory_core
+python benchmark/run_benchmark.py --adapter archon_memory_core
 
 # Or a single scenario
-python benchmark/run_benchmark.py --adapter agent_memory_core --scenario 01_personal_assistant
+python benchmark/run_benchmark.py --adapter archon_memory_core --scenario 01_personal_assistant
 
 # Results go to benchmark/results/<adapter>-<YYYY-MM-DD>.json
 ```
@@ -266,10 +266,10 @@ If you reference AMB in a paper, report, or blog post:
 
 ```
 @software{agentic_memory_benchmark_2026,
-  author = {agent-memory-core contributors},
+  author = {archon-memory-core contributors},
   title = {Agentic Memory Benchmark (AMB) v1},
   year = {2026},
-  url = {https://github.com/atw4757-byte/agent-memory-core},
+  url = {https://github.com/atw4757-byte/archon-memory-core},
   note = {See docs/EVALUATION.md for methodology}
 }
 ```
@@ -287,6 +287,6 @@ If you reference AMB in a paper, report, or blog post:
 | `benchmark/adapters/` | 4 reference adapters. |
 | `benchmark/results/` | Every run's raw JSON. Nothing deleted. |
 | `docs/EVALUATION.md` | This file. |
-| `src/agent_memory_core/eval.py` | **Separate** lightweight eval harness for users to run against their own memory (30 stratified default queries, recall/precision/answer). Not used for AMB scoring. |
+| `src/archon_memory_core/eval.py` | **Separate** lightweight eval harness for users to run against their own memory (30 stratified default queries, recall/precision/answer). Not used for AMB scoring. |
 
-One note on the `src/agent_memory_core/eval.py` module: it is a **user-facing** eval tool shipped with the library so anyone can measure retrieval quality against their own ingested data. It uses a 30-query default suite that is separate from the AMB benchmark. Do not confuse a score from this module with an AMB score. AMB scores come only from `benchmark/run_benchmark.py`.
+One note on the `src/archon_memory_core/eval.py` module: it is a **user-facing** eval tool shipped with the library so anyone can measure retrieval quality against their own ingested data. It uses a 30-query default suite that is separate from the AMB benchmark. Do not confuse a score from this module with an AMB score. AMB scores come only from `benchmark/run_benchmark.py`.

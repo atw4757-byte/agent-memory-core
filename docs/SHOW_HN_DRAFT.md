@@ -9,7 +9,7 @@ author: atw4757-byte
 last_verified: 2026-04-21
 ---
 
-# Show HN submission package — agent-memory-core
+# Show HN submission package — archon-memory-core
 
 ## Title (80 char max — HN truncates aggressively)
 
@@ -30,27 +30,27 @@ last_verified: 2026-04-21
 
 > Frontier labs are racing to build agents on top of context windows. We ran the obvious experiment — what happens to agent memory over a 90-day horizon when confusers start sharing vocabulary with the query?
 >
-> - **agent-memory-core (ours, with supersede-aware consolidation): 99.2% top-1 accuracy**
+> - **archon-memory-core (ours, with supersede-aware consolidation): 99.2% top-1 accuracy**
 > - **Same retriever, no consolidation: 49.2%** (drops once at day 14, stays there)
 > - **LangChain 32k context dump: 0% top-1** (the answer is in the buffer — the LLM just attends to the wrong chunk)
 > - **Naive word-overlap retrieval: ~0%**
 >
-> 3-seed grid at scale L (250 queries × 2,300 confusers across a simulated 90-day horizon). Fully preregistered: https://github.com/atw4757-byte/agent-memory-core/blob/main/benchmark/amb_v2/PREREGISTERED.md
+> 3-seed grid at scale L (250 queries × 2,300 confusers across a simulated 90-day horizon). Fully preregistered: https://github.com/atw4757-byte/archon-memory-core/blob/main/benchmark/amb_v2/PREREGISTERED.md
 >
 > The core insight — and the reason frontier labs don't ship this — is that memory is plumbing. Plumbing doesn't sell GPU hours. Bigger context windows do. So the industry defaults to "just dump more into context" even when the benchmark shows context length ≠ memory without ranking.
 >
-> What `agent-memory-core` does differently:
+> What `archon-memory-core` does differently:
 >
 > 1. **Supersede-aware consolidation.** When a new fact contradicts an old one, the old fact is archived with a link to what replaced it. Not left to compete at retrieval time.
 > 2. **Ranked top-1 retrieval.** Buffer memory returns chunks in recency order, so an LLM attending to "position 1" gets whatever arrived last — often a confuser. AMC returns a ranked top-1 that actually earns the slot.
 > 3. **Preregistered adversarial benchmark (AMB v2.3).** Per-query *confusers* — vocabulary-overlapping distractors that force the retriever to actually rank, not just lexically match. Four corpus scales (mini/small/medium/large: 4/20/75/250 queries, with 27/156/660/2,300 confusers respectively). 3 seeds at mini/medium/large. Composite `quality_v2_3` metric weights top-1 accuracy, any-answer accuracy, confuser resistance, contradiction resolution, stale-fact rate, and salience preservation.
 >
-> `pip install archon-memory-core` — Apache 2.0. Benchmark harness + results + simulator included. (Import as `from agent_memory_core import …` — the PyPI short name was taken, module name is unchanged.)
+> `pip install archon-memory-core` — Apache 2.0. Benchmark harness + results + simulator included.
 >
 > Happy to answer questions about methodology, the adversarial setup, or why the LangChain 32k dump scores 0% on top-1 even when the answer is verifiably in the buffer.
 >
 > Benchmark details: https://divergencerouter.com/amc/
-> Repo: https://github.com/atw4757-byte/agent-memory-core
+> Repo: https://github.com/atw4757-byte/archon-memory-core
 
 ---
 
@@ -62,7 +62,7 @@ last_verified: 2026-04-21
 >
 > **"Why not just use a bigger context window?"** That's the comparison in the chart. LangChain-style 32k dump scores 0% top-1 because buffer memory has no ranking — the LLM defaults to the most-prominent chunk, which is noise after confusers land. "Just use more context" is what the industry defaults to and it's what the benchmark falsifies.
 >
-> **"Why should I trust the numbers?"** Everything is preregistered. Seeds published (42/43/44). Scenarios, queries, confusers, and adapter code are all in the repo. See [`REPRODUCE.md`](https://github.com/atw4757-byte/agent-memory-core/blob/main/REPRODUCE.md) for copy-paste commands per scale — the large-v23 grid (the one behind the 99.2% / 0% chart) runs in ~20 min on a laptop.
+> **"Why should I trust the numbers?"** Everything is preregistered. Seeds published (42/43/44). Scenarios, queries, confusers, and adapter code are all in the repo. See [`REPRODUCE.md`](https://github.com/atw4757-byte/archon-memory-core/blob/main/REPRODUCE.md) for copy-paste commands per scale — the large-v23 grid (the one behind the 99.2% / 0% chart) runs in ~20 min on a laptop.
 
 ---
 
@@ -76,14 +76,14 @@ Three lines + bracket annotation. Matches the claim.
 
 ## Pre-flight checklist (run through before submitting)
 
-- [x] v0.1.3 tagged and pushed (2026-04-21)
-- [x] 50/50 tests pass on v0.1.3
-- [x] Public API unchanged from v0.1.2
+- [x] v0.2.0 tagged and pushed (2026-04-21)
+- [x] 50/50 tests pass on v0.2.0
+- [x] Public API unchanged from v0.1.3
 - [x] PREREGISTERED.md exists at benchmark/amb_v2/PREREGISTERED.md
-- [ ] Verify `pip install archon-memory-core==0.1.3` actually installs on a fresh Python 3.11 env (PyPI publish needed)
+- [ ] Verify `pip install archon-memory-core==0.2.0` actually installs on a fresh Python 3.11 env (PyPI publish needed)
 - [ ] `REPRODUCE.md` large-v23 command reproduces chart numbers (amc-tuned top1@90 = 0.992, langchain-dump = 0.000, naive = 0.000) on a clean clone
 - [ ] https://divergencerouter.com/amc/ loads on mobile (Safari iOS) with the chart visible
-- [ ] https://github.com/atw4757-byte/agent-memory-core README matches the Show HN claims
+- [ ] https://github.com/atw4757-byte/archon-memory-core README matches the Show HN claims
 - [ ] HN account has enough karma to avoid auto-flag (check with `archon-hn status`)
 - [ ] Set a calendar block at submission + 3h to respond to comments — first two hours determine ranking
 
