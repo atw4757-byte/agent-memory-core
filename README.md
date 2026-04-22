@@ -247,6 +247,39 @@ pip install "archon-memory-core[all]"              # everything
 
 ---
 
+## Operations
+
+### Scheduling nightly consolidation
+
+Consolidation is designed to run as a nightly job (cron, launchd, systemd timer). Two foot-guns to avoid:
+
+**1. Python version in the scheduler's `PATH`.** On macOS, `cron` runs with a minimal `PATH` that resolves `python3` to Apple's system `/usr/bin/python3` (Python 3.9), which does not support the PEP 604 `X | None` syntax used in this package. The job will crash on import and fail silently. Fix by pinning the scheduler's `PATH` to your 3.10+ interpreter *first*:
+
+```cron
+# macOS crontab — put Homebrew Python ahead of Apple's system Python
+PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
+30 3 * * * python -m archon_memory_core.consolidate >> ~/.local/log/amc-consolidate.log 2>&1
+```
+
+Or reference the interpreter explicitly:
+
+```cron
+30 3 * * * /opt/homebrew/bin/python3 -m archon_memory_core.consolidate >> ~/.log 2>&1
+```
+
+On Linux with a venv, the cleanest form is `/path/to/venv/bin/python -m archon_memory_core.consolidate`.
+
+**2. Monitor for silent failure.** Because schedulers swallow stderr by default, consolidation can crash for weeks without notice — and memory quality degrades in the meantime (retrieval precision falls as near-duplicate chunks accumulate). Tail your log for `Traceback` *and* verify a successful completion record appears every ~24 hours. A one-line check:
+
+```bash
+grep -q '"dry_run": false' <(tail -n 500 ~/.log) && \
+  find ~/.log -mmin -$((28*60)) | grep -q . && echo OK || echo STALE
+```
+
+Wire that into whatever monitoring you already have (Healthchecks.io, PagerDuty, a Slack webhook — this is a low-cardinality check, no heavy infra needed).
+
+---
+
 ## Roadmap
 
 - **Q2 2026 — shipped:** AMB v2.3 longitudinal benchmark (90-day simulated decay, daily contradiction injection, preregistered grid). Public leaderboard live.
