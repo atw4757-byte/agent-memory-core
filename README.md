@@ -22,6 +22,15 @@ Full results, seeds, and reproducible harness: [`benchmark/amb_v2/results/v2.3/l
 
 Apache 2.0. `pip install archon-memory-core`. Python ≥ 3.10.
 
+### Alternatives you might be evaluating
+
+Looking at this space? Here's how `archon-memory-core` compares to the other options:
+
+- [vs **Letta** (formerly MemGPT)](https://divergencerouter.com/amc/vs-letta/) — Letta is a full agent runtime; this is a library.
+- [vs **Mem0**](https://divergencerouter.com/amc/vs-mem0/) — both are Apache 2.0 libraries; we resolve contradictions at retrieval, Mem0 reconciles at write.
+- [vs **Zep**](https://divergencerouter.com/amc/vs-zep/) — Zep is a temporal knowledge graph server; this is in-process.
+- [vs **LangGraph Store**](https://divergencerouter.com/amc/vs-langgraph-store/) — LangGraph Store is a KV primitive; this is an opinionated memory policy.
+
 ---
 
 ## Why this exists
